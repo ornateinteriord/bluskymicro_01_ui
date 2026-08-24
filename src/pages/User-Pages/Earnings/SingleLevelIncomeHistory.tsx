@@ -27,8 +27,8 @@ const SingleLevelIncomeHistory = () => {
       const descStr = transaction.description?.toLowerCase() || "";
       const benefitType = transaction.benefit_type?.toLowerCase() || "";
 
-      // Only include single level / single line income
-      const isSingleLevel = txType.includes('single') || descStr.includes('single') || benefitType.includes('single');
+      // Only include single level / single line income / global income
+      const isSingleLevel = txType.includes('single') || descStr.includes('single') || benefitType.includes('single') || txType.includes('global') || descStr.includes('global');
       
       return isSingleLevel;
     })
@@ -37,7 +37,8 @@ const SingleLevelIncomeHistory = () => {
       if (transaction.related_member_id) {
         extractedMemberId = transaction.related_member_id;
       } else if (transaction.description && transaction.description.includes('from ')) {
-        extractedMemberId = transaction.description.split('from ')[1];
+        const fromPart = transaction.description.split('from ')[1];
+        extractedMemberId = fromPart ? fromPart.split("'")[0] : 'N/A';
       }
 
       return {
@@ -46,7 +47,7 @@ const SingleLevelIncomeHistory = () => {
         payoutLevel: 'Single Leg Income', 
         memberName: transaction.related_member_name || '-',
         memberId: extractedMemberId,
-        amount: ((parseFloat(transaction.ew_credit) || 0) + (parseFloat(transaction.uw_credit) || 0)).toFixed(2),
+        amount: ((parseFloat(transaction.ew_credit) || 0) + (parseFloat(transaction.uw_credit) || 0) + (parseFloat(transaction.fd_credit) || 0)).toFixed(2),
         description: transaction.description || 'Single Leg Income',
         transactionType: transaction.transaction_type
       };
