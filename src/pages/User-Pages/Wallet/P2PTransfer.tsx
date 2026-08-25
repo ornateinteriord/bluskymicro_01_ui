@@ -55,7 +55,7 @@ const P2PTransfer: React.FC = () => {
       return;
     }
     if (numAmount > maxBalance) {
-      toast.error(`Insufficient balance in your ${sourceWallet === 'Top Up Wallet' ? 'Purchase Wallet' : 'Payouts'}`);
+      toast.error(`Insufficient balance in your ${sourceWallet === 'Top Up Wallet' ? 'Top Up Wallet' : 'Payouts'}`);
       return;
     }
     setStep(2);
@@ -316,7 +316,7 @@ const P2PTransfer: React.FC = () => {
                 >
                   <MenuItem value="Top Up Wallet" sx={{ bgcolor: '#F8FAFC', color: '#0F172A', '&:hover': { bgcolor: 'rgba(255,215,0,0.1)' } }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                      <span>Purchase Wallet</span>
+                      <span>Top Up Wallet</span>
                       <span style={{ color: '#00E676', fontWeight: 'bold', marginLeft: '10px' }}>
                         {Number(walletOverview?.topUpBalance || 0).toFixed(2)}
                       </span>
@@ -590,7 +590,7 @@ const P2PTransfer: React.FC = () => {
                     From Wallet:
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#00E676', fontWeight: 800, fontSize: { xs: 13, sm: 15 }, textAlign: 'right' }}>
-                    {sourceWallet === 'Top Up Wallet' ? 'Purchase Wallet' : 'Payouts'}
+                    {sourceWallet === 'Top Up Wallet' ? 'Top Up Wallet' : 'Payouts'}
                   </Typography>
                 </Stack>
 
@@ -603,7 +603,7 @@ const P2PTransfer: React.FC = () => {
                       {parseFloat(amount).toFixed(2)}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255, 215, 0, 0.8)', fontWeight: 700, fontSize: { xs: 11, sm: 12 }, display: 'block' }}>
-                      (Purchase Wallet)
+                      (Top Up Wallet)
                     </Typography>
                   </Box>
                 </Stack>

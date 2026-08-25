@@ -1602,7 +1602,7 @@ export const getTopUpWalletColumns = () => [
     name: "Amount",
     selector: (row: any) => {
       const amt = row.amount || row.requested_amount || row.ew_credit;
-      return amt && parseFloat(amt) > 0 ? "" : "-";
+      return amt && parseFloat(amt) > 0 ? `${parseFloat(amt).toFixed(2)}` : "-";
     },
     sortable: true,
   },
