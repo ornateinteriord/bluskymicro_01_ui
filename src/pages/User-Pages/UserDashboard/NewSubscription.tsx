@@ -188,8 +188,8 @@ const NewSubscription: React.FC = () => {
                   ...inputStyles, 
                   bgcolor: targetName === 'Member Not Found' ? 'rgba(239, 68, 68, 0.1)' : '#F8FAFC',
                   '& .MuiInputBase-input.Mui-disabled': {
-                    color: targetName === 'Member Not Found' ? '#ef4444' : '#ffffff',
-                    WebkitTextFillColor: targetName === 'Member Not Found' ? '#ef4444' : '#ffffff',
+                    color: targetName === 'Member Not Found' ? '#ef4444' : '#121010ff',
+                    WebkitTextFillColor: targetName === 'Member Not Found' ? '#ef4444' : '#0f0e0eff',
                   }
                 }}
               />
@@ -309,7 +309,7 @@ const NewSubscription: React.FC = () => {
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
               <Typography variant="body2" sx={{ color: '#475569' }}>Target Name</Typography>
-              <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 700 }}>{purchasedPkgDetails?.targetName}</Typography>
+              <Typography variant="h6" sx={{ color: '#0000', fontWeight: 700 }}>{purchasedPkgDetails?.targetName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
               <Typography variant="body2" sx={{ color: '#475569' }}>Package</Typography>

@@ -189,7 +189,7 @@ const Wallet = () => {
         {/* Withdrawal Section */}
         {isWithdrawalView && (
         <div>
-          <Box sx={{ marginBottom: "1rem", backgroundColor: "#0a2558", color: '#0F172A', padding: "12px 16px", borderRadius: "8px", fontWeight: "bold", fontSize: "1.1rem", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: "8px" }}>
+          <Box sx={{ marginBottom: "1rem", backgroundColor: "#0a2558", color: '#ffff', padding: "12px 16px", borderRadius: "8px", fontWeight: "bold", fontSize: "1.1rem", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: "8px" }}>
             {step === 2 && (
               <IconButton onClick={() => setStep(1)} size="small" sx={{ color: '#0F172A' }}>
                 <ArrowBackIcon fontSize="small" />

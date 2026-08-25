@@ -185,12 +185,12 @@ const ProductsContainer: React.FC = () => {
                     sx={{ 
                       bgcolor: 'rgba(59, 130, 246, 0.2)', 
                       color: '#0284C7',
-                      fontWeight: 700,
+                      fontWeight: 800,
                       borderRadius: '24px',
-                      height: '24px',
-                      fontSize: '0.65rem',
+                      width: '80px',
+                      height: '36px',
+                      fontSize: '0.875rem',
                       flexShrink: 0,
-                      
                     }} 
                   />
                 ) : (
@@ -204,9 +204,8 @@ const ProductsContainer: React.FC = () => {
                       fontWeight: 800,
                       textTransform: 'none',
                       borderRadius: '24px',
-                      minWidth: '64px',
-                      px: 3,
-                      py: 0.8,
+                      width: '80px',
+                      height: '36px',
                       boxShadow: 'none',
                       flexShrink: 0,
                       '&:hover': {
