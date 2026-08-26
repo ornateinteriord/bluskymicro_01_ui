@@ -28,7 +28,7 @@ const SingleLevelIncomeHistory = () => {
       const benefitType = transaction.benefit_type?.toLowerCase() || "";
 
       // Only include single level / single line income / global income
-      const isSingleLevel = txType.includes('single') || descStr.includes('single') || benefitType.includes('single') || txType.includes('global') || descStr.includes('global');
+      const isSingleLevel = txType.includes('single') || descStr.includes('single') || benefitType.includes('single');
       
       return isSingleLevel;
     })

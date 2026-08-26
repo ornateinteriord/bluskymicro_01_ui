@@ -116,7 +116,7 @@ const PackageDetail = () => {
             <Box sx={{ p: 1.5, borderRadius: '12px', bgcolor: 'rgba(239, 68, 68, 0.1)', display: 'flex', height: 'fit-content' }}>
               <TrendingUpIcon sx={{ fontSize: { xs: 24, sm: 32 }, color: '#ef4444' }} />
             </Box>
-            <Typography sx={{ color: '#0F172A', fontWeight: 900, fontSize: { xs: '1.3rem', sm: '1.6rem' }, letterSpacing: '1px', m: 0 }}>{Number(packageIncome || (parseFloat(walletOverview?.singleLineIncome) || 0) + (parseFloat(walletOverview?.globalIncome) || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Typography>
+            <Typography sx={{ color: '#0F172A', fontWeight: 900, fontSize: { xs: '1.3rem', sm: '1.6rem' }, letterSpacing: '1px', m: 0 }}>{Number(packageIncome || parseFloat(walletOverview?.singleLineIncome) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Typography>
           </Box>
           <Box sx={{ width: '100%' }}>
             <Typography sx={{ color: '#475569', fontWeight: 800, fontSize: { xs: '1rem', sm: '1.2rem' }, textTransform: 'uppercase', mb: 0.5 }}>Direct Commission</Typography>
@@ -124,20 +124,9 @@ const PackageDetail = () => {
           </Box>
         </Box>
 
-        {/* <Box sx={{ display: 'flex', flexDirection: 'column', p: { xs: 2, sm: 3 }, borderRadius: '20px', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', mb: 2 }}>
-            <Box sx={{ p: 1.5, borderRadius: '12px', bgcolor: 'rgba(29, 233, 182, 0.1)', display: 'flex', height: 'fit-content' }}>
-              <LanguageIcon sx={{ fontSize: { xs: 24, sm: 32 }, color: '#1de9b6' }} />
-            </Box>
-            <Typography sx={{ color: '#0F172A', fontWeight: 900, fontSize: { xs: '1.3rem', sm: '1.6rem' }, letterSpacing: '1px', m: 0 }}>{Number(0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Typography>
-          </Box>
-          <Box sx={{ width: '100%' }}>
-            <Typography sx={{ color: '#475569', fontWeight: 800, fontSize: { xs: '1rem', sm: '1.2rem' }, textTransform: 'uppercase', mb: 0.5 }}>Global Income</Typography>
-            <Typography variant="caption" sx={{ color: '#475569', display: 'block', lineHeight: 1.3, width: '100%', fontSize: '14px' }}>Earn from your global network as your community continues to grow</Typography>
-          </Box>
-        </Box> */}
-      </Box>
 
+
+      </Box>
     </Box>
   );
 };

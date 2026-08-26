@@ -68,9 +68,7 @@ const AdminLevelBenifits = lazy(
 const AdminReferralIncome = lazy(
   () => import("./pages/Admin-Pages/Incomes/ReferralIncome")
 );
-const AdminGlobalIncome = lazy(
-  () => import("./pages/Admin-Pages/Incomes/AdminGlobalIncome")
-);
+
 const AdminROIBenefits = lazy(
   () => import("./pages/Admin-Pages/Incomes/ROIBenifits")
 );
@@ -206,9 +204,7 @@ const UserSingleLevelIncome = lazy(
 const UserSingleLevelIncomeHistory = lazy(
   () => import("./pages/User-Pages/Earnings/SingleLevelIncomeHistory")
 );
-const UserGlobalIncomeHistory = lazy(
-  () => import("./pages/User-Pages/Earnings/GlobalIncomeHistory")
-);
+
 const UserWallet = lazy(() => import("./pages/User-Pages/Wallet/Wallet"));
 const UserUpgradeWallet = lazy(() => import("./pages/User-Pages/Wallet/UpgradeWallet"));
 const UserWalletTransfer = lazy(() => import("./pages/User-Pages/Wallet/WalletTransfer"));
@@ -439,10 +435,7 @@ const RoutesProvider = ({
                 path="/admin/income/daily-payouts"
                 element={<AdminDailyBenifitsPayouts />}
               />
-              <Route
-                path="/admin/income/global-income"
-                element={<AdminGlobalIncome />}
-              />
+
               <Route
                 path="/admin/income/roi-benefits"
                 element={<AdminROIBenefits />}
@@ -598,10 +591,7 @@ const RoutesProvider = ({
                 path="/user/earnings/single-level-income-history"
                 element={<UserSingleLevelIncomeHistory />}
               />
-              <Route
-                path="/user/earnings/global-income-history"
-                element={<UserGlobalIncomeHistory />}
-              />
+
               <Route path="/user/transactions" element={<UserTransaction />} />
               <Route path="/user/loantransactions" element={<UserLoanTransaction />} />
               <Route path="/user/mailbox" element={<UserMailBox />} />

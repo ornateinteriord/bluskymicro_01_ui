@@ -271,11 +271,7 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
         path: "/admin/income/daily-payouts",
         icon: <PaymentsIcon />,
       },
-      {
-        name: "Franchise Bonus",
-        path: "/admin/income/global-income",
-        icon: <PaymentsIcon />,
-      },
+
     ],
   },
 
