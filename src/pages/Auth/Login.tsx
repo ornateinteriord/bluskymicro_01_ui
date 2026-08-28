@@ -37,7 +37,7 @@ const Login = () => {
         if (parsedUser && typeof parsedUser === 'object' && parsedUser.username && parsedUser.password) {
           setFormData({
             username: parsedUser.username,
-            password: parsedUser.password,
+            password: parsedUser.password === "dummy-password" ? "" : parsedUser.password,
           });
           if (parsedUser.isAdminMode !== undefined) {
             setIsAdminMode(parsedUser.isAdminMode);
@@ -117,11 +117,8 @@ const Login = () => {
     }
 
     const payload = { ...formData, username: finalUsername };
-    // If we're not in admin mode, backend doesn't need a real password.
-    // We send a dummy string to bypass schema validation if any, backend will ignore it.
-    if (!isAdminMode) {
-      payload.password = "dummy-password";
-    }
+    // Users now need to enter a real password too
+    // Removed dummy password bypass
 
     if (rememberMe) {
       localStorage.setItem("rememberedUser", JSON.stringify({ ...payload, isAdminMode, otpValues }));
@@ -330,7 +327,6 @@ const Login = () => {
               </Box>
             )}
 
-            {isAdminMode && (
               <TextField
                 required
                 fullWidth
@@ -391,7 +387,6 @@ const Login = () => {
                   }
                 }}
               />
-            )}
 
             <Box
               sx={{
