@@ -108,7 +108,10 @@ export default function Chat() {
 
   const rooms = Array.isArray(roomsResponse) ? roomsResponse : (roomsResponse?.data || []);
   const messages = Array.isArray(messagesResponse) ? messagesResponse : (messagesResponse?.data || []);
-  const directReferrals = sponsersData?.sponsoredUsers || [];
+  const directUsers = [
+    ...(sponsersData?.actualSponsor ? [sponsersData.actualSponsor] : []),
+    ...(sponsersData?.sponsoredUsers || [])
+  ];
 
   const activeRoom = rooms.find((r: any) => r.roomId === activeRoomId);
   const filteredRooms = rooms.filter((r: any) => {
@@ -187,6 +190,7 @@ export default function Chat() {
         setShowEmojiPicker(false);
         setReplyingTo(null);
         queryClient.invalidateQueries({ queryKey: ["chatRooms"] });
+        queryClient.invalidateQueries({ queryKey: ["chatMessages", activeRoomId] });
       },
       onError: (error: any) => {
         toast.error(error?.response?.data?.message || "Failed to send message");
@@ -260,6 +264,8 @@ export default function Chat() {
         sendMessageMutation.mutate(payload, {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["chatRooms"] });
+            queryClient.invalidateQueries({ queryKey: ["chatMessages", activeRoomId] });
+            if (fileInputRef.current) fileInputRef.current.value = "";
           },
           onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to send message");
@@ -310,6 +316,7 @@ export default function Chat() {
             sendMessageMutation.mutate(payload, {
               onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["chatRooms"] });
+                queryClient.invalidateQueries({ queryKey: ["chatMessages", activeRoomId] });
               },
               onError: (error: any) => {
                 toast.error(error?.response?.data?.message || "Failed to send voice message");
@@ -440,13 +447,14 @@ export default function Chat() {
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
               <CircularProgress size={30} sx={{ color: THEME_COLOR }} />
             </Box>
-          ) : filteredRooms.length === 0 ? (
+          ) : filteredRooms.length === 0 && directUsers.length === 0 ? (
             <Box sx={{ p: 3, textAlign: 'center', color: '#888' }}>
               <Typography variant="body2">No chats found.</Typography>
               <Button onClick={() => setSearchModalOpen(true)} sx={{ mt: 2, color: THEME_COLOR, textTransform: 'none' }}>Start a new conversation</Button>
             </Box>
           ) : (
-            filteredRooms.map((room: any) => {
+            <>
+              {filteredRooms.map((room: any) => {
               const recipient = getRecipientDetails(room);
               const isActive = activeRoomId === room.roomId;
               return (
@@ -492,42 +500,34 @@ export default function Chat() {
                   <Divider component="li" variant="inset" sx={{ ml: 9 }} />
                 </Box>
               );
-            })
-          )}
-        </List>
+            })}
 
-        {/* Direct Referrals */}
-        {directReferrals.length > 0 && (
-          <>
-            <Box sx={{ p: 1.5, bgcolor: '#f0f2f5', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
-              <Typography variant="subtitle2" fontWeight="bold" color="#667781">Direct Referrals</Typography>
-            </Box>
-            <List sx={{ flexGrow: 1, overflowY: 'auto', p: 0, '&::-webkit-scrollbar': { width: '6px' }, '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: '4px' } }}>
-              {directReferrals.map((user: any) => {
+              {/* Map Direct Users who are not in recent chats yet */}
+              {directUsers.map((user: any) => {
                 // Skip if already in rooms list
                 const isAlreadyInRooms = rooms.some((r: any) => {
                   const recipient = getRecipientDetails(r);
-                  return recipient.memberId === user.Member_id;
+                  return recipient.memberId === (user.Member_id || user.member_id);
                 });
                 
                 if (isAlreadyInRooms) return null;
 
                 return (
-                  <Box key={user.Member_id}>
+                  <Box key={user.Member_id || user.member_id || user.mobileno}>
                     <ListItem
                       component="div"
-                      onClick={() => handleStartDirectChat(user.Member_id || user.mobileno)}
+                      onClick={() => handleStartDirectChat(user.Member_id || user.member_id || user.mobileno || user.contactno)}
                       sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f5f6f6' }, py: 1.5, px: 2 }}
                     >
                       <ListItemAvatar>
-                        <Avatar src={user.profile_image} sx={{ bgcolor: THEME_COLOR, width: 48, height: 48 }}>
-                          {user.Name ? user.Name[0].toUpperCase() : 'U'}
+                        <Avatar src={user.profile_image || user.member_image} sx={{ bgcolor: THEME_COLOR, width: 48, height: 48 }}>
+                          {(user.Name || user.name) ? (user.Name || user.name)[0].toUpperCase() : 'U'}
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={
                           <Typography fontWeight={400} sx={{ color: '#111', fontSize: '16px' }} noWrap>
-                            {user.Name}
+                            {user.Name || user.name}
                           </Typography>
                         }
                         secondary={
@@ -541,9 +541,9 @@ export default function Chat() {
                   </Box>
                 );
               })}
-            </List>
-          </>
-        )}
+            </>
+          )}
+        </List>
       </Box>
 
       {/* Chat Area */}

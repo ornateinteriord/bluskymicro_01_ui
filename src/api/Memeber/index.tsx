@@ -491,11 +491,13 @@ export const useGetSponsers = (memberId: any) => {
         return {
           parentUser: response.parentUser,
           sponsoredUsers: response.sponsoredUsers,
+          actualSponsor: response.actualSponsor,
         };
       } else {
         throw new Error(response.message || "Failed to fetch sponsers");
       }
-    }
+    },
+    enabled: !!memberId,
   });
 };
 
