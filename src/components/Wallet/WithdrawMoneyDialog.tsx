@@ -35,14 +35,21 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
         }))
     ) || [];
 
+    const currentDay = new Date().getDay();
+    const isWeekend = currentDay === 0 || currentDay === 6;
+
     const handleWithdraw = async () => {
         // Validation
+        if (isWeekend) {
+            toast.error('Withdrawals are only allowed from Monday to Friday');
+            return;
+        }
         if (!isCommission && !selectedAccount) {
             toast.error('Please select an account');
             return;
         }
-        if (!amount || parseFloat(amount) <= 0) {
-            toast.error('Please enter a valid amount');
+        if (!amount || parseFloat(amount) < 500) {
+            toast.error('Minimum withdrawal amount is ₹500');
             return;
         }
         /* if (!isCommission) {
@@ -242,11 +249,11 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
                                 }
                             }}
                             placeholder="Enter amount"
-                            error={isCommission ? parseFloat(amount || '0') > availableBalance : (selectedAccountData && parseFloat(amount || '0') > selectedAccountData.account_amount)}
+                            error={isCommission ? parseFloat(amount || '0') > availableBalance : (selectedAccountData && parseFloat(amount || '0') > selectedAccountData.account_amount) || (Boolean(amount) && parseFloat(amount) < 500)}
                             helperText={
                                 selectedAccountData && parseFloat(amount || '0') > selectedAccountData.account_amount
                                     ? `Insufficient balance. Available: ${selectedAccountData.account_amount.toFixed(2)}`
-                                    : ''
+                                    : (amount && parseFloat(amount) < 500) ? 'Minimum withdrawal amount is ₹500' : ''
                             }
                             InputProps={{
                                 startAdornment: <InputAdornment position="start"></InputAdornment>,
@@ -310,9 +317,15 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
                     )}
                     */}
 
-                    <Alert severity="info" sx={{ borderRadius: '12px' }}>
-                        Withdrawal requests are processed within 2-3 business days.
-                    </Alert>
+                    {isWeekend ? (
+                        <Alert severity="error" sx={{ borderRadius: '12px' }}>
+                            Withdrawals are only allowed from Monday to Friday.
+                        </Alert>
+                    ) : (
+                        <Alert severity="info" sx={{ borderRadius: '12px' }}>
+                            Minimum withdrawal amount is ₹500. Requests are processed within 2-3 business days.
+                        </Alert>
+                    )}
                 </Box>
             </DialogContent>
 
@@ -338,7 +351,7 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
                 <Button
                     onClick={handleWithdraw}
                     variant="contained"
-                    disabled={withdrawing || (!isCommission && !selectedAccount) || !amount}
+                    disabled={withdrawing || (!isCommission && !selectedAccount) || !amount || parseFloat(amount) < 500 || isWeekend}
                     sx={{
                         borderRadius: '12px',
                         textTransform: 'none',

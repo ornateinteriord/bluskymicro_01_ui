@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, TextField, Typography, Box, Button, CircularProgress, Fade, IconButton } from '@mui/material';
+import { Card, CardContent, TextField, Typography, Box, Button, CircularProgress, Fade, IconButton, Alert } from '@mui/material';
 import DataTable from "react-data-table-component";
 import { useMediaQuery } from '@mui/material';
 import { DASHBOARD_CUTSOM_STYLE, getWalletColumns,  } from '../../../utils/DataTableColumnsProvider';
@@ -12,7 +12,7 @@ import { MuiOtpInput } from 'mui-one-time-password-input';
 import { useSearchParams } from 'react-router-dom';
 
 const Wallet = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isWithdrawalView = searchParams.get('type') === 'withdrawal';
   const isMobile = useMediaQuery("(max-width:600px)");
   const [amount, setAmount] = useState("");
@@ -41,6 +41,9 @@ const Wallet = () => {
   const currentDirects = memberDetails?.data?.registration_stats?.direct || 0;
   const totalPackages = parseFloat(walletData?.data?.totalPackages || 0);
   const maxWithdrawal = totalPackages * 0.25;
+
+  const currentDay = new Date().getDay();
+  const isWeekend = currentDay === 0 || currentDay === 6;
 
   let requiredReferrals = 0;
   if (totalPackages >= 1000) requiredReferrals = 10;
@@ -91,6 +94,11 @@ const Wallet = () => {
     }
 
     if (!memberId) {
+      return;
+    }
+
+    if (isWeekend) {
+      toast.error('Withdrawals are only allowed from Monday to Friday');
       return;
     }
 
@@ -190,11 +198,16 @@ const Wallet = () => {
         {isWithdrawalView && (
         <div>
           <Box sx={{ marginBottom: "1rem", backgroundColor: "#0a2558", color: '#ffff', padding: "12px 16px", borderRadius: "8px", fontWeight: "bold", fontSize: "1.1rem", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: "8px" }}>
-            {step === 2 && (
-              <IconButton onClick={() => setStep(1)} size="small" sx={{ color: '#0F172A' }}>
-                <ArrowBackIcon fontSize="small" />
-              </IconButton>
-            )}
+            <IconButton 
+              onClick={() => {
+                if (step === 2) setStep(1);
+                else setSearchParams({});
+              }} 
+              size="small" 
+              sx={{ color: 'white' }}
+            >
+              <ArrowBackIcon fontSize="small" />
+            </IconButton>
             Withdrawal Request {!isWithdrawalAllowed && "(Temporarily Disabled)"}
           </Box>
           <div style={{ padding: "0 1rem 1rem 1rem" }}>
@@ -229,10 +242,10 @@ const Wallet = () => {
                 onChange={handleAmountChange}
                 fullWidth
                 size="medium"
-                placeholder="Enter amount (Min 5)"
-                disabled={withdrawMutation.isPending || !isWithdrawalAllowed}
-                error={parseFloat(amount) > displayBalance}
-                helperText={parseFloat(amount) > displayBalance ? "Insufficient Balance" : ""}
+                placeholder="Enter amount (Min 500)"
+                disabled={withdrawMutation.isPending || !isWithdrawalAllowed || isWeekend}
+                error={parseFloat(amount) > displayBalance || (Boolean(amount) && parseFloat(amount) < 500)}
+                helperText={parseFloat(amount) > displayBalance ? "Insufficient Balance" : (amount && parseFloat(amount) < 500) ? "Minimum withdrawal amount is ₹500" : ""}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "&:hover fieldset": { borderColor: isWithdrawalAllowed ? "#0a2558" : "#ff9800" },
@@ -285,6 +298,16 @@ const Wallet = () => {
                 }}
               />
 
+              {isWeekend ? (
+                <Alert severity="error" sx={{ mb: 1, borderRadius: '8px' }}>
+                  Withdrawals are only allowed from Monday to Friday.
+                </Alert>
+              ) : (
+                <Alert severity="info" sx={{ mb: 1, borderRadius: '8px' }}>
+                  Minimum withdrawal amount is ₹500. Requests are processed within 2-3 business days.
+                </Alert>
+              )}
+
               <Box
                 sx={{
                   display: "flex",
@@ -301,7 +324,7 @@ const Wallet = () => {
                   <Box sx={{ display: "flex", gap: 4, flexDirection: isMobile ? "column" : "row" }}>
                     <Box>
                       <Typography variant="body2">• 5% Admin applied</Typography>
-                      <Typography variant="body2">• Minimum withdrawal: 500</Typography>
+                      <Typography variant="body2">  Minimum withdrawal: 500</Typography>
                       <Typography variant="body2">• Maximum withdrawal: 25% of total package ({maxWithdrawal.toFixed(2)})</Typography>
                       <Typography variant="body2">• One withdrawal per day allowed</Typography>
                     </Box>
@@ -334,29 +357,30 @@ const Wallet = () => {
 
                 <Button
                   variant="contained"
-                  onClick={handleSendOTP}
+                  fullWidth
                   disabled={
                     isSendingOTP ||
+                    withdrawMutation.isPending ||
                     !amount ||
-                    amount === "0" ||
-                    parseFloat(amount) > displayBalance ||
                     !isWithdrawalAllowed ||
-                    !isReferralConditionMet
+                    !isReferralConditionMet ||
+                    isWeekend || 
+                    parseFloat(amount) < 500
                   }
+                  onClick={handleSendOTP}
                   sx={{
                     backgroundColor: isWithdrawalAllowed && isReferralConditionMet ? "#0a2558" : "#ff9800",
-                    minWidth: "120px",
+                    color: "white",
                     "&:hover": {
                       backgroundColor: isWithdrawalAllowed && isReferralConditionMet ? "#581c87" : "#f57c00"
                     },
-                    "&:disabled": { backgroundColor: "#cccccc" },
+                    height: "48px",
+                    fontSize: "1rem",
+                    fontWeight: "bold"
                   }}
                 >
-                  {isSendingOTP ? (
-                    <CircularProgress size={24} sx={{ color: '#0F172A' }} />
-                  ) : (
-                    (!isWithdrawalAllowed || !isReferralConditionMet) ? "Disabled" : "Proceed to Withdraw"
-                  )}
+                  {isSendingOTP ? <CircularProgress size={24} sx={{ color: 'white' }} /> :
+                  (!isWithdrawalAllowed || !isReferralConditionMet) ? "Disabled" : "Proceed to Withdraw"}
                 </Button>
               </Box>
             </form>
@@ -427,7 +451,23 @@ const Wallet = () => {
         {/* Transaction History */}
         {!isWithdrawalView && (
         <>
-        <div style={{ marginBottom: "1rem", color: "#000", fontWeight: "bold", fontSize: "1.25rem"     }}>Transaction History</div>
+        <div style={{ marginBottom: "1rem", color: "#000", fontWeight: "bold", fontSize: "1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>Transaction History</span>
+          <Button 
+            variant="contained" 
+            onClick={() => setSearchParams({ type: 'withdrawal' })}
+            sx={{
+              backgroundColor: "#0a2558",
+              color: "white",
+              "&:hover": { backgroundColor: "#581c87" },
+              borderRadius: "8px",
+              fontWeight: "bold",
+              textTransform: "none"
+            }}
+          >
+            Withdraw
+          </Button>
+        </div>
           {walletData?.transactions && walletData.transactions.length > 0 ? (
               <DataTable
                 columns={getWalletColumns()}
