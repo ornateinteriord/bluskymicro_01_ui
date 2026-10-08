@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, IconButton, Drawer, List, ListItem, ListItemText, Box, Button, Typography, Container, Collapse } from '@mui/material';
 import { Menu as MenuIcon, X as CloseIcon, ChevronDown } from 'lucide-react';
-import bmsLogo from '../../assets/bms_logo.png';
 
 const PublicNavbar = () => {
   const navigate = useNavigate();
@@ -50,7 +49,19 @@ const PublicNavbar = () => {
         <Container maxWidth="xl">
           <Toolbar sx={{ justifyContent: "space-between", py: 1, px: { xs: 0, sm: 2 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => navigate('/')}>
-              <img src={bmsLogo} alt="BMS Foundations" style={{ height: "50px", objectFit: "contain" }} />
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 950,
+                  fontSize: { xs: '1.5rem', md: '1.9rem' },
+                  letterSpacing: '1px',
+                  color: '#0284C7',
+                  textShadow: '0 2px 4px rgba(2, 132, 199, 0.1)',
+                  userSelect: 'none'
+                }}
+              >
+                Ecash
+              </Typography>
             </Box>
 
             {/* Desktop Links */}
@@ -150,8 +161,19 @@ const PublicNavbar = () => {
         PaperProps={{ sx: { width: 280, bgcolor: "#ffffff", color: "#1e293b", zIndex: (theme) => theme.zIndex.drawer + 2 } }}
       >
         <Box sx={{ display: "flex", justifyContent: "space-between", p: 2, borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <img src={bmsLogo} alt="BMS Foundations" style={{ height: "40px", objectFit: "contain" }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => { navigate('/'); handleDrawerToggle(); }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 950,
+                fontSize: '1.5rem',
+                letterSpacing: '1px',
+                color: '#0284C7',
+                userSelect: 'none'
+              }}
+            >
+              Ecash
+            </Typography>
           </Box>
           <IconButton onClick={handleDrawerToggle} sx={{ color: "#475569" }}><CloseIcon /></IconButton>
         </Box>

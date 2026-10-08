@@ -1,14 +1,27 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, TextField, Button, Typography, Container, Paper, Checkbox, FormControlLabel, Link as MuiLink, InputAdornment, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { Visibility, VisibilityOff, PersonOutline, LockOutlined, Close as CloseIcon } from '@mui/icons-material';
+import { Visibility, VisibilityOff, PersonOutline, LockOutlined, PhoneAndroid, Close as CloseIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { post } from '../../api/Api';
 
 import { LoadingComponent } from '../../App';
 import { useLoginMutation } from '../../api/Auth';
 import ForgotPasswordForm from "./components/ForgotPasswordForm";
-import bmsLogo from "../../assets/bms_logo.png";
+
+const textFieldSx = {
+  "& .MuiOutlinedInput-root": {
+    color: "#ffffff",
+    bgcolor: "rgba(255, 255, 255, 0.02)",
+    borderRadius: "12px",
+    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.12)" },
+    "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.25)" },
+    "&.Mui-focused fieldset": { borderColor: "#3b82f6", borderWidth: "2px" },
+  },
+  "& .MuiInputLabel-root": { color: "rgba(255, 255, 255, 0.6)" },
+  "& .MuiInputLabel-root.Mui-focused": { color: "#3b82f6" },
+  "& .MuiOutlinedInput-input::placeholder": { color: "rgba(255, 255, 255, 0.4)", opacity: 1 },
+};
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -18,10 +31,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
-
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(""));
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Guest chat state
   const [openMsgDialog, setOpenMsgDialog] = useState(false);
@@ -42,9 +52,6 @@ const Login = () => {
           if (parsedUser.isAdminMode !== undefined) {
             setIsAdminMode(parsedUser.isAdminMode);
           }
-          if (parsedUser.otpValues !== undefined) {
-            setOtpValues(parsedUser.otpValues);
-          }
           setRememberMe(true);
         } else {
           localStorage.removeItem("rememberedUser");
@@ -58,44 +65,16 @@ const Login = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    // For mobile number field (user mode): strip non-digit chars and cap at 10
+    if (name === "username" && !isAdminMode) {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, username: digitsOnly }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-    
-    const newOtpValues = [...otpValues];
-    // Keep only the last typed character in case they type multiple quickly
-    newOtpValues[index] = value.slice(-1); 
-    setOtpValues(newOtpValues);
-
-    // Auto focus next
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text/plain').replace(/\D/g, '').slice(0, 6);
-    if (pastedData) {
-      const newOtpValues = [...otpValues];
-      for (let i = 0; i < pastedData.length; i++) {
-        newOtpValues[i] = pastedData[i];
-      }
-      setOtpValues(newOtpValues);
-      const nextFocusIndex = Math.min(pastedData.length, 5);
-      inputRefs.current[nextFocusIndex]?.focus();
-    }
   };
 
   const loginMutation = useLoginMutation();
@@ -104,24 +83,19 @@ const Login = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    let finalUsername = formData.username;
-    
     if (!isAdminMode) {
-      const cardSuffix = otpValues.join('');
-      if (cardSuffix.length < 6) {
-        toast.error("Please enter the full 6-digit card suffix.");
+      // Validate mobile number: digits only, 10 digits
+      const mobile = formData.username.trim();
+      if (!/^\d{10}$/.test(mobile)) {
+        toast.error("Please enter a valid 10-digit mobile number.");
         return;
       }
-      // Use the 6 digits directly as the Member_id
-      finalUsername = cardSuffix;
     }
 
-    const payload = { ...formData, username: finalUsername };
-    // Users now need to enter a real password too
-    // Removed dummy password bypass
+    const payload = { ...formData, username: formData.username.trim() };
 
     if (rememberMe) {
-      localStorage.setItem("rememberedUser", JSON.stringify({ ...payload, isAdminMode, otpValues }));
+      localStorage.setItem("rememberedUser", JSON.stringify({ ...payload, isAdminMode }));
     } else {
       localStorage.removeItem("rememberedUser");
     }
@@ -168,41 +142,35 @@ const Login = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0f172a", // Match welcome page theme
+        background: "#0f172a",
         position: "relative",
         overflow: "hidden",
+        px: { xs: 1.5, sm: 2 },
       }}
     >
-      <Box
-        sx={{
-          position: "absolute",
-          top: "-10%",
-          left: "-10%",
-          width: "250px",
-          height: "250px",
-          background: "radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-          filter: "blur(50px)",
-        }}
-      />
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "-5%",
-          right: "-5%",
-          width: "400px",
-          height: "400px",
-          background: "radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%)",
-          borderRadius: "50%",
-          filter: "blur(60px)",
-        }}
-      />
+      {/* Decorative blobs */}
+      <Box sx={{ position: "absolute", top: "-10%", left: "-10%", width: { xs: "200px", sm: "250px" }, height: { xs: "200px", sm: "250px" }, background: "radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%)", borderRadius: "50%", filter: "blur(50px)" }} />
+      <Box sx={{ position: "absolute", bottom: "-5%", right: "-5%", width: { xs: "250px", sm: "400px" }, height: { xs: "250px", sm: "400px" }, background: "radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%)", borderRadius: "50%", filter: "blur(60px)" }} />
 
-      <Container component="main" maxWidth="xs" sx={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        
-        {/* LOGO OUTSIDE FORM */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', mb: 3 }}>
-          <img src={bmsLogo} alt="BMS Logo" style={{ height: "90px", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+      <Container
+        component="main"
+        maxWidth="xs"
+        sx={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}
+      >
+        {/* Brand Text */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', mb: { xs: 2, sm: 3 } }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 950,
+              fontSize: { xs: '2.2rem', sm: '2.8rem' },
+              letterSpacing: '2px',
+              color: '#38bdf8',
+              textShadow: '0 4px 16px rgba(56, 189, 248, 0.4)'
+            }}
+          >
+            Ecash
+          </Typography>
         </Box>
 
         <Paper
@@ -212,371 +180,285 @@ const Login = () => {
             flexDirection: "column",
             alignItems: "center",
             width: "100%",
-            p: { xs: 3, md: 4 },
-            borderRadius: "16px",
+            p: { xs: 2.5, sm: 4 },
+            borderRadius: "20px",
             background: "rgba(255, 255, 255, 0.02)",
             backdropFilter: "blur(12px)",
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-            border: "1px solid rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.07)",
           }}
         >
-
           {isResetMode ? (
             <ForgotPasswordForm onBackToLogin={() => setIsResetMode(false)} />
           ) : (
             <>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 2.5 }}
-          >
-            {isAdminMode ? (
-              <TextField
-                required
-                fullWidth
-                id="username"
-                name="username"
-                autoComplete="username"
-                autoFocus
-                label="Admin Username"
-                placeholder="Enter your admin ID"
-                value={formData.username}
-                onChange={handleChange}
-                variant="outlined"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonOutline sx={{ color: "rgba(255, 255, 255, 0.5)" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    color: "#ffffff",
-                    bgcolor: "rgba(255, 255, 255, 0.02)",
-                    borderRadius: "12px",
-                    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.12)" },
-                    "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.25)" },
-                    "&.Mui-focused fieldset": { borderColor: "#3b82f6", borderWidth: "2px" },
-                  },
-                  "& .MuiInputLabel-root": { color: "rgba(255, 255, 255, 0.6)" },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#3b82f6" },
-                  "& .MuiOutlinedInput-input::placeholder": { color: "rgba(255, 255, 255, 0.4)", opacity: 1 }
-                }}
-              />
-            ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.7)", textAlign: "center", mb: 0.5 }}>
-                  Please enter your 6-Digit Login PIN in the boxes below
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'space-between', mb: 1 }}>
-                  {"4638292644".split('').map((digit, index) => (
-                    <TextField
-                      key={`prefix-${index}`}
-                      disabled
-                      value={digit}
-                      variant="outlined"
-                      inputProps={{
-                        style: { textAlign: 'center', fontSize: '1.1rem', padding: '10px 0', fontWeight: 'bold' }
-                      }}
-                      sx={{
-                        flex: 1,
-                        "& .MuiOutlinedInput-root": {
-                          color: "#94a3b8",
-                          bgcolor: "rgba(255, 255, 255, 0.05)",
-                          borderRadius: "8px",
-                          "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
-                        },
-                        "& .Mui-disabled": {
-                          WebkitTextFillColor: "#94a3b8 !important",
-                          opacity: 1,
-                        }
-                      }}
-                    />
-                  ))}
-                </Box>
-                
-                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
-                  {otpValues.map((digit, index) => (
-                    <TextField
-                      key={index}
-                      inputRef={(el) => (inputRefs.current[index] = el)}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e as any)}
-                      onPaste={handleOtpPaste}
-                      variant="outlined"
-                      inputProps={{
-                        maxLength: 2, // Allow 2 to catch rapid typing and slice it
-                        style: { textAlign: 'center', fontSize: '1.25rem', padding: '12px 0', fontWeight: 'bold' }
-                      }}
-                      sx={{
-                        flex: 1,
-                        "& .MuiOutlinedInput-root": {
-                          color: "#ffffff",
-                          bgcolor: "rgba(255, 255, 255, 0.02)",
-                          borderRadius: "12px",
-                          "& fieldset": { borderColor: "rgba(255, 255, 255, 0.12)" },
-                          "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.25)" },
-                          "&.Mui-focused fieldset": { borderColor: "#3b82f6", borderWidth: "2px" },
-                        }
-                      }}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            )}
-
-              <TextField
-                required
-                fullWidth
-                name="password"
-                type={showPassword ? "text" : "password"}
-                id="password"
-                autoComplete="current-password"
-                label="Password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                variant="outlined"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockOutlined sx={{ color: "rgba(255, 255, 255, 0.5)" }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                        sx={{ color: "rgba(255, 255, 255, 0.6)", mr: 0.5 }}
-                      >
-                        {showPassword ? <VisibilityOff sx={{ color: "rgba(255, 255, 255, 0.6)" }} /> : <Visibility sx={{ color: "rgba(255, 255, 255, 0.6)" }} />}
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    color: "#ffffff",
-                    bgcolor: "rgba(255, 255, 255, 0.02)",
-                    borderRadius: "12px",
-                    "& fieldset": {
-                      borderColor: "rgba(255, 255, 255, 0.12)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(255, 255, 255, 0.25)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#3b82f6",
-                      borderWidth: "2px"
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "rgba(255, 255, 255, 0.6)",
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#3b82f6",
-                  },
-                  "& .MuiOutlinedInput-input::placeholder": {
-                    color: "rgba(255, 255, 255, 0.4)",
-                    opacity: 1,
-                  }
-                }}
-              />
-
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mt: -0.5
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    sx={{
-                      color: "rgba(255, 255, 255, 0.3)",
-                      "&.Mui-checked": {
-                        color: "#3b82f6",
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.7)", fontWeight: 500 }}>
-                    Remember me
-                  </Typography>
-                }
-              />
-              <MuiLink
-                component="button"
-                type="button"
-                onClick={() => setIsResetMode(true)}
-                underline="hover"
-                sx={{ color: "#3b82f6", fontSize: "0.875rem", fontWeight: 600, "&:hover": { color: "#60a5fa" } }}
+              {/* Header */}
+              <Typography
+                variant="h5"
+                sx={{ color: "#fff", fontWeight: 800, mb: 0.5, textAlign: "center", fontSize: { xs: "1.3rem", sm: "1.5rem" } }}
               >
-                Forgot password?
-              </MuiLink>
-            </Box>
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isPending}
-              sx={{
-                mt: 1,
-                mb: 1,
-                background: "#3b82f6",
-                color: "#ffffff",
-                fontWeight: 600,
-                fontSize: "1rem",
-                padding: "12px",
-                borderRadius: "12px",
-                textTransform: "none",
-                boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  background: "#2563eb",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 6px 16px rgba(59, 130, 246, 0.4)",
-                },
-                "&:disabled": {
-                  background: "rgba(255, 255, 255, 0.12)",
-                  color: "rgba(255, 255, 255, 0.3)"
-                }
-              }}
-            >
-              Sign In
-            </Button>
-
-            {/* ADMIN LOGIN TOGGLE */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, width: '100%' }}>
-              <MuiLink
-                component="button"
-                type="button"
-                onClick={() => setIsAdminMode(!isAdminMode)}
-                underline="hover"
-                sx={{ color: "rgba(255, 255, 255, 0.5)", fontSize: "0.8rem", "&:hover": { color: "#ffffff" } }}
-              >
-                {isAdminMode ? "Login as Member" : "Login as Administrator"}
-              </MuiLink>
-            </Box>
-
-            {/* INTEGRATED SECOND CONTAINER: CREATE ACCOUNT & SUPPORT */}
-            <Box sx={{ mt: 2, pt: 3, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-              <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.5)", mb: 2 }}>
-                Don't have an account?
+                Welcome Back
               </Typography>
-              <Button
-                component={Link}
-                to="/register"
-                fullWidth
-                variant="outlined"
-                sx={{
-                  py: 1.5,
-                  color: "#3b82f6",
-                  borderColor: "rgba(59, 130, 246, 0.5)",
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  borderRadius: "12px",
-                  textTransform: "none",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    borderColor: "#3b82f6",
-                    background: "rgba(59, 130, 246, 0.05)",
-                  }
-                }}
+              <Typography
+                variant="body2"
+                sx={{ color: "rgba(255,255,255,0.5)", mb: 3, textAlign: "center", fontSize: { xs: "0.82rem", sm: "0.875rem" } }}
               >
-                Create New Account
-              </Button>
+                {isAdminMode ? "Sign in to your admin account" : "Sign in with your mobile number & password"}
+              </Typography>
 
-              {/* SUPPORT BUTTONS */}
-              <Box sx={{ mt: 3, display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: 3, width: '100%' }}>
-                <Button 
-                    variant="text" 
-                    onClick={() => setOpenMsgDialog(true)}
-                    sx={{ 
-                      color: 'rgba(255,255,255,0.6)', 
-                      textTransform: 'none',
-                      fontWeight: 500,
-                      padding: 0,
-                      minWidth: 'auto',
-                      '&:hover': { bgcolor: 'transparent', color: '#3b82f6' }
-                    }}
+              <Box
+                component="form"
+                onSubmit={handleSubmit}
+                sx={{ width: "100%", display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}
+              >
+                {/* Mobile Number or Admin Username */}
+                <TextField
+                  required
+                  fullWidth
+                  id="username"
+                  name="username"
+                  autoComplete={isAdminMode ? "username" : "tel"}
+                  autoFocus
+                  label={isAdminMode ? "Admin Username" : "Mobile Number"}
+                  placeholder={isAdminMode ? "Enter your admin ID" : "10-digit mobile number"}
+                  value={formData.username}
+                  onChange={handleChange}
+                  variant="outlined"
+                  type="text"
+                  inputMode={isAdminMode ? undefined : "numeric"}
+                  inputProps={isAdminMode ? {} : { maxLength: 10, inputMode: "numeric" }}
+                  error={!isAdminMode && formData.username.length > 0 && formData.username.length < 10}
+                  helperText={
+                    !isAdminMode && formData.username.length === 10
+                      ? "✓ Valid mobile number"
+                      : ""
+                  }
+                  FormHelperTextProps={{
+                    sx: {
+                      color: "#00e676",
+                      fontSize: "0.76rem",
+                      ml: 0.5,
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        {isAdminMode
+                          ? <PersonOutline sx={{ color: "rgba(255, 255, 255, 0.5)" }} />
+                          : <PhoneAndroid sx={{ color: formData.username.length === 10 ? "#00e676" : "rgba(255, 255, 255, 0.5)" }} />
+                        }
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    ...textFieldSx,
+                    ...(!isAdminMode && formData.username.length === 10 ? {
+                      "& .MuiOutlinedInput-root": {
+                        ...textFieldSx["& .MuiOutlinedInput-root"],
+                        "& fieldset": { borderColor: "rgba(0, 230, 118, 0.5)" },
+                        "&.Mui-focused fieldset": { borderColor: "#00e676", borderWidth: "2px" },
+                      }
+                    } : {})
+                  }}
+                />
+
+                {/* Password */}
+                <TextField
+                  required
+                  fullWidth
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  autoComplete="current-password"
+                  label="Password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlined sx={{ color: "rgba(255, 255, 255, 0.5)" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                          sx={{ color: "rgba(255, 255, 255, 0.6)", mr: 0.5 }}
+                        >
+                          {showPassword ? <VisibilityOff sx={{ color: "rgba(255, 255, 255, 0.6)" }} /> : <Visibility sx={{ color: "rgba(255, 255, 255, 0.6)" }} />}
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                  sx={textFieldSx}
+                />
+
+                {/* Remember Me & Forgot Password */}
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: -0.5, flexWrap: "wrap", gap: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        size="small"
+                        sx={{ color: "rgba(255, 255, 255, 0.3)", "&.Mui-checked": { color: "#3b82f6" } }}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.7)", fontWeight: 500, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
+                        Remember me
+                      </Typography>
+                    }
+                  />
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    onClick={() => setIsResetMode(true)}
+                    underline="hover"
+                    sx={{ color: "#3b82f6", fontSize: { xs: "0.8rem", sm: "0.875rem" }, fontWeight: 600, "&:hover": { color: "#60a5fa" } }}
+                  >
+                    Forgot password?
+                  </MuiLink>
+                </Box>
+
+                {/* Sign In Button */}
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  disabled={isPending}
+                  sx={{
+                    mt: 0.5,
+                    mb: 0.5,
+                    background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    fontSize: { xs: "0.95rem", sm: "1rem" },
+                    padding: "13px",
+                    borderRadius: "12px",
+                    textTransform: "none",
+                    boxShadow: "0 4px 14px rgba(59, 130, 246, 0.35)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 20px rgba(59, 130, 246, 0.45)",
+                    },
+                    "&:disabled": { background: "rgba(255, 255, 255, 0.10)", color: "rgba(255, 255, 255, 0.3)" }
+                  }}
                 >
-                    💬 Message Us
+                  {isPending ? "Signing In..." : "Sign In"}
                 </Button>
-                <Button 
-                    variant="text" 
-                    href="mailto:support@bmsfoundations.com"
-                    sx={{ 
-                      color: 'rgba(255,255,255,0.6)', 
-                      textTransform: 'none',
-                      fontWeight: 500,
-                      padding: 0,
-                      minWidth: 'auto',
-                      '&:hover': { bgcolor: 'transparent', color: '#3b82f6' }
+
+                {/* Admin Toggle */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 0.5, width: '100%' }}>
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    onClick={() => {
+                      setIsAdminMode(!isAdminMode);
+                      setFormData({ username: "", password: "" });
                     }}
-                >
-                    ✉️ Mail To Us
-                </Button>
+                    underline="hover"
+                    sx={{ color: "rgba(255, 255, 255, 0.4)", fontSize: "0.78rem", "&:hover": { color: "#ffffff" } }}
+                  >
+                    {isAdminMode ? "← Login as Member" : "Login as Administrator"}
+                  </MuiLink>
+                </Box>
+
+                {/* Divider & Register */}
+                <Box sx={{ mt: 1.5, pt: 2.5, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: 2 }}>
+                  <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.45)", fontSize: { xs: "0.82rem", sm: "0.875rem" } }}>
+                    Don't have an account?
+                  </Typography>
+                  <Button
+                    component={Link}
+                    to="/register"
+                    fullWidth
+                    variant="outlined"
+                    sx={{
+                      py: 1.4,
+                      color: "#3b82f6",
+                      borderColor: "rgba(59, 130, 246, 0.4)",
+                      fontWeight: 600,
+                      fontSize: { xs: "0.9rem", sm: "0.95rem" },
+                      borderRadius: "12px",
+                      textTransform: "none",
+                      transition: "all 0.3s ease",
+                      "&:hover": { borderColor: "#3b82f6", background: "rgba(59, 130, 246, 0.06)" }
+                    }}
+                  >
+                    Create New Account
+                  </Button>
+
+                  {/* Support Buttons */}
+                  <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: { xs: 2, sm: 3 }, width: '100%', flexWrap: 'wrap' }}>
+                    <Button
+                      variant="text"
+                      onClick={() => setOpenMsgDialog(true)}
+                      sx={{ color: 'rgba(255,255,255,0.5)', textTransform: 'none', fontWeight: 500, padding: 0, minWidth: 'auto', fontSize: { xs: "0.8rem", sm: "0.85rem" }, '&:hover': { bgcolor: 'transparent', color: '#3b82f6' } }}
+                    >
+                      💬 Message Us
+                    </Button>
+                    <Button
+                      variant="text"
+                      href="mailto:support@ecash.com"
+                      sx={{ color: 'rgba(255,255,255,0.5)', textTransform: 'none', fontWeight: 500, padding: 0, minWidth: 'auto', fontSize: { xs: "0.8rem", sm: "0.85rem" }, '&:hover': { bgcolor: 'transparent', color: '#3b82f6' } }}
+                    >
+                      ✉️ Mail To Us
+                    </Button>
+                  </Box>
+                </Box>
               </Box>
-            </Box>
-
-            </Box>
             </>
           )}
         </Paper>
       </Container>
+
       {isPending && <LoadingComponent />}
 
-      {/* GUEST MESSAGE DIALOG */}
-      <Dialog open={openMsgDialog} onClose={() => setOpenMsgDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { bgcolor: '#0f172a', color: '#fff', borderRadius: '16px' } }}>
+      {/* Guest Message Dialog */}
+      <Dialog
+        open={openMsgDialog}
+        onClose={() => setOpenMsgDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { bgcolor: '#0f172a', color: '#fff', borderRadius: '16px', mx: { xs: 2, sm: 'auto' } } }}
+      >
         <DialogTitle sx={{ borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6" fontWeight={600} color="#3b82f6">Message Support</Typography>
           <IconButton onClick={() => setOpenMsgDialog(false)} sx={{ color: 'rgba(255,255,255,0.5)' }}><CloseIcon /></IconButton>
         </DialogTitle>
         <DialogContent sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <TextField 
-            label="Your Name" 
-            fullWidth 
-            variant="outlined" 
-            value={guestMsgData.name} 
+          <TextField
+            label="Your Name" fullWidth variant="outlined"
+            value={guestMsgData.name}
             onChange={(e) => setGuestMsgData({ ...guestMsgData, name: e.target.value })}
             sx={{ "& .MuiOutlinedInput-root": { color: "#fff", "& fieldset": { borderColor: "rgba(255,255,255,0.2)" } }, "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.6)" } }}
           />
-          <TextField 
-            label="Mobile Number" 
-            fullWidth 
-            variant="outlined" 
-            value={guestMsgData.phone} 
+          <TextField
+            label="Mobile Number" fullWidth variant="outlined"
+            value={guestMsgData.phone}
             onChange={(e) => setGuestMsgData({ ...guestMsgData, phone: e.target.value })}
             sx={{ "& .MuiOutlinedInput-root": { color: "#fff", "& fieldset": { borderColor: "rgba(255,255,255,0.2)" } }, "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.6)" } }}
           />
-          <TextField 
-            label="Message" 
-            fullWidth 
-            multiline 
-            rows={4} 
-            variant="outlined" 
-            value={guestMsgData.message} 
+          <TextField
+            label="Message" fullWidth multiline rows={4} variant="outlined"
+            value={guestMsgData.message}
             onChange={(e) => setGuestMsgData({ ...guestMsgData, message: e.target.value })}
             sx={{ "& .MuiOutlinedInput-root": { color: "#fff", "& fieldset": { borderColor: "rgba(255,255,255,0.2)" } }, "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.6)" } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <Button onClick={() => setOpenMsgDialog(false)} sx={{ color: 'rgba(255,255,255,0.6)' }}>Cancel</Button>
-          <Button 
-            onClick={handleSendGuestMessage} 
-            variant="contained" 
+          <Button
+            onClick={handleSendGuestMessage}
+            variant="contained"
             disabled={isSendingMsg}
             sx={{ background: "#3b82f6", color: "#ffffff", fontWeight: 600, borderRadius: '8px', '&:hover': { background: '#2563eb' } }}
           >

@@ -147,7 +147,7 @@ const LoadFundPage: React.FC = () => {
 
                   <TextField
                     fullWidth
-                    label="Amount (BMS / )"
+                    label="Amount (Ecash / ₹)"
                     variant="outlined"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
@@ -203,7 +203,7 @@ const LoadFundPage: React.FC = () => {
                     <Box component="img" src={jeeScImage} alt="Payment QR Code" sx={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
                   </Box>
                   <Typography variant="h6" sx={{ color: '#0284C7', fontWeight: 800 }}>
-                    UPI ID: blusky01qr@fbl
+                    UPI ID: ecash01qr@fbl
                   </Typography>
                 </Box>
 

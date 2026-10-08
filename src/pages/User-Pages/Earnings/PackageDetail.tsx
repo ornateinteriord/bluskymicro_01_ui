@@ -3,7 +3,6 @@ import { Box, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import TokenService from '../../../api/token/tokenService';
 import { useGetWalletOverview } from '../../../api/Memeber';
-import BMSLogo from "../../../assets/bms_logo.png";
 import PaymentsIcon from '@mui/icons-material/Payments';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
@@ -54,7 +53,17 @@ const PackageDetail = () => {
           boxShadow: `0 0 30px ${pkgInfo.color}20`,
           border: `1px solid ${pkgInfo.color}40`
         }}>
-          <img src={BMSLogo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <Typography
+            sx={{
+              fontWeight: 950,
+              fontSize: '1.8rem',
+              letterSpacing: '1px',
+              color: pkgInfo.color,
+              userSelect: 'none'
+            }}
+          >
+            Ecash
+          </Typography>
         </Box>
         
         <Box sx={{ 

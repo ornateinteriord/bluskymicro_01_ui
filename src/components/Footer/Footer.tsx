@@ -1,14 +1,13 @@
 import { Box, Container, Typography, Grid, IconButton } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, ArrowUpRight } from 'lucide-react';
-import bmsLogo from '../../assets/bms_logo.png';
 
 const Footer = () => {
     return (
         <Box
             component="footer"
             sx={{
-                bgcolor: '#F1F5F9', // Dark background matching accent-2
+                bgcolor: '#0f172a',
                 color: "#f8fafc",
                 position: "relative",
                 overflow: "hidden"
@@ -24,7 +23,18 @@ const Footer = () => {
                             {/* Column 1: Logo & Text */}
                             <Grid item xs={12} md={4}>
                                 <Box sx={{ mb: 2 }}>
-                                    <img src={bmsLogo} alt="BMS Foundations Logo" style={{ height: "60px", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+                                    <Typography
+                                        variant="h4"
+                                        sx={{
+                                            fontWeight: 950,
+                                            fontSize: { xs: '1.8rem', md: '2.2rem' },
+                                            letterSpacing: '1.5px',
+                                            color: '#38bdf8',
+                                            textShadow: '0 2px 10px rgba(56, 189, 248, 0.3)'
+                                        }}
+                                    >
+                                        Ecash
+                                    </Typography>
                                 </Box>
                                 <Typography variant="body1" sx={{ color: "#94a3b8", lineHeight: 1.7, pr: { md: 4 } }}>
                                     Highlights the impact of technology on the banking industry,
@@ -63,7 +73,7 @@ const Footer = () => {
                                 </Typography>
                                 <Typography 
                                     component="a" 
-                                    href="mailto:support@bmsfoundations.com" 
+                                    href="mailto:support@ecash.com" 
                                     sx={{ 
                                         color: "#94a3b8", 
                                         textDecoration: "none",
@@ -72,7 +82,7 @@ const Footer = () => {
                                         '&:hover': { color: "#38bdf8" }
                                     }}
                                 >
-                                    support@bmsfoundations.com
+                                    support@ecash.com
                                 </Typography>
                                 
                                 <Box sx={{ display: "flex", gap: 1.5 }}>
@@ -109,7 +119,7 @@ const Footer = () => {
                             gap: { xs: 2, sm: 3 }
                         }}>
                             <Typography variant="body2" sx={{ color: "#f8fafc" }}>
-                                Copyright @ 2026 BMS
+                                Copyright @ 2026 Ecash
                             </Typography>
                             <Box sx={{ width: { xs: "40px", sm: "1px" }, height: { xs: "1px", sm: "16px" }, bgcolor: "#334155" }} />
                             <Typography 

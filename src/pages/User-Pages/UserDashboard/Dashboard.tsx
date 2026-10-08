@@ -18,7 +18,6 @@ import TokenService from '../../../api/token/tokenService';
 import { useVerifyPayment, parsePaymentRedirectParams, useGetTransactionDetails, useGetWalletOverview, useGetMemberDetails, useGetDailyPayout } from '../../../api/Memeber';
 
 import ProductsContainer from './ProductsContainer';
-import bmsLogo from '../../../assets/bms_logo.png';
 
 const UserDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -132,11 +131,18 @@ const UserDashboard = () => {
         }
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 1 }}>
-          <img 
-            src={bmsLogo} 
-            alt="BMS Logo" 
-            style={{ height: '26px', objectFit: 'contain' }} 
-          />
+          <Typography
+            sx={{
+              fontWeight: 900,
+              fontSize: '1.25rem',
+              letterSpacing: '1.5px',
+              color: '#ffffff',
+              textShadow: '0 2px 4px rgba(0,0,0,0.4)',
+              userSelect: 'none'
+            }}
+          >
+            Ecash
+          </Typography>
         </Box>
 
         <Box sx={{ zIndex: 1 }}>
@@ -224,7 +230,7 @@ const UserDashboard = () => {
                   }}
                   sx={{
                     background: 'linear-gradient(45deg, #0284C7 30%, #38BDF8 90%)',
-                    color: '#0F172A',
+                    color: '#ffffff',
                     borderRadius: '999px',
                     px: 3.5,
                     py: 0.8,
@@ -285,15 +291,15 @@ const UserDashboard = () => {
       {/* Referral Link */}
       <Box sx={{ mt: 4, mb: 4 }}>
         <Paper elevation={0} sx={{
-          p: 4,
+          p: { xs: 2.5, sm: 4 },
           borderRadius: '28px',
           background: 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)',
-          color: '#0F172A',
+          color: '#ffffff',
           boxShadow: '0 20px 40px rgba(2, 132, 199, 0.25)',
           width: '100%'
         }}>
-          <Typography variant="h5" sx={{ fontWeight: 900, mb: 1 }}>Refer & Earn</Typography>
-          <Typography variant="caption" sx={{ display: 'block', mb: 3, opacity: 0.8, lineHeight: 1.4, fontSize: '0.8rem' }}>One link, endless connections—start building your network today</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, color: '#ffffff' }}>Refer & Earn</Typography>
+          <Typography variant="caption" sx={{ display: 'block', mb: 3, opacity: 0.9, lineHeight: 1.4, fontSize: '0.85rem', color: '#ffffff' }}>One link, endless connections—start building your network today</Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant="contained"

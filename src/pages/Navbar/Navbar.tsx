@@ -158,7 +158,7 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                     textShadow: '0 2px 4px rgba(2, 132, 199, 0.1)'
                   }}
                 >
-                  BMS
+                  Ecash
                 </Typography>
               </Box>
 

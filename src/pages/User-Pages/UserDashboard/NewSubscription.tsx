@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Card, CardContent, CardHeader, TextField, FormControl, Button, Box, Typography, Select, MenuItem, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Card, CardContent, CardHeader, TextField, Button, Box, Typography, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment } from '@mui/material';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import UserContext from "../../../context/user/userContext";
 import { useGetWalletOverview } from '../../../api/Memeber';
 import { useBuyPackageDirectlyMutation } from '../../../api/Packages';
@@ -65,13 +66,6 @@ const NewSubscription: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [formData.targetMemberId, user?.Member_id, user?.Name]);
 
-  const handleSelectChange = (e: any) => {
-    setFormData({
-      ...formData,
-      package: e.target.value,
-    });
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -83,7 +77,19 @@ const NewSubscription: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.Member_id || !formData.package) {
-      toast.error("Please select a package");
+      toast.error("Please enter or select a package amount");
+      return;
+    }
+
+    const packageAmt = Number(formData.package);
+    if (isNaN(packageAmt) || packageAmt < 100) {
+      toast.error("Minimum package amount is ₹100");
+      return;
+    }
+
+    const availableBalance = Number(walletOverview?.topUpBalance || 0);
+    if (packageAmt > availableBalance) {
+      toast.error(`Insufficient Purchase Balance! You have ₹${availableBalance.toLocaleString()} but need ₹${packageAmt.toLocaleString()}`);
       return;
     }
 
@@ -95,19 +101,10 @@ const NewSubscription: React.FC = () => {
     buyPackage({
       member_id: user.Member_id,
       target_member_id: formData.targetMemberId || user.Member_id,
-      requested_amount: Number(formData.package),
+      requested_amount: packageAmt,
     }, {
       onSuccess: () => {
-        let packageName = "";
-        switch(formData.package) {
-          case "10000": packageName = "Secure Growth Plan"; break;
-          case "25000": packageName = "Smart Saver Plan"; break;
-          case "50000": packageName = "Wealth Builder Plan"; break;
-          case "100000": packageName = "Future Secure Deposit"; break;
-          case "200000": packageName = "Prosper Plus Plan"; break;
-          case "500000": packageName = "Golden Growth Investment Plan"; break;
-          default: packageName = `${formData.package} Package`;
-        }
+        let packageName = `₹${packageAmt.toLocaleString()} Deposit`;
         
         setPurchasedPkgDetails({
           targetMemberId: formData.targetMemberId || user.Member_id,
@@ -207,33 +204,40 @@ const NewSubscription: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>
-              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Package <span style={{color: '#ef4444'}}>*</span></Typography>
-              <FormControl fullWidth size="small">
-                <Select
-                  name="package"
-                  value={formData.package}
-                  onChange={handleSelectChange}
-                  sx={inputStyles}
-                  displayEmpty
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        bgcolor: '#F1F5F9',
-                        color: '#0F172A',
-                        border: '1px solid #E2E8F0'
-                      }
-                    }
-                  }}
-                >
-                  <MenuItem value="" disabled>Select Package</MenuItem>
-                  <MenuItem value="10000">10,000 Secure Growth Plan</MenuItem>
-                  <MenuItem value="25000">25,000 Smart Saver Plan</MenuItem>
-                  <MenuItem value="50000">50,000 Wealth Builder Plan</MenuItem>
-                  <MenuItem value="100000">1,00,000 Future Secure Deposit</MenuItem>
-                  <MenuItem value="200000">2,00,000 Prosper Plus Plan</MenuItem>
-                  <MenuItem value="500000">5,00,000 Golden Growth Investment Plan</MenuItem>
-                </Select>
-              </FormControl>
+              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Amount (₹) <span style={{color: '#ef4444'}}>*</span></Typography>
+              <TextField
+                name="package"
+                type="text"
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                value={formData.package}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || /^\d+$/.test(val)) {
+                    setFormData((prev) => ({ ...prev, package: val }));
+                  }
+                }}
+                placeholder="Min 100"
+                fullWidth
+                size="small"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PaymentsIcon sx={{ color: '#0a2558', fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  ...inputStyles,
+                  "& input": {
+                    MozAppearance: "textfield",
+                  },
+                  "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+                    WebkitAppearance: "none",
+                    display: "none",
+                    margin: 0,
+                  },
+                }}
+              />
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>

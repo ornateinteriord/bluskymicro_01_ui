@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import moment from 'moment';
-import { Box, Card, CardContent, Typography, Button, Grid, CircularProgress, Autocomplete, TextField, Divider, InputAdornment, Chip, LinearProgress,  } from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Grid, CircularProgress, TextField, Divider, InputAdornment, Chip, LinearProgress,  } from '@mui/material';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -11,6 +11,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import UserContext from '../../../context/user/userContext';
 import { useRequestAddOnMutation, useGetMemberAddOns } from '../../../api/Packages';
 import { useGetWalletOverview } from '../../../api/Memeber';
+import { toast } from 'react-toastify';
 
 
 export const UserAddOnPackages = () => {
@@ -28,6 +29,11 @@ export const UserAddOnPackages = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!packageAmount || !user?.Member_id) return;
+
+    if (Number(packageAmount) < 100) {
+      toast.error("Minimum package amount is ₹100");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -75,40 +81,59 @@ export const UserAddOnPackages = () => {
               </Box>
 
               <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                {/* 
                 <Autocomplete
                   freeSolo
-                  options={["1000", "2000", "5000", "10000", "25000", "50000", "100000", "250000", "500000", "1000000", "2500000"]}
+                  options={["500", "1000", "2000", "3000", "5000", "10000", "25000", "50000", "100000", "250000", "500000", "1000000", "2500000"]}
                   value={packageAmount}
                   onChange={(_, newValue) => setPackageAmount(newValue || '')}
                   onInputChange={(_, newInputValue) => setPackageAmount(newInputValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      label="Amount ()"
-                      variant="outlined"
-                      size="medium"
-                      placeholder="e.g. 10000"
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <>
-                            <InputAdornment position="start">
-                              <PaymentsIcon sx={{ color: '#0a2558', fontSize: 20 }} />
-                            </InputAdornment>
-                            {params.InputProps.startAdornment}
-                          </>
-                        )
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "12px",
-                          backgroundcolor: '#0F172A',
-                        },
-                      }}
-                    />
-                  )}
                 />
+                */}
+                <TextField
+                  fullWidth
+                  required
+                  type="text"
+                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  label="Amount (₹)"
+                  variant="outlined"
+                  size="medium"
+                  value={packageAmount}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || /^\d+$/.test(val)) {
+                      setPackageAmount(val);
+                    }
+                  }}
+                  placeholder="Min 100"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PaymentsIcon sx={{ color: '#0a2558', fontSize: 20 }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                    },
+                    "& input": {
+                      MozAppearance: "textfield",
+                    },
+                    "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+                      WebkitAppearance: "none",
+                      display: "none",
+                      margin: 0,
+                    },
+                  }}
+                />
+
+                {/* Balance displayed below amount text box on left corner */}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 0.75, mb: 1, pl: 0.5 }}>
+                  <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
+                    Balance: <span style={{ color: '#059669', fontWeight: 700 }}>₹{Number(walletOverview?.topUpBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </Typography>
+                </Box>
 
                 <Button
                   type="submit"

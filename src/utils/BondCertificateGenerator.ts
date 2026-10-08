@@ -1,7 +1,5 @@
-// Bond Certificate Generator — BMS
+// Bond Certificate Generator — Ecash
 // Opens a print-ready A4 certificate in a new browser tab
-
-import BMSLogoPath from '../assets/bms_logo.png';
 
 export interface BondData {
   memberNumber: string;
@@ -84,7 +82,7 @@ const buildStamp = (): string => {
   <circle cx="80" cy="80" r="48" fill="none" stroke="#1a3a7a" stroke-width="1.5"/>
   
   <text font-size="8.5" fill="#1a3a7a" font-family="Arial Black" font-weight="900" letter-spacing="0.5">
-    <textPath href="#ts" startOffset="50%" text-anchor="middle">BLUSKY MICRO SERVICES FOUNDATION</textPath>
+    <textPath href="#ts" startOffset="50%" text-anchor="middle">ECASH FOUNDATION</textPath>
   </text>
   <text font-size="8.5" fill="#1a3a7a" font-family="Arial Black" font-weight="900" letter-spacing="1">
     <textPath href="#bs" startOffset="50%" text-anchor="middle">HOSPET - 583 201</textPath>
@@ -93,13 +91,13 @@ const buildStamp = (): string => {
   <text x="25" y="83" text-anchor="middle" fill="#1a3a7a" font-size="12">★</text>
   <text x="135" y="83" text-anchor="middle" fill="#1a3a7a" font-size="12">★</text>
   
-  <text x="80" y="85" text-anchor="middle" fill="#1a3a7a" font-size="28" font-weight="900" font-family="Arial Black">BMS</text>
+  <text x="80" y="85" text-anchor="middle" fill="#1a3a7a" font-size="24" font-weight="900" font-family="Arial Black">ECASH</text>
 </svg>`;
 };
 
 // ─── HTML Generator ──────────────────────────────────────────────────────────
 
-export const generateBondCertificate = (data: BondData, logoDataUrl: string, profilePhotoDataUrl?: string): string => {
+export const generateBondCertificate = (data: BondData, _logoDataUrl?: string, profilePhotoDataUrl?: string): string => {
   const interestRate = data.interestRate ?? 9.0;
   const maturityDate = data.maturityDate ?? addDays(data.commencementDate, 365);
   const maturityAmt = data.maturityAmount ?? (data.planAmount + (data.planAmount * interestRate / 100));
@@ -266,22 +264,22 @@ th { background: #e0e0e0; font-weight: bold; }
 <div class="page">
   <div class="border-frame">
     
-    <img src="${logoDataUrl}" class="wm" alt=""/>
+    <div class="wm" style="display:flex;align-items:center;justify-content:center;font-size:80pt;font-weight:900;color:rgba(30,58,138,0.04);letter-spacing:10px;position:absolute;width:100%;height:100%;user-select:none;pointer-events:none;">ECASH</div>
 
     <div class="content">
       <!-- HEADER -->
       <header class="hdr">
-        <div class="hdr-logo">
-          <img src="${logoDataUrl}" alt="Logo"/>
+        <div class="hdr-logo" style="width: auto; text-align: left;">
+          <div style="font-size: 20pt; font-weight: 900; color: #1a3a7a; letter-spacing: 1px;">ECASH</div>
         </div>
         <div class="hdr-main">
-          <div class="hdr-t1">BMS</div>
+          <div class="hdr-t1">ECASH</div>
           <div class="hdr-t1-sub">(CIN = U64990KA2025PTC212899)</div>
-          <div class="hdr-t2">BMS</div>
-          <div class="hdr-t2-sub">(BLUSKY MICRO FOUNDATION)</div>
+          <div class="hdr-t2">ECASH</div>
+          <div class="hdr-t2-sub">(ECASH FOUNDATION)</div>
           <div class="hdr-cin">(CIN = U85300DL2022NPL407403/ROC)</div>
           <div class="hdr-addr">
-            Tel: +91 8394232300 | Email: support@BMS.com<br/>
+            Tel: +91 8394232300 | Email: support@ecash.com<br/>
             Branch Address: ASHA CHANDRA TRADE CENTER OPPOSITE COURT ROAD UDUPI Karnataka - 576101
           </div>
         </div>
@@ -375,7 +373,7 @@ th { background: #e0e0e0; font-weight: bold; }
         <div class="sig-box">Authorized Signatory</div>
       </div>
 
-      <div class="powered">Powered by BMS</div>
+      <div class="powered">Powered by Ecash</div>
     </div>
   </div>
 </div>
@@ -387,16 +385,7 @@ th { background: #e0e0e0; font-weight: bold; }
 // ─── Open in new tab ─────────────────────────────────────────────────────────
 
 export const openBondCertificate = async (data: BondData): Promise<void> => {
-  // Resolve logo to absolute URL then fetch as base64
-  const absoluteLogoUrl = new URL(BMSLogoPath, window.location.href).href;
   let logoDataUrl = '';
-  try {
-    logoDataUrl = await toBase64DataUrl(absoluteLogoUrl);
-  } catch {
-    // Fallback: use absolute URL directly (may fail in blob context)
-    logoDataUrl = absoluteLogoUrl;
-    console.warn('BondCertificate: could not convert logo to base64');
-  }
 
   // Resolve profile photo
   let profilePhotoDataUrl = '';

@@ -81,9 +81,9 @@ const MyQR: React.FC = () => {
       setSendingRoomId(roomId);
       const mId = TokenService.getMemberId() || memberDetails?.Member_id || memberDetails?.member_id || '';
       const mName = memberDetails?.Name || memberDetails?.name || memberDetails?.username || 'Member';
-      const qrData = `BMS-P2P:${mId}`;
+      const qrData = `Ecash-P2P:${mId}`;
       const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&margin=10`;
-      const messageText = `P2P Transfer QR Code\nName: ${mName}\nMember ID: ${mId}\n\nBMS-P2P:${mId}`;
+      const messageText = `P2P Transfer QR Code\nName: ${mName}\nMember ID: ${mId}\n\nEcash-P2P:${mId}`;
       const res = await post('/chat/message/send', {
         roomId,
         text: messageText,
@@ -115,7 +115,7 @@ const MyQR: React.FC = () => {
 
   const memberId = TokenService.getMemberId() || memberDetails?.Member_id || memberDetails?.member_id || 'UNKNOWN';
   const memberName = memberDetails?.Name || memberDetails?.name || memberDetails?.username || 'Member';
-  const qrData = `BMS-P2P:${memberId}`;
+  const qrData = `Ecash-P2P:${memberId}`;
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&margin=10`;
 
   const handleCopy = () => {
@@ -130,7 +130,7 @@ const MyQR: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `BMS-QR-${memberId}.png`;
+      link.download = `Ecash-QR-${memberId}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -165,7 +165,7 @@ const MyQR: React.FC = () => {
           MY P2P QR CODE
         </Typography>
         <Typography variant="body2" sx={{ color: '#475569', mb: 4, maxWidth: '400px', mx: 'auto',fontSize:{xs:12,sm:14} }}>
-          Share this QR code with other BMS members to receive instant member-to-member transfers directly to your Top Up Wallet.
+          Share this QR code with other Ecash members to receive instant member-to-member transfers directly to your Top Up Wallet.
         </Typography>
 
         <Box

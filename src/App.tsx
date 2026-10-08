@@ -2,7 +2,7 @@ import { Suspense, lazy, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { BrowserRouter as Router, Route, Routes, useLocation,  } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import "./App.css";
 import "./index.css";
 import { CircularProgress, Box } from '@mui/material';
@@ -32,7 +32,7 @@ import ScrollToTop from "./components/common/ScrollToTop";
 
 
 // public pages
-const Home = lazy(() => import("./pages/Home/Home"));
+// const Home = lazy(() => import("./pages/Home/Home"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 const Register = lazy(() => import("./pages/Auth/Register"));
 const RecoverPassword = lazy(() => import("./pages/Auth/RecoverPassword"))
@@ -43,10 +43,10 @@ const PublicNavbar = lazy(() => import("./components/PublicNavbar/PublicNavbar")
 const Sidebar = lazy(() => import("./pages/Sidebar/Sidebar"));
 const NotFound = lazy(() => import("./pages/not-found/NotFound"));
 const Footer = lazy(() => import("./components/Footer/Footer"));
-const About = lazy(() => import("./pages/About/About"));
-const Contact = lazy(() => import("./pages/Contact/Contact"));
-const Services = lazy(() => import("./pages/Services/Services"));
-const Gallery = lazy(() => import("./pages/Gallery/Gallery"));
+// const About = lazy(() => import("./pages/About/About"));
+// const Contact = lazy(() => import("./pages/Contact/Contact"));
+// const Services = lazy(() => import("./pages/Services/Services"));
+// const Gallery = lazy(() => import("./pages/Gallery/Gallery"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms/Terms"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy/RefundPolicy"));
@@ -257,16 +257,14 @@ const ShouldHideNavbar = () => {
   return noNavbarPaths.includes(location.pathname);
 };
 
+// Website pages not needed - direct login form for app
 const ShouldShowPublicNavbar = () => {
-  const location = useLocation();
-  const publicPaths = ["/", "/about", "/contact", "/services", "/gallery", "/terms", "/privacy-policy", "/refund-policy"];
-  return publicPaths.includes(location.pathname);
+  return false;
 };
 
+// Website footer not needed in app
 const ShouldShowFooter = () => {
-  const location = useLocation();
-  const noFooterPaths: string[] = [];
-  return !noFooterPaths.includes(location.pathname);
+  return false;
 };
 
 
@@ -359,17 +357,19 @@ const RoutesProvider = ({
             <Route path="/impersonate" element={<Impersonate />} />
             {/* public routes */}
             <Route element={<PublicRoute />}>
-              <Route index element={<Home />} />
+              <Route index element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/recover-password" element={<RecoverPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
-            {/* policy and info pages - accessible to all */}
+            {/* Website pages commented out - direct login form for app */}
+            {/*
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/services" element={<Services />} />
             <Route path="/gallery" element={<Gallery />} />
+            */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
