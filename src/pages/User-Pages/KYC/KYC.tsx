@@ -7,11 +7,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ImageIcon from '@mui/icons-material/Image';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BadgeIcon from '@mui/icons-material/Badge';
+import { useNavigate } from 'react-router-dom';
 import UserContext from '../../../context/user/userContext';
 import { LoadingComponent } from '../../../App';
 import { useSubmitKYC, useUploadKYCDocument } from '../../../api/Memeber';
 import { toast } from 'react-toastify';
-import BadgeIcon from '@mui/icons-material/Badge';
 
 interface DocumentUploadProps {
   label: string;
@@ -33,12 +35,10 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         toast.error('Please upload an image file');
         return;
       }
-      // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
         return;
@@ -48,78 +48,86 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
   };
 
   return (
-    <Card sx={{ height: '100%', position: 'relative' }}>
-      <CardContent>
-        <Box display="flex" alignItems="center" mb={2}>
+    <Card sx={{ 
+      height: '100%', 
+      position: 'relative', 
+      bgcolor: '#FFF8F0', 
+      borderRadius: '20px', 
+      border: '1.5px solid #f0d0d8',
+      boxShadow: 'none'
+    }}>
+      <CardContent sx={{ p: 2 }}>
+        <Box display="flex" alignItems="center" mb={1.5}>
           {icon}
-          <Typography variant="subtitle1" fontWeight="bold" ml={1}>
+          <Typography variant="subtitle2" fontWeight="800" ml={1} sx={{ color: '#6D214F' }}>
             {label}
           </Typography>
         </Box>
 
         {value ? (
-          <Box>
-            <Box
-              component="img"
+          <Box sx={{ position: 'relative', width: '100%', height: 160, borderRadius: '14px', overflow: 'hidden', border: '1px solid #E5989B' }}>
+            <img
               src={value}
               alt={label}
-              sx={{
+              style={{
                 width: '100%',
-                height: '150px',
+                height: '100%',
                 objectFit: 'cover',
-                borderRadius: 1,
-                mb: 1,
               }}
             />
-            <Box display="flex" justifyContent="space-between">
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => window.open(value, '_blank')}
-                sx={{ flex: 1, mr: 1 }}
-              >
-                View
-              </Button>
-              <IconButton
-                color="error"
-                size="small"
-                onClick={onDelete}
-                disabled={uploading}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Box>
+            <IconButton
+              onClick={onDelete}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                bgcolor: '#6D214F',
+                color: '#FFF8F0',
+                '&:hover': {
+                  bgcolor: '#4e1739',
+                },
+              }}
+              size="small"
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
           </Box>
         ) : (
-          <Box>
+          <Box
+            sx={{
+              border: '2px dashed #E5989B',
+              borderRadius: '16px',
+              p: 2.5,
+              textAlign: 'center',
+              cursor: 'pointer',
+              bgcolor: '#ffffff',
+              '&:hover': {
+                borderColor: '#6D214F',
+                bgcolor: '#fdf2f4',
+              },
+            }}
+            component="label"
+          >
             <input
-              accept="image/*"
-              id={`upload-${label}`}
               type="file"
-              style={{ display: 'none' }}
+              hidden
+              accept="image/*"
               onChange={handleFileChange}
               disabled={uploading}
             />
-            <label htmlFor={`upload-${label}`}>
-              <Button
-                variant="outlined"
-                component="span"
-                fullWidth
-                disabled={uploading}
-                startIcon={uploading ? <CircularProgress size={20} /> : <CloudUploadIcon />}
-                sx={{
-                  height: '150px',
-                  borderStyle: 'dashed',
-                  borderWidth: 2,
-                  '&:hover': {
-                    borderColor: '#0a2558',
-                    backgroundColor: 'rgba(0, 8, 49, 0.04)',
-                  },
-                }}
-              >
-                {uploading ? 'Uploading...' : 'Upload Image'}
-              </Button>
-            </label>
+            {uploading ? (
+              <CircularProgress size={28} sx={{ color: '#6D214F' }} />
+            ) : (
+              <>
+                <CloudUploadIcon sx={{ fontSize: 36, color: '#6D214F', mb: 0.5 }} />
+                <Typography variant="body2" sx={{ color: '#6D214F', fontWeight: 800 }}>
+                  Upload Document
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#8c6b7d', display: 'block', mt: 0.3 }}>
+                  PNG, JPG up to 5MB
+                </Typography>
+              </>
+            )}
           </Box>
         )}
       </CardContent>
@@ -128,7 +136,10 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 };
 
 const KYC: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useContext(UserContext);
+  const submitKYC = useSubmitKYC();
+  const uploadDoc = useUploadKYCDocument();
 
   const [formData, setFormData] = useState({
     accountName: '',
@@ -138,13 +149,12 @@ const KYC: React.FC = () => {
     upi_id: '',
   });
 
-  const [documents, setDocuments] = useState({
-    panImage: null as string | null,
-    aadhaarImage: null as string | null,
-    checkImage: null as string | null,
-    passbookImage: null as string | null,
-    rationCardImage: null as string | null,
-    profileImage: null as string | null,
+  const [documents, setDocuments] = useState<{
+    panImage: string | null;
+    profileImage: string | null;
+  }>({
+    panImage: null,
+    profileImage: null,
   });
 
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
@@ -152,49 +162,32 @@ const KYC: React.FC = () => {
   useEffect(() => {
     if (user) {
       setFormData({
-        accountName: user.Name,
-        account_number: user.account_number || '',
-        ifsc_code: user.ifsc_code || '',
-        bank_name: user.bank_name || '',
-        upi_id: user.upi_id || '',
+        accountName: user.accountName || user.Name || '',
+        account_number: user.bankAccount || '',
+        ifsc_code: user.ifsc || '',
+        bank_name: user.bankName || '',
+        upi_id: user.upiId || '',
       });
 
-      // Load existing document URLs if available
       setDocuments({
-        panImage: user.panImage || user.aadhaarImage || null,
-        aadhaarImage: user.aadhaarImage || null,
-        checkImage: user.checkImage || null,
-        passbookImage: user.passbookImage || null,
-        rationCardImage: user.rationCardImage || null,
-        profileImage: user.profile_image || null,
+        panImage: user.panImage || null,
+        profileImage: user.profileImage || null,
       });
     }
   }, [user]);
 
-  const submitKYC = useSubmitKYC();
-  const uploadPanImage = useUploadKYCDocument(user?.Member_id || '', 'pan');
-  const uploadProfileImage = useUploadKYCDocument(user?.Member_id || '', 'profile');
-
   const handleDocumentUpload = async (docType: string, file: File) => {
-    setUploadingDoc(docType);
-
     try {
-      let result;
-
-      switch (docType) {
-        case 'panImage':
-          result = await uploadPanImage.mutateAsync(file);
-          break;
-        case 'profileImage':
-          result = await uploadProfileImage.mutateAsync(file);
-          break;
-        default:
-          throw new Error('Unknown document type');
-      }
+      setUploadingDoc(docType);
+      const res = await uploadDoc.mutateAsync({
+        memberId: user.Member_id,
+        file,
+        documentType: docType,
+      });
 
       setDocuments((prev) => ({
         ...prev,
-        [docType]: result.url,
+        [docType]: res.url || res.documentUrl,
       }));
 
       toast.success(`Document uploaded successfully!`);
@@ -222,7 +215,6 @@ const KYC: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    // Validate all documents are uploaded
     const missingDocs = [];
     if (!documents.panImage) missingDocs.push('PAN / Aadhaar Image');
     if (!documents.profileImage) missingDocs.push('Profile Image');
@@ -232,7 +224,6 @@ const KYC: React.FC = () => {
       return;
     }
 
-    // Validate bank details
     if (!formData.account_number || !formData.ifsc_code || !formData.bank_name || !formData.upi_id) {
       toast.error('Please fill all bank account and UPI details');
       return;
@@ -250,44 +241,97 @@ const KYC: React.FC = () => {
   };
 
   const documentConfigs = [
-    { key: 'panImage', label: 'PAN / Aadhaar Card', icon: <BadgeIcon sx={{ color: '#0a2558' }} /> },
-    { key: 'profileImage', label: 'Profile Photo', icon: <ImageIcon sx={{ color: '#0a2558' }} /> },
+    { key: 'panImage', label: 'PAN / Aadhaar Card', icon: <BadgeIcon sx={{ color: '#6D214F' }} /> },
+    { key: 'profileImage', label: 'Profile Photo', icon: <ImageIcon sx={{ color: '#6D214F' }} /> },
   ];
 
+  const inputStyles = {
+    bgcolor: '#FFF8F0',
+    borderRadius: '16px',
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#f0d0d8',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#E5989B',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#6D214F',
+      borderWidth: '2px',
+    },
+    '& .MuiInputBase-input': {
+      color: '#2d0f1e',
+      fontWeight: 600,
+    },
+    '& .MuiInputLabel-root': {
+      color: '#8c6b7d',
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#6D214F',
+    }
+  };
+
   return (
-    <Card sx={{ margin: '2rem', mt: 4, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-      <CardContent>
-        <div>
-          <div style={{ marginBottom: "1rem", color: "#000", fontWeight: "bold", fontSize: "1.25rem", display: "flex", alignItems: "center", gap: "8px"     }}>
-            Update Account Details
-          </div>
-          <div style={{ padding: "0 1rem 1rem 1rem" }}>
-            <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <Box sx={{ 
+      p: { xs: 2, sm: 3 }, 
+      bgcolor: '#FFF8F0', 
+      minHeight: '100vh',
+      maxWidth: '480px',
+      margin: '0 auto',
+      pb: 10
+    }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <IconButton 
+          onClick={() => navigate(-1)}
+          sx={{ 
+            bgcolor: '#ffffff', 
+            border: '1.5px solid #f0d0d8',
+            color: '#6D214F',
+            p: 1,
+            '&:hover': { bgcolor: '#fdf2f4' }
+          }}
+        >
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
+            KYC Verification
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
+            Bank account details & identification
+          </Typography>
+        </Box>
+      </Box>
+
+      <Card sx={{ 
+        width: '100%', 
+        bgcolor: '#ffffff', 
+        border: '1.5px solid #f0d0d8', 
+        boxShadow: "0 8px 24px rgba(109,33,79,0.06)", 
+        borderRadius: '24px', 
+      }}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900, mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Bank Account Details
+            </Typography>
+            <form style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <TextField
-                label="Account Name"
+                label="Account Holder Name"
                 name="accountName"
                 value={formData.accountName}
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-                placeholder="Enter account holder name"
+                placeholder="Enter name as in bank"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonIcon sx={{ color: '#0a2558' }} />
+                      <PersonIcon sx={{ color: '#8c6b7d' }} />
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                  },
-                }}
+                sx={inputStyles}
               />
               <TextField
                 label="Account Number"
@@ -296,24 +340,15 @@ const KYC: React.FC = () => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-                placeholder="Enter account number"
+                placeholder="Enter bank account number"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <AccountBalanceWalletIcon sx={{ color: '#0a2558' }} />
+                      <AccountBalanceWalletIcon sx={{ color: '#8c6b7d' }} />
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                  },
-                }}
+                sx={inputStyles}
               />
               <TextField
                 label="IFSC Code"
@@ -322,24 +357,15 @@ const KYC: React.FC = () => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-                placeholder="Enter IFSC code"
+                placeholder="e.g. SBIN0001234"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <ConfirmationNumberIcon sx={{ color: '#0a2558' }} />
+                      <ConfirmationNumberIcon sx={{ color: '#8c6b7d' }} />
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                  },
-                }}
+                sx={inputStyles}
               />
               <TextField
                 label="Bank Name"
@@ -348,24 +374,15 @@ const KYC: React.FC = () => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-                placeholder="Enter bank name"
+                placeholder="e.g. State Bank of India"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <AccountBalanceIcon sx={{ color: '#0a2558' }} />
+                      <AccountBalanceIcon sx={{ color: '#8c6b7d' }} />
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                  },
-                }}
+                sx={inputStyles}
               />
               <TextField
                 label="UPI ID"
@@ -374,37 +391,27 @@ const KYC: React.FC = () => {
                 onChange={handleInputChange}
                 fullWidth
                 variant="outlined"
-                placeholder="Enter UPI ID (e.g., name@okbank)"
+                placeholder="e.g. yourname@upi"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <AccountBalanceWalletIcon sx={{ color: '#0a2558' }} />
+                      <AccountBalanceWalletIcon sx={{ color: '#8c6b7d' }} />
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#0a2558',
-                    },
-                  },
-                }}
+                sx={inputStyles}
               />
             </form>
-          </div>
-        </div>
-        {/* KYC Documents */}
-        <div>
-          <div style={{ marginBottom: "1rem", color: "#000", fontWeight: "bold", fontSize: "1.25rem", display: "flex", alignItems: "center", gap: "8px"     }}>
-            Upload KYC Documents
-          </div>
-          <div style={{ padding: "0 1rem 1rem 1rem" }}>
-            <Grid container spacing={3}>
+          </Box>
+
+          {/* KYC Documents */}
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900, mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Upload KYC Documents
+            </Typography>
+            <Grid container spacing={2}>
               {documentConfigs.map((config) => (
-                <Grid item xs={12} sm={6} md={4} key={config.key}>
+                <Grid item xs={12} key={config.key}>
                   <DocumentUpload
                     label={config.label}
                     icon={config.icon}
@@ -417,28 +424,40 @@ const KYC: React.FC = () => {
               ))}
             </Grid>
 
-            <Box mt={3}>
+            <Box mt={3.5}>
               <Button
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={submitKYC.isPending}
                 fullWidth
                 sx={{
-                  backgroundColor: '#0a2558',
-                  padding: '12px',
+                  background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                  color: '#FFF8F0',
+                  padding: '14px',
+                  fontWeight: 900,
+                  fontSize: '1rem',
+                  borderRadius: '16px',
+                  textTransform: 'none',
+                  boxShadow: '0 8px 24px rgba(109, 33, 79, 0.25)',
                   '&:hover': {
-                    backgroundColor: '#581c87',
+                    background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                    transform: 'translateY(-1px)'
                   },
+                  '&:disabled': {
+                    bgcolor: '#f0d0d8',
+                    color: '#8c6b7d'
+                  },
+                  transition: 'all 0.2s'
                 }}
               >
-                {submitKYC.isPending ? 'Submitting...' : 'Submit KYC'}
+                {submitKYC.isPending ? 'Submitting KYC...' : 'Submit KYC Details'}
               </Button>
             </Box>
-          </div>
-        </div>
-      </CardContent>
-      {submitKYC.isPending && <LoadingComponent />}
-    </Card>
+          </Box>
+        </CardContent>
+        {submitKYC.isPending && <LoadingComponent />}
+      </Card>
+    </Box>
   );
 };
 

@@ -82,12 +82,12 @@ const TableToolbar: React.FC<TableToolbarProps> = ({
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={2} sx={{ mb: 2 }}>
         <Box>
           {title && (
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#0D2658', mb: 1, fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>
+            <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', mb: 0.5, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
               {title}
             </Typography>
           )}
           {selectedCount > 0 && (
-            <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+            <Typography variant="body2" sx={{ color: '#8c6b7d', mt: 0.5, fontWeight: 600 }}>
               {selectedCount} selected
             </Typography>
           )}
@@ -95,7 +95,7 @@ const TableToolbar: React.FC<TableToolbarProps> = ({
 
         <Stack direction="row" spacing={1}>
           {onRefresh && (
-            <IconButton onClick={onRefresh} size="small">
+            <IconButton onClick={onRefresh} size="small" sx={{ color: '#6D214F' }}>
               <RefreshIcon />
             </IconButton>
           )}
@@ -116,17 +116,17 @@ const TableToolbar: React.FC<TableToolbarProps> = ({
             flex: 1,
             maxWidth: { xs: '100%', sm: 350 },
             '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              backgroundColor: '#f8fafc',
-              '&:hover': {
-                backgroundColor: '#f1f5f9',
-              },
+              borderRadius: '12px',
+              backgroundColor: '#FFF8F0',
+              '& fieldset': { borderColor: '#f0d0d8' },
+              '&:hover fieldset': { borderColor: '#E5989B' },
+              '&.Mui-focused fieldset': { borderColor: '#6D214F' },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#64748b' }} />
+                <SearchIcon sx={{ color: '#8c6b7d' }} />
               </InputAdornment>
             ),
           }}
@@ -139,12 +139,13 @@ const TableToolbar: React.FC<TableToolbarProps> = ({
             size="small"
             sx={{
               textTransform: 'none',
-              borderRadius: 2,
-              px: 2,
-              background: 'linear-gradient(135deg, #FFD700 0%, #e6c200 100%)',
-              color: '#0D2658',
-              fontWeight: 700,
-              '&:hover': { background: 'linear-gradient(135deg, #e6c200 0%, #cca000 100%)' }
+              borderRadius: '12px',
+              px: 2.5,
+              background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+              color: '#FFF8F0',
+              fontWeight: 800,
+              boxShadow: '0 4px 12px rgba(109,33,79,0.25)',
+              '&:hover': { background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)' }
             }}
           >
             Search
@@ -428,14 +429,14 @@ const AdminReusableTable = <T extends Record<string, any>>({
       <TableContainer sx={{ maxHeight: 600 }}>
         <Table stickyHeader size="medium">
           <TableHead>
-            <TableRow sx={{ backgroundColor: 'rgba(255, 215, 0, 0.1)' }}>
+            <TableRow sx={{ backgroundColor: '#fdf2f4' }}>
               {enableSelection && (
-                <TableCell padding="checkbox" sx={{ width: 60, backgroundColor: 'transparent' }}>
+                <TableCell padding="checkbox" sx={{ width: 60, backgroundColor: '#fdf2f4' }}>
                   <Checkbox
                     indeterminate={selected.length > 0 && selected.length < data.length}
                     checked={data.length > 0 && selected.length === data.length}
                     onChange={handleSelectAllClick}
-                    sx={{ color: '#0D2658', '&.Mui-checked': { color: '#0D2658' }, '&.MuiCheckbox-indeterminate': { color: '#0D2658' } }}
+                    sx={{ color: '#6D214F', '&.Mui-checked': { color: '#6D214F' }, '&.MuiCheckbox-indeterminate': { color: '#6D214F' } }}
                   />
                 </TableCell>
               )}
@@ -446,11 +447,11 @@ const AdminReusableTable = <T extends Record<string, any>>({
                   align={column.align || 'left'}
                   sx={{
                     minWidth: column.minWidth,
-                    backgroundColor: 'transparent',
+                    backgroundColor: '#fdf2f4',
                     fontWeight: 800,
-                    fontSize: '0.9rem',
-                    color: '#0D2658',
-                    borderBottom: '2px solid rgba(255, 215, 0, 0.5)',
+                    fontSize: '0.88rem',
+                    color: '#6D214F',
+                    borderBottom: '2px solid #f0d0d8',
                   }}
                 >
                   {column.sortable ? (
@@ -458,6 +459,10 @@ const AdminReusableTable = <T extends Record<string, any>>({
                       active={orderBy === column.id}
                       direction={orderBy === column.id ? order : 'asc'}
                       onClick={() => handleRequestSort(column.id as keyof T)}
+                      sx={{
+                        '&.Mui-active': { color: '#6D214F' },
+                        '& .MuiTableSortLabel-icon': { color: '#6D214F !important' }
+                      }}
                     >
                       {column.label}
                       {orderBy === column.id ? (
@@ -479,7 +484,7 @@ const AdminReusableTable = <T extends Record<string, any>>({
               <TableRow>
                 <TableCell colSpan={columns.length + (enableSelection ? 1 : 0)} align="center" sx={{ py: 8 }}>
                   <Box sx={{ textAlign: 'center' }}>
-                    <Typography color="#64748b" sx={{ mb: 2 }}>
+                    <Typography color="#8c6b7d" sx={{ mb: 2, fontWeight: 600 }}>
                       {emptyMessage}
                     </Typography>
                   </Box>
@@ -502,12 +507,12 @@ const AdminReusableTable = <T extends Record<string, any>>({
                     sx={{
                       cursor: onRowClick || enableSelection ? 'pointer' : 'default',
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+                        backgroundColor: '#FFF8F0 !important',
                       },
                       '&.Mui-selected': {
-                        backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                        backgroundColor: 'rgba(229, 152, 155, 0.18) !important',
                         '&:hover': {
-                          backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                          backgroundColor: 'rgba(229, 152, 155, 0.28) !important',
                         },
                       },
                     }}
@@ -517,7 +522,7 @@ const AdminReusableTable = <T extends Record<string, any>>({
                         <Checkbox
                           checked={isItemSelected}
                           inputProps={{ 'aria-labelledby': labelId }}
-                          sx={{ color: '#94a3b8' }}
+                          sx={{ color: '#E5989B', '&.Mui-checked': { color: '#6D214F' } }}
                         />
                       </TableCell>
                     )}

@@ -1283,24 +1283,42 @@ const TABLE_ROW_CUSTOM_STYLE = {
 export const DASHBOARD_CUTSOM_STYLE = {
   headCells: {
     style: {
-      fontSize: "16px",
-      fontWeight: "Bogle-Bold",
-      backgroundColor: "rgba(255, 215, 0, 0.1)",
-      color: "#0D2658",
-      borderBottom: "2px solid rgba(255, 215, 0, 0.5)",
+      fontSize: "14px",
+      fontWeight: 800,
+      backgroundColor: "#fdf2f4",
+      color: "#6D214F",
+      borderBottom: "2px solid #E5989B",
     },
   },
   rows: {
     style: {
       ...TABLE_ROW_CUSTOM_STYLE,
+      fontSize: "13px",
+      color: "#2d0f1e",
       '&:hover': {
-        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+        backgroundColor: 'rgba(229, 152, 155, 0.08)',
       },
     },
     highlightOnHoverStyle: {
-      backgroundColor: 'rgba(255, 215, 0, 0.05)',
-      borderBottomColor: '#FFD700',
-      outline: '1px solid #FFD700',
+      backgroundColor: 'rgba(229, 152, 155, 0.08)',
+      borderBottomColor: '#E5989B',
+      outline: '1px solid #E5989B',
+    },
+  },
+  pagination: {
+    style: {
+      color: '#6D214F',
+      borderTop: '1px solid #f0d0d8',
+      backgroundColor: '#ffffff',
+    },
+    pageButtonsStyle: {
+      fill: '#6D214F',
+      '&:disabled': {
+        fill: '#d8b8c4',
+      },
+      '&:hover:not(:disabled)': {
+        backgroundColor: '#fce8ec',
+      },
     },
   },
 };

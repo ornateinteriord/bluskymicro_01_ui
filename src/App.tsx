@@ -237,9 +237,10 @@ export const LoadingComponent = () => {
       top: 0,
       left: 0,
       zIndex: 9999,
-      backgroundColor: 'rgba(255, 255, 255, 0.5)'
+      backgroundColor: 'rgba(255, 248, 240, 0.6)',
+      backdropFilter: 'blur(4px)'
     }}>
-      <CircularProgress sx={{ color: '#1a237e' }} />
+      <CircularProgress sx={{ color: '#6D214F' }} />
     </Box>
   );
 };
@@ -277,8 +278,8 @@ function App() {
     <UserProvider>
       <QueryClientProvider client={queryClient}>
         <ToastContainer
-          toastClassName="bg-white shadow-lg rounded-lg p-4"
-          className="text-sm text-gray-800"
+          toastClassName="bg-white shadow-lg rounded-xl p-4"
+          className="text-sm"
           style={{ width: 'auto', minWidth: '25rem' }} />
         <Router>
           <ScrollToTop />

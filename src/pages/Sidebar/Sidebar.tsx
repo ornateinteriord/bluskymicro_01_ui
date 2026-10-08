@@ -6,7 +6,6 @@ import { UserSideBarMenuItems, AdminSideBarMenuItems, Admin01SideBarMenuItems, A
 import { Avatar, Toolbar, Typography } from '@mui/material';
 import { SideBarMenuItemType } from '../../store/store';
 import { ExpandMoreIcon, ExpandLessIcon } from '../Icons';
-import { deepOrange } from '@mui/material/colors';
 import { useGetMemberDetails } from '../../api/Memeber';
 import { LoadingComponent } from '../../App';
 import { toast } from 'react-toastify';
@@ -71,10 +70,10 @@ const Sidebar = ({ isOpen, onClose, role }: { isOpen: boolean, onClose: () => vo
       transition={{ duration: 0.3, ease: "easeInOut" }}
       style={{
         zIndex: 100,
-        background: isNidhiRole ? '#081b42' : undefined,
-        boxShadow: isOpen && isNidhiRole ? '4px 0 20px rgba(0, 0, 0, 0.4)' : 'none',
+        background: isNidhiRole ? '#3d1430' : undefined,
+        boxShadow: isOpen && isNidhiRole ? '4px 0 20px rgba(109, 33, 79, 0.4)' : 'none',
         overflow: 'hidden',
-        borderRight: isNidhiRole ? '1px solid rgba(255,255,255,0.1)' : 'none'
+        borderRight: isNidhiRole ? '1px solid rgba(229, 152, 155, 0.12)' : 'none'
       }}
     >
       <Toolbar className="navbar-toolbar" />
@@ -100,19 +99,19 @@ const Sidebar = ({ isOpen, onClose, role }: { isOpen: boolean, onClose: () => vo
                 sx={isNidhiRole ? {
                   width: 44,
                   height: 44,
-                  background: 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                  border: '2px solid white',
-                } : { width: 50, height: 50, background: deepOrange[500] }}
+                  background: 'linear-gradient(135deg, #E5989B 0%, #F4C95D 100%)',
+                  boxShadow: '0 4px 12px rgba(109, 33, 79, 0.3)',
+                  border: '2px solid rgba(244, 201, 93, 0.5)',
+                } : { width: 50, height: 50, bgcolor: '#6D214F', color: '#FFF8F0' }}
               >
                 {!fethedUser?.profileImage && name?.charAt(0).toUpperCase()}
               </Avatar>
-              <div className="welcome-text" style={{ padding: '0 10px', color: isNidhiRole ? '#fff' : undefined }}>
+              <div className="welcome-text" style={{ padding: '0 10px', color: isNidhiRole ? '#FFF8F0' : undefined }}>
                 <Typography style={isNidhiRole ? {
                   fontWeight: 'bold',
-                  color: 'white',
+                  color: '#F4C95D',
                   fontSize: '0.9rem',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
                   lineHeight: '1.2',
                 } : {}}>Welcome,</Typography>
                 <Typography style={isNidhiRole ? {
@@ -147,7 +146,7 @@ const Sidebar = ({ isOpen, onClose, role }: { isOpen: boolean, onClose: () => vo
           }).map((item: SideBarMenuItemType) => {
             const isSelected = selectedItem === item.name;
             const backgroundColor = isSelected && isNidhiRole
-              ? 'rgba(255, 255, 255, 0.2)'
+              ? 'rgba(244, 201, 93, 0.15)'
               : 'transparent';
 
             return (
@@ -173,7 +172,7 @@ const Sidebar = ({ isOpen, onClose, role }: { isOpen: boolean, onClose: () => vo
                     borderRadius: '12px',
                     marginBottom: '4px',
                     border: isSelected
-                      ? '1px solid rgba(255, 255, 255, 0.3)'
+                      ? '1px solid rgba(244, 201, 93, 0.4)'
                       : '1px solid transparent',
                     transition: 'all 0.3s ease',
                     backdropFilter: isSelected ? 'blur(10px)' : 'none',
@@ -188,10 +187,11 @@ const Sidebar = ({ isOpen, onClose, role }: { isOpen: boolean, onClose: () => vo
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    color: isSelected ? 'white' : 'rgba(255, 255, 255, 0.9)',
-                    fontWeight: isSelected ? '600' : '500',
+                    color: isSelected ? '#F4C95D' : 'rgba(255, 255, 255, 0.9)',
+                    fontWeight: isSelected ? '700' : '500',
                     flex: 1,
                   } : {}}>
+
                     {item.icon}
                     <span style={isNidhiRole ? { flex: 1 } : {}}>{item.name}</span>
                   </span>
@@ -225,18 +225,18 @@ const Sidebar = ({ isOpen, onClose, role }: { isOpen: boolean, onClose: () => vo
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                     style={isNidhiRole ? {
-                      background: 'rgba(255, 255, 255, 0.05)',
+                      background: 'rgba(229, 152, 155, 0.07)',
                       borderRadius: '8px',
                       margin: '4px 0 4px 8px',
                       overflow: 'hidden',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(229, 152, 155, 0.12)',
                     } : {}}
                   >
                     <AnimatePresence>
                       {(expandedItem === item.name || closingItem === item.name) && item.subItems?.map(subItem => {
                         const isSubItemActive = location.pathname === subItem.path;
                         const subItemBackground = isSubItemActive && isNidhiRole
-                          ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)'
+                          ? 'linear-gradient(135deg, rgba(109, 33, 79, 0.4) 0%, rgba(244, 201, 93, 0.2) 100%)'
                           : 'transparent';
 
                         return (

@@ -261,24 +261,24 @@ const Register = () => {
 
   const textFieldStyles = {
     "& .MuiOutlinedInput-root": {
-      color: "#ffffff",
-      bgcolor: "rgba(255, 255, 255, 0.03)",
-      borderRadius: "12px",
+      color: "#2d0f1e",
+      bgcolor: "#ffffff",
+      borderRadius: "14px",
       transition: "all 0.3s ease",
-      "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
-      "&:hover fieldset": { borderColor: "rgba(0, 230, 118, 0.5)" },
-      "&.Mui-focused fieldset": { borderColor: "#00e676", borderWidth: "2px" },
+      "& fieldset": { borderColor: "#f0d0d8", borderWidth: "1.5px" },
+      "&:hover fieldset": { borderColor: "#E5989B" },
+      "&.Mui-focused fieldset": { borderColor: "#6D214F", borderWidth: "2px" },
     },
-    "& .MuiInputLabel-root": { color: "rgba(255, 255, 255, 0.6)" },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#00e676" },
-    "& .MuiOutlinedInput-input::placeholder": { color: "rgba(255, 255, 255, 0.3)", opacity: 1 }
+    "& .MuiInputLabel-root": { color: "#b08090", fontWeight: 500 },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#6D214F" },
+    "& .MuiOutlinedInput-input::placeholder": { color: "#b08090", opacity: 0.8 }
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#0f172a", position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#FFF8F0", position: 'relative', overflow: 'hidden' }}>
       {/* Background decorations */}
-      <Box sx={{ position: 'fixed', top: '-10%', left: '-10%', width: '50vw', height: '50vw', minWidth: '300px', minHeight: '300px', background: 'radial-gradient(circle, rgba(0, 230, 118, 0.08) 0%, rgba(15,23,42,0) 70%)', filter: 'blur(60px)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }} />
-      <Box sx={{ position: 'fixed', bottom: '-10%', right: '-5%', width: '40vw', height: '40vw', minWidth: '250px', minHeight: '250px', background: 'radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, rgba(15,23,42,0) 70%)', filter: 'blur(60px)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }} />
+      <Box sx={{ position: 'fixed', top: '-10%', left: '-10%', width: '50vw', height: '50vw', minWidth: '300px', minHeight: '300px', background: 'radial-gradient(circle, rgba(229, 152, 155, 0.15) 0%, rgba(255, 248, 240, 0) 70%)', filter: 'blur(60px)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }} />
+      <Box sx={{ position: 'fixed', bottom: '-10%', right: '-5%', width: '40vw', height: '40vw', minWidth: '250px', minHeight: '250px', background: 'radial-gradient(circle, rgba(244, 201, 93, 0.15) 0%, rgba(255, 248, 240, 0) 70%)', filter: 'blur(60px)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }} />
 
       {/* Main Content */}
       <Box
@@ -305,18 +305,18 @@ const Register = () => {
               fontWeight: 950,
               fontSize: { xs: '2.5rem', lg: '3.5rem' },
               letterSpacing: '2px',
-              color: '#38bdf8',
-              mb: '1.25rem',
-              textShadow: '0 4px 20px rgba(56, 189, 248, 0.4)'
+              color: '#6D214F',
+              mb: '1rem',
+              textShadow: '0 2px 12px rgba(109, 33, 79, 0.2)'
             }}
           >
-            Ecash
+            ECASH
           </Typography>
           <Typography
             variant={isMobile ? "h5" : "h3"}
-            sx={{ color: '#00e676', fontWeight: 900, mb: 1.5, textShadow: '0 4px 12px rgba(0,0,0,0.3)', lineHeight: 1.2 }}
+            sx={{ color: '#E5989B', fontWeight: 900, mb: 1.5, lineHeight: 1.2 }}
           >
-            Join the Future
+            Join the Network
           </Typography>
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
@@ -326,10 +326,10 @@ const Register = () => {
                 { label: 'Premium', icon: <AutoAwesomeIcon /> }
               ].map((item, i) => (
                 <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                  <Avatar sx={{ bgcolor: 'rgba(0, 230, 118, 0.1)', color: '#00e676', width: 58, height: 58, border: '1px solid rgba(0, 230, 118, 0.2)' }}>
+                  <Avatar sx={{ bgcolor: 'rgba(244, 201, 93, 0.2)', color: '#6D214F', width: 56, height: 56, border: '1.5px solid #F4C95D' }}>
                     {item.icon}
                   </Avatar>
-                  <Typography variant="caption" sx={{ color: '#cbd5e1', fontWeight: 600 }}>{item.label}</Typography>
+                  <Typography variant="caption" sx={{ color: '#7a5060', fontWeight: 700 }}>{item.label}</Typography>
                 </Box>
               ))}
             </Box>
@@ -340,24 +340,23 @@ const Register = () => {
         <Box
           sx={{
             width: '100%', maxWidth: { xs: '100%', sm: '520px', lg: '560px' },
-            bgcolor: 'rgba(30, 41, 59, 0.6)',
-            backdropFilter: 'blur(20px)',
+            bgcolor: '#ffffff',
             borderRadius: { xs: '20px', sm: '24px' },
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.4)',
+            border: '1px solid #f0d0d8',
+            boxShadow: '0 16px 40px rgba(109,33,79,0.08)',
             p: { xs: 2.5, sm: 4 },
           }}
         >
           <Typography
             component="h1"
             variant="h5"
-            sx={{ color: "#ffffff", fontWeight: 800, mb: 0.5, textAlign: { xs: 'center', sm: 'left' }, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+            sx={{ color: "#2d0f1e", fontWeight: 800, mb: 0.5, textAlign: { xs: 'center', sm: 'left' }, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
           >
             Create Account
           </Typography>
           <Typography
             variant="body2"
-            sx={{ color: "#94a3b8", mb: 3, textAlign: { xs: 'center', sm: 'left' }, fontSize: { xs: '0.82rem', sm: '0.875rem' } }}
+            sx={{ color: "#b08090", mb: 3, textAlign: { xs: 'center', sm: 'left' }, fontSize: { xs: '0.82rem', sm: '0.875rem' }, fontWeight: 500 }}
           >
             Fill in your details below to get started.
           </Typography>
@@ -384,7 +383,7 @@ const Register = () => {
                       ? "Minimum 5 chars."
                       : formData.Sponsor_code.length >= 5 && sponsorError ? sponsorError : ""
                   }
-                  InputProps={{ startAdornment: <InputAdornment position="start"><LockIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><LockIcon sx={{ color: "#b08090" }} /></InputAdornment> }}
                   sx={textFieldStyles}
                 />
               </Grid>
@@ -394,11 +393,11 @@ const Register = () => {
                 <TextField
                   required fullWidth name="Sponsor_name" placeholder="Sponsor Name"
                   value={formData.Sponsor_name} disabled
-                  InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon sx={{ color: "#b08090" }} /></InputAdornment> }}
                   sx={{
                     ...textFieldStyles,
-                    "& .MuiOutlinedInput-root.Mui-disabled": { bgcolor: "rgba(255,255,255,0.02)" },
-                    "& .MuiOutlinedInput-input.Mui-disabled": { WebkitTextFillColor: "rgba(255, 255, 255, 0.5)" }
+                    "& .MuiOutlinedInput-root.Mui-disabled": { bgcolor: "#fdf8f8" },
+                    "& .MuiOutlinedInput-input.Mui-disabled": { WebkitTextFillColor: "#6D214F", fontWeight: 700 }
                   }}
                 />
               </Grid>
@@ -408,7 +407,7 @@ const Register = () => {
                 <TextField
                   required fullWidth name="Name" placeholder="Full Name"
                   value={formData.Name} onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon sx={{ color: "#b08090" }} /></InputAdornment> }}
                   sx={textFieldStyles}
                 />
               </Grid>
@@ -418,7 +417,7 @@ const Register = () => {
                 <TextField
                   required fullWidth name="email" placeholder="Email Address" type="email"
                   value={formData.email} onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon sx={{ color: "#b08090" }} /></InputAdornment> }}
                   sx={textFieldStyles}
                 />
               </Grid>
@@ -431,19 +430,19 @@ const Register = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <PhoneIcon sx={{ color: isMobileVerified ? "#00e676" : (formData.mobileno.length === 10 ? "#38bdf8" : "rgba(255,255,255,0.4)") }} />
+                        <PhoneIcon sx={{ color: isMobileVerified ? "#38a169" : (formData.mobileno.length === 10 ? "#6D214F" : "#b08090") }} />
                       </InputAdornment>
                     ),
                     endAdornment: (
                       <InputAdornment position="end">
                         {isMobileVerified ? (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, bgcolor: 'rgba(0, 230, 118, 0.15)', px: 1, py: 0.4, borderRadius: '8px', border: '1px solid rgba(0, 230, 118, 0.3)' }}>
-                            <CheckCircleIcon sx={{ color: '#00e676', fontSize: 16 }} />
-                            <Typography sx={{ color: '#00e676', fontSize: '0.72rem', fontWeight: 700 }}>Verified</Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, bgcolor: 'rgba(56, 161, 105, 0.1)', px: 1, py: 0.4, borderRadius: '8px', border: '1px solid rgba(56, 161, 105, 0.3)' }}>
+                            <CheckCircleIcon sx={{ color: '#38a169', fontSize: 16 }} />
+                            <Typography sx={{ color: '#38a169', fontSize: '0.72rem', fontWeight: 700 }}>Verified</Typography>
                             <Button
                               size="small"
                               onClick={() => { setIsMobileVerified(false); setFirebaseToken(""); }}
-                              sx={{ minWidth: 'auto', p: 0, ml: 0.5, color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', textTransform: 'none', '&:hover': { color: '#ef4444' } }}
+                              sx={{ minWidth: 'auto', p: 0, ml: 0.5, color: '#b08090', fontSize: '0.65rem', textTransform: 'none', '&:hover': { color: '#ef4444' } }}
                             >
                               Edit
                             </Button>
@@ -458,17 +457,17 @@ const Register = () => {
                               textTransform: 'none',
                               fontWeight: 700,
                               fontSize: '0.72rem',
-                              py: 0.4,
-                              px: 1.2,
+                              py: 0.5,
+                              px: 1.4,
                               borderRadius: '8px',
-                              bgcolor: formData.mobileno.length === 10 ? '#0284C7' : 'rgba(255,255,255,0.08)',
-                              color: '#ffffff',
+                              bgcolor: '#6D214F',
+                              color: '#FFF8F0',
                               boxShadow: 'none',
-                              '&:hover': { bgcolor: '#0369A1' },
-                              '&:disabled': { color: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(255,255,255,0.04)' }
+                              '&:hover': { bgcolor: '#8f2f68' },
+                              '&:disabled': { color: '#a88098', bgcolor: '#f0d0d8' }
                             }}
                           >
-                            {isSendingOTP ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : "Verify OTP"}
+                            {isSendingOTP ? <CircularProgress size={14} sx={{ color: '#FFF8F0' }} /> : "Verify OTP"}
                           </Button>
                         )}
                       </InputAdornment>
@@ -480,13 +479,13 @@ const Register = () => {
                       : ""
                   }
                   FormHelperTextProps={{
-                    sx: { color: '#38bdf8', fontSize: '0.72rem', mt: 0.5 }
+                    sx: { color: '#6D214F', fontSize: '0.72rem', mt: 0.5, fontWeight: 600 }
                   }}
                   sx={{
                     ...textFieldStyles,
                     "& .MuiOutlinedInput-root": {
                       ...textFieldStyles["& .MuiOutlinedInput-root"],
-                      borderColor: isMobileVerified ? "#00e676 !important" : undefined
+                      borderColor: isMobileVerified ? "#38a169 !important" : undefined
                     }
                   }}
                 />
@@ -499,10 +498,10 @@ const Register = () => {
                   type={showPassword ? "text" : "password"}
                   value={formData.password} onChange={handleChange}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><LockIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment>,
+                    startAdornment: <InputAdornment position="start"><LockIcon sx={{ color: "#b08090" }} /></InputAdornment>,
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: '#b08090' }}>
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -521,10 +520,10 @@ const Register = () => {
                   error={!!(formData.confirmPassword && formData.password !== formData.confirmPassword)}
                   helperText={formData.confirmPassword && formData.password !== formData.confirmPassword ? "Passwords do not match" : ""}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><LockIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment>,
+                    startAdornment: <InputAdornment position="start"><LockIcon sx={{ color: "#b08090" }} /></InputAdornment>,
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" sx={{ color: '#b08090' }}>
                           {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -539,15 +538,15 @@ const Register = () => {
                 <TextField
                   select required fullWidth name="country"
                   value={formData.country} onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><PublicIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><PublicIcon sx={{ color: "#b08090" }} /></InputAdornment> }}
                   SelectProps={{
                     displayEmpty: true,
                     renderValue: (value: any) => {
-                      if (!value) return <span style={{ color: "rgba(255, 255, 255, 0.3)" }}>Country</span>;
+                      if (!value) return <span style={{ color: "#b08090" }}>Country</span>;
                       return value;
                     }
                   }}
-                  sx={{ ...textFieldStyles, "& .MuiSelect-icon": { color: "rgba(255, 255, 255, 0.6)" } }}
+                  sx={{ ...textFieldStyles, "& .MuiSelect-icon": { color: "#b08090" } }}
                 >
                   <MenuItem disabled value=""><em>Country</em></MenuItem>
                   {COUNTRIES.map(country => (
@@ -559,7 +558,7 @@ const Register = () => {
                 <TextField
                   required fullWidth name="pincode" placeholder="Pincode"
                   value={formData.pincode} onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon sx={{ color: "rgba(255,255,255,0.4)" }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon sx={{ color: "#b08090" }} /></InputAdornment> }}
                   sx={textFieldStyles}
                 />
               </Grid>
@@ -567,12 +566,12 @@ const Register = () => {
               {/* Gender */}
               <Grid item xs={12} sx={{ mt: 0.5 }}>
                 <FormControl error={!!genderError}>
-                  <FormLabel sx={{ color: "rgba(255,255,255,0.7)", display: 'flex', alignItems: 'center', mb: 1, fontSize: '0.9rem' }}>
-                    <WcIcon sx={{ mr: 1, color: "rgba(255,255,255,0.4)", fontSize: '1.2rem' }} /> Gender
+                  <FormLabel sx={{ color: "#2d0f1e", display: 'flex', alignItems: 'center', mb: 1, fontSize: '0.9rem', fontWeight: 600 }}>
+                    <WcIcon sx={{ mr: 1, color: "#b08090", fontSize: '1.2rem' }} /> Gender
                   </FormLabel>
                   <RadioGroup row name="gender" value={formData.gender} onChange={handleRadioChange}>
-                    <FormControlLabel value="Male" control={<Radio size="small" sx={{ color: "rgba(255,255,255,0.3)", "&.Mui-checked": { color: "#00e676" } }} />} label={<span style={{ color: "rgba(255,255,255,0.8)", fontSize: '0.9rem' }}>Male</span>} />
-                    <FormControlLabel value="Female" control={<Radio size="small" sx={{ color: "rgba(255,255,255,0.3)", "&.Mui-checked": { color: "#00e676" } }} />} label={<span style={{ color: "rgba(255,255,255,0.8)", fontSize: '0.9rem' }}>Female</span>} />
+                    <FormControlLabel value="Male" control={<Radio size="small" sx={{ color: "#E5989B", "&.Mui-checked": { color: "#6D214F" } }} />} label={<span style={{ color: "#2d0f1e", fontSize: '0.9rem', fontWeight: 500 }}>Male</span>} />
+                    <FormControlLabel value="Female" control={<Radio size="small" sx={{ color: "#E5989B", "&.Mui-checked": { color: "#6D214F" } }} />} label={<span style={{ color: "#2d0f1e", fontSize: '0.9rem', fontWeight: 500 }}>Female</span>} />
                   </RadioGroup>
                   {genderError && <FormHelperText sx={{ color: "#ef4444", mx: 0 }}>Please select a gender</FormHelperText>}
                 </FormControl>
@@ -581,9 +580,9 @@ const Register = () => {
               {/* Terms */}
               <Grid item xs={12}>
                 <FormControlLabel
-                  control={<Checkbox checked={isChecked} onChange={handleCheckboxChange} size="small" sx={{ color: "rgba(255,255,255,0.3)", "&.Mui-checked": { color: "#00e676" } }} />}
+                  control={<Checkbox checked={isChecked} onChange={handleCheckboxChange} size="small" sx={{ color: "#E5989B", "&.Mui-checked": { color: "#6D214F" } }} />}
                   label={
-                    <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)", fontSize: { xs: '0.8rem', sm: '0.85rem' } }}>
+                    <Typography variant="body2" sx={{ color: "#7a5060", fontSize: { xs: '0.8rem', sm: '0.85rem' }, fontWeight: 500 }}>
                       I accept the Terms and Conditions
                     </Typography>
                   }
@@ -596,16 +595,20 @@ const Register = () => {
                   type="submit" fullWidth variant="contained" disabled={!isChecked || isPending}
                   sx={{
                     py: 1.7,
-                    bgcolor: "#00e676",
-                    color: "#0f172a",
+                    background: "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)",
+                    color: "#FFF8F0",
                     fontWeight: 800,
                     fontSize: { xs: "0.95rem", sm: "1rem" },
-                    borderRadius: "12px",
+                    borderRadius: "14px",
                     textTransform: "none",
-                    boxShadow: "0 8px 24px rgba(0, 230, 118, 0.2)",
+                    boxShadow: "0 6px 22px rgba(109, 33, 79, 0.35)",
                     transition: "all 0.3s ease",
-                    "&:hover": { bgcolor: "#00c853", transform: "translateY(-2px)", boxShadow: "0 12px 28px rgba(0, 230, 118, 0.3)" },
-                    "&:disabled": { bgcolor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.3)" }
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #4e1739 0%, #6D214F 100%)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 10px 28px rgba(109, 33, 79, 0.45)"
+                    },
+                    "&:disabled": { bgcolor: "#f0d0d8", color: "#a88098" }
                   }}
                 >
                   {isPending ? "Creating Account..." : "Create Account"}
@@ -614,9 +617,9 @@ const Register = () => {
             </Grid>
           </Box>
 
-          <Typography variant="body2" sx={{ textAlign: "center", mt: 3, color: "#94a3b8", fontSize: { xs: '0.82rem', sm: '0.875rem' } }}>
+          <Typography variant="body2" sx={{ textAlign: "center", mt: 3, color: "#b08090", fontSize: { xs: '0.82rem', sm: '0.875rem' }, fontWeight: 500 }}>
             Already registered?{" "}
-            <Link to="/login" style={{ color: "#00e676", textDecoration: "none", fontWeight: 700 }}>
+            <Link to="/login" style={{ color: "#6D214F", textDecoration: "none", fontWeight: 700 }}>
               Sign In
             </Link>
           </Typography>
@@ -631,64 +634,64 @@ const Register = () => {
         fullWidth
         PaperProps={{
           sx: {
-            bgcolor: '#1e293b',
-            border: '1px solid rgba(0, 230, 118, 0.2)',
+            bgcolor: '#FFF8F0',
+            border: '1px solid #fce8ec',
             borderRadius: '24px',
             p: { xs: 1, sm: 2 },
-            boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+            boxShadow: '0 24px 48px rgba(109,33,79,0.15)',
             mx: { xs: 2, sm: 'auto' },
           }
         }}
       >
-        <DialogTitle sx={{ color: '#00e676', textAlign: 'center', fontWeight: 800, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
+        <DialogTitle sx={{ color: '#6D214F', textAlign: 'center', fontWeight: 800, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
           🎉 Registration Successful!
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center' }}>
-          <Typography variant="body1" sx={{ color: '#f8fafc', mb: 3, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+          <Typography variant="body1" sx={{ color: '#2d0f1e', mb: 3, fontSize: { xs: '0.9rem', sm: '1rem' }, fontWeight: 500 }}>
             Welcome aboard! Here are your account details:
           </Typography>
           <Box
             sx={{
-              bgcolor: 'rgba(15,23,42,0.6)',
+              bgcolor: '#ffffff',
               p: { xs: 2, sm: 3 },
               borderRadius: '16px',
-              border: '1px solid rgba(255,255,255,0.06)',
+              border: '1px solid #f0d0d8',
               display: 'inline-block',
               textAlign: 'left',
               minWidth: { xs: '100%', sm: 260 },
               width: { xs: '100%', sm: 'auto' },
             }}
           >
-            <Typography variant="body2" sx={{ color: '#fff', mb: 1.5, fontSize: { xs: '0.85rem', sm: '1rem' } }}>
-              <strong style={{ color: '#00e676', display: 'inline-block', minWidth: '110px' }}>Member ID:</strong>
+            <Typography variant="body2" sx={{ color: '#2d0f1e', mb: 1.5, fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+              <strong style={{ color: '#6D214F', display: 'inline-block', minWidth: '110px' }}>Member ID:</strong>
               {registrationData.memberId}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#fff', mb: 1.5, fontSize: { xs: '0.85rem', sm: '1rem' } }}>
-              <strong style={{ color: '#00e676', display: 'inline-block', minWidth: '110px' }}>Mobile:</strong>
+            <Typography variant="body2" sx={{ color: '#2d0f1e', mb: 1.5, fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+              <strong style={{ color: '#6D214F', display: 'inline-block', minWidth: '110px' }}>Mobile:</strong>
               {registrationData.mobile}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#fff', fontSize: { xs: '0.85rem', sm: '1rem' } }}>
-              <strong style={{ color: '#00e676', display: 'inline-block', minWidth: '110px' }}>Email:</strong>
+            <Typography variant="body2" sx={{ color: '#2d0f1e', fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+              <strong style={{ color: '#6D214F', display: 'inline-block', minWidth: '110px' }}>Email:</strong>
               {registrationData.email}
             </Typography>
           </Box>
-          <Typography variant="body2" sx={{ mt: 3, color: '#94a3b8', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
-            Use your <strong style={{ color: '#00e676' }}>mobile number</strong> and the <strong style={{ color: '#00e676' }}>password</strong> you just created to log in.
+          <Typography variant="body2" sx={{ mt: 3, color: '#b08090', fontSize: { xs: '0.8rem', sm: '0.875rem' }, fontWeight: 500 }}>
+            Use your <strong style={{ color: '#6D214F' }}>mobile number</strong> and the <strong style={{ color: '#6D214F' }}>password</strong> you just created to log in.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
           <Button
             onClick={handleCloseDialog}
             sx={{
-              bgcolor: '#00e676',
-              color: '#0f172a',
+              background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+              color: '#FFF8F0',
               fontWeight: 700,
               px: { xs: 4, sm: 6 },
               py: 1.5,
               borderRadius: '12px',
               textTransform: 'none',
               fontSize: { xs: '0.9rem', sm: '1rem' },
-              '&:hover': { bgcolor: '#00c853', transform: 'translateY(-2px)' },
+              '&:hover': { background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)', transform: 'translateY(-2px)' },
               transition: 'all 0.2s'
             }}
           >
@@ -708,21 +711,21 @@ const Register = () => {
         fullWidth
         PaperProps={{
           sx: {
-            bgcolor: '#1e293b',
-            color: '#fff',
+            bgcolor: '#FFF8F0',
+            color: '#2d0f1e',
             borderRadius: '20px',
             p: { xs: 2, sm: 2.5 },
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)',
+            border: '1px solid #fce8ec',
+            boxShadow: '0 25px 50px -12px rgba(109,33,79,0.15)',
           }
         }}
       >
-        <DialogTitle sx={{ textAlign: 'center', pb: 1, pt: 1, fontWeight: 800, fontSize: { xs: '1.15rem', sm: '1.25rem' } }}>
+        <DialogTitle sx={{ textAlign: 'center', pb: 1, pt: 1, fontWeight: 800, fontSize: { xs: '1.15rem', sm: '1.25rem' }, color: '#6D214F' }}>
           Verify Mobile Number
         </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, pt: 1 }}>
-          <Typography variant="body2" sx={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
-            Enter the 6-digit verification code sent to <strong style={{ color: '#38bdf8' }}>+91 {formData.mobileno}</strong>
+          <Typography variant="body2" sx={{ textAlign: 'center', color: '#b08090', fontSize: '0.85rem' }}>
+            Enter the 6-digit verification code sent to <strong style={{ color: '#6D214F' }}>+91 {formData.mobileno}</strong>
           </Typography>
 
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
@@ -734,12 +737,12 @@ const Register = () => {
               TextFieldsProps={{
                 sx: {
                   '& .MuiOutlinedInput-root': {
-                    color: '#ffffff',
-                    bgcolor: 'rgba(255,255,255,0.06)',
+                    color: '#2d0f1e',
+                    bgcolor: '#ffffff',
                     borderRadius: '12px',
-                    '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-                    '&:hover fieldset': { borderColor: '#38bdf8' },
-                    '&.Mui-focused fieldset': { borderColor: '#00e676', borderWidth: '2px' }
+                    '& fieldset': { borderColor: '#f0d0d8' },
+                    '&:hover fieldset': { borderColor: '#E5989B' },
+                    '&.Mui-focused fieldset': { borderColor: '#6D214F', borderWidth: '2px' }
                   },
                   '& .MuiOutlinedInput-input': {
                     textAlign: 'center',
@@ -753,7 +756,7 @@ const Register = () => {
           </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', px: 1 }}>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+            <Typography variant="caption" sx={{ color: '#b08090' }}>
               Didn't receive code?
             </Typography>
             <Button
@@ -761,7 +764,7 @@ const Register = () => {
               onClick={handleSendOTP}
               disabled={resendCooldown > 0 || isSendingOTP}
               sx={{
-                color: resendCooldown > 0 ? 'rgba(255,255,255,0.4)' : '#38bdf8',
+                color: resendCooldown > 0 ? '#b08090' : '#6D214F',
                 fontWeight: 700,
                 textTransform: 'none',
                 fontSize: '0.8rem'
@@ -774,7 +777,7 @@ const Register = () => {
         <DialogActions sx={{ px: 2, pb: 1, gap: 1 }}>
           <Button
             onClick={() => setOtpDialogOpen(false)}
-            sx={{ color: 'rgba(255,255,255,0.6)', textTransform: 'none' }}
+            sx={{ color: '#b08090', textTransform: 'none' }}
           >
             Cancel
           </Button>
@@ -784,17 +787,17 @@ const Register = () => {
             disabled={otp.length !== 6 || isVerifyingOTP}
             onClick={handleVerifyOTP}
             sx={{
-              bgcolor: '#00e676',
-              color: '#0f172a',
+              background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+              color: '#FFF8F0',
               fontWeight: 800,
               borderRadius: '12px',
               py: 1.2,
               textTransform: 'none',
-              '&:hover': { bgcolor: '#00c853' },
-              '&:disabled': { bgcolor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }
+              '&:hover': { background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)' },
+              '&:disabled': { bgcolor: '#f0d0d8', color: '#a88098' }
             }}
           >
-            {isVerifyingOTP ? <CircularProgress size={20} sx={{ color: '#0f172a' }} /> : "Verify Code"}
+            {isVerifyingOTP ? <CircularProgress size={20} sx={{ color: '#FFF8F0' }} /> : "Verify Code"}
           </Button>
         </DialogActions>
       </Dialog>

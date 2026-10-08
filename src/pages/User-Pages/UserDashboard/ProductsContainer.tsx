@@ -69,22 +69,22 @@ const ProductsContainer: React.FC = () => {
   };
 
   return (
-    <Box sx={{ mt: 3, mb: 4, width: '100%', display: 'flex', justifyContent: 'center' }}>
+    <Box sx={{ mb: 3.5, width: '100%', display: 'flex', justifyContent: 'center' }}>
       <Card
         sx={{
           maxWidth: 540,
           width: '100%',
-          boxShadow: '0 8px 32px rgba(10,37,88,0.06)',
-          borderRadius: '16px',
-          border: '1px dashed #90a4d4',
-          backgroundColor: '#fdfdff',
+          boxShadow: '0 8px 24px rgba(109,33,79,0.06)',
+          borderRadius: '24px',
+          border: '1.5px dashed #E5989B',
+          backgroundColor: '#ffffff',
         }}
       >
         <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <AccountBalanceWalletIcon sx={{ fontSize: 28, color: '#ed6c02' }} />
-              <Typography variant="body2" sx={{ color: '#0a2558', fontWeight: 700, fontSize: '0.9rem' }}>
+              <AccountBalanceWalletIcon sx={{ fontSize: 26, color: '#6D214F' }} />
+              <Typography variant="body2" sx={{ color: '#2d0f1e', fontWeight: 800, fontSize: '0.95rem' }}>
                 Package Deposit (Min ₹100)
               </Typography>
             </Box>
@@ -110,21 +110,29 @@ const ProductsContainer: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PaymentsIcon sx={{ color: '#0a2558', fontSize: 20 }} />
+                    <PaymentsIcon sx={{ color: '#6D214F', fontSize: 20 }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "12px",
-                  bgcolor: '#ffffff',
+                  borderRadius: "14px",
+                  bgcolor: '#FFF8F0',
+                  "& fieldset": { borderColor: "#f0d0d8", borderWidth: "1.5px" },
+                  "&:hover fieldset": { borderColor: "#E5989B" },
+                  "&.Mui-focused fieldset": { borderColor: "#6D214F", borderWidth: "2px" },
                 },
                 "& .MuiInputLabel-root": {
-                  color: '#475569',
+                  color: '#7a5060',
                   fontWeight: 600,
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: '#6D214F',
                 },
                 "& input": {
                   MozAppearance: "textfield",
+                  color: "#2d0f1e",
+                  fontWeight: 600,
                 },
                 "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
                   WebkitAppearance: "none",
@@ -136,8 +144,8 @@ const ProductsContainer: React.FC = () => {
 
             {/* Balance displayed below amount text box on left corner */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 0.75, mb: 1, pl: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
-                Balance: <span style={{ color: '#059669', fontWeight: 700 }}>₹{Number(topUpBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <Typography variant="caption" sx={{ color: '#7a5060', fontWeight: 600 }}>
+                Available Balance: <span style={{ color: '#6D214F', fontWeight: 800 }}>₹{Number(topUpBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </Typography>
             </Box>
 
@@ -149,24 +157,25 @@ const ProductsContainer: React.FC = () => {
               sx={{
                 mt: 2.5,
                 py: 1.5,
-                backgroundColor: !packageAmount ? '#e2e8f0' : '#0a2558',
-                color: !packageAmount ? '#94a3b8' : '#ffffff',
-                fontWeight: 700,
-                fontSize: '1rem',
+                background: !packageAmount ? '#f0d0d8' : 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                color: !packageAmount ? '#a88098' : '#FFF8F0',
+                fontWeight: 800,
+                fontSize: '0.95rem',
                 textTransform: 'none',
-                borderRadius: '12px',
-                boxShadow: 'none',
+                borderRadius: '14px',
+                boxShadow: !packageAmount ? 'none' : '0 4px 16px rgba(109,33,79,0.25)',
                 '&:hover': {
-                  backgroundColor: !packageAmount ? '#e2e8f0' : '#153b93',
-                  boxShadow: 'none',
+                  background: !packageAmount ? '#f0d0d8' : 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                  boxShadow: '0 6px 20px rgba(109,33,79,0.35)',
+                  transform: 'translateY(-1px)'
                 },
                 '&:disabled': {
-                  backgroundColor: '#e2e8f0',
-                  color: '#94a3b8',
+                  backgroundColor: '#f0d0d8',
+                  color: '#a88098',
                 }
               }}
             >
-              {isPending ? <CircularProgress size={22} sx={{ color: '#ffffff' }} /> : "Submit Deposit Request"}
+              {isPending ? <CircularProgress size={22} sx={{ color: '#FFF8F0' }} /> : "Submit Deposit Request"}
             </Button>
           </Box>
         </CardContent>
@@ -178,27 +187,27 @@ const ProductsContainer: React.FC = () => {
         onClose={() => setSuccessDialogOpen(false)}
         PaperProps={{
           sx: {
-            bgcolor: '#FFFFFF',
-            borderRadius: '20px',
-            border: '1px solid #E2E8F0',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            bgcolor: '#FFF8F0',
+            borderRadius: '24px',
+            border: '1px solid #fce8ec',
+            boxShadow: '0 20px 48px rgba(109,33,79,0.15)',
           }
         }}
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle sx={{ textAlign: 'center', pt: 3.5, color: '#10b981', fontWeight: 800 }}>
-          Deposit Successful!
+        <DialogTitle sx={{ textAlign: 'center', pt: 3.5, color: '#6D214F', fontWeight: 800 }}>
+          Deposit Successful! 🎉
         </DialogTitle>
         <DialogContent sx={{ pb: 1, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ color: '#64748B', mb: 2 }}>
+          <Typography variant="body2" sx={{ color: '#7a5060', mb: 2 }}>
             Your deposit request has been processed successfully.
           </Typography>
-          <Box sx={{ bgcolor: '#F8FAFC', p: 2, borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-            <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>
+          <Box sx={{ bgcolor: '#ffffff', p: 2, borderRadius: '16px', border: '1px solid #f0d0d8' }}>
+            <Typography variant="caption" sx={{ color: '#7a5060', display: 'block' }}>
               Amount Processed
             </Typography>
-            <Typography variant="h5" sx={{ color: '#0F172A', fontWeight: 800, mt: 0.5 }}>
+            <Typography variant="h5" sx={{ color: '#6D214F', fontWeight: 900, mt: 0.5 }}>
               ₹{Number(purchasedAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </Typography>
           </Box>
@@ -210,12 +219,15 @@ const ProductsContainer: React.FC = () => {
             fullWidth
             sx={{
               py: 1.2,
-              borderRadius: '10px',
-              bgcolor: '#0284C7',
-              color: '#FFFFFF',
-              fontWeight: 700,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+              color: '#FFF8F0',
+              fontWeight: 800,
               textTransform: 'none',
-              '&:hover': { bgcolor: '#0369A1' }
+              boxShadow: '0 4px 12px rgba(109,33,79,0.25)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)'
+              }
             }}
           >
             Done

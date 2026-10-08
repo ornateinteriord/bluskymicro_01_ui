@@ -2,40 +2,126 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* ============================================
+   BLUSKY MOBILE APP DESIGN SYSTEM
+   Color Palette:
+   #6D214F  - Deep Plum (Primary)
+   #E5989B  - Soft Rose (Accent)
+   #FFF8F0  - Warm Cream (Background)
+   #F4C95D  - Golden Yellow (Highlight)
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Brand Colors */
+  --color-primary:        #6D214F;
+  --color-accent:         #E5989B;
+  --color-bg:             #FFF8F0;
+  --color-highlight:      #F4C95D;
+
+  /* Derived */
+  --color-primary-dark:   #4e1739;
+  --color-primary-light:  #8f2f68;
+  --color-accent-light:   #f5bcbf;
+  --color-accent-dark:    #c97579;
+  --color-highlight-dark: #d4a83a;
+  --color-bg-card:        #ffffff;
+  --color-bg-surface:     #fef0e7;
+
+  /* Text */
+  --color-text-primary:   #2d0f1e;
+  --color-text-secondary: #7a5060;
+  --color-text-muted:     #b08090;
+
+  /* Borders */
+  --color-border:         #f0d0d8;
+  --color-border-light:   #fce8ec;
+
+  /* Shadows */
+  --shadow-sm:  0 2px 8px rgba(109, 33, 79, 0.08);
+  --shadow-md:  0 4px 16px rgba(109, 33, 79, 0.12);
+  --shadow-lg:  0 8px 32px rgba(109, 33, 79, 0.18);
+  --shadow-xl:  0 16px 48px rgba(109, 33, 79, 0.22);
+
+  /* Radii */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  /* Mobile App Constraints */
+  --navbar-height:      60px;
+  --bottom-nav-height:  70px;
+
+  /* Tailwind / shadcn-ui CSS variable mappings */
+  --background:         30 100% 97%;
+  --foreground:         330 55% 14%;
+  --card:               0 0% 100%;
+  --card-foreground:    330 55% 14%;
+  --popover:            0 0% 100%;
+  --popover-foreground: 330 55% 14%;
+  --primary:            323 52% 33%;
+  --primary-foreground: 30 100% 97%;
+  --secondary:          351 47% 74%;
+  --secondary-foreground: 330 55% 14%;
+  --muted:              30 60% 94%;
+  --muted-foreground:   330 25% 46%;
+  --accent:             43 87% 66%;
+  --accent-foreground:  330 55% 14%;
+  --destructive:        0 84% 60%;
+  --destructive-foreground: 30 100% 97%;
+  --border:             340 50% 88%;
+  --input:              340 50% 88%;
+  --ring:               323 52% 33%;
+  --chart-1:            323 52% 33%;
+  --chart-2:            351 47% 74%;
+  --chart-3:            43 87% 66%;
+  --chart-4:            330 25% 46%;
+  --chart-5:            0 60% 55%;
+  --radius:             0.75rem;
+
+  /* Sidebar */
+  --sidebar-background:         323 52% 23%;
+  --sidebar-foreground:         30 100% 97%;
+  --sidebar-primary:            43 87% 66%;
+  --sidebar-primary-foreground: 330 55% 14%;
+  --sidebar-accent:             323 52% 28%;
+  --sidebar-accent-foreground:  30 100% 97%;
+  --sidebar-border:             323 52% 30%;
+  --sidebar-ring:               43 87% 66%;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  border-color: hsl(var(--border));
 }
 
-html,
-body {
+html, body {
   overflow-x: hidden;
-  background-color: transparent;
-  /* Let each page/route control its own background */
+  font-family: 'Inter', sans-serif;
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
 }
 
-/* Premium Webkit Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition: background 0.3s ease;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
+/* ===== PREMIUM SCROLLBAR ===== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #fce8ec; }
+::-webkit-scrollbar-thumb { background: #E5989B; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #6D214F; }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #0284C7;
-}
-
-/* Global Transition Effects for Buttons & Cards */
+/* ===== MUI GLOBAL OVERRIDES ===== */
 .css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input,
 .MuiButton-root,
 .MuiPaper-root,
@@ -45,136 +131,92 @@ body {
 
 .MuiButton-contained:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(2, 132, 199, 0.3) !important;
+  box-shadow: 0 6px 15px rgba(109, 33, 79, 0.3) !important;
 }
 
 .MuiCard-root:hover {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 25px rgba(109, 33, 79, 0.1) !important;
 }
 
+/* ===== SIDEBAR OVERLAY (desktop) ===== */
 @media (min-width: 769px) {
-  .sidebar-overlay {
-    display: none !important;
-  }
+  .sidebar-overlay { display: none !important; }
 }
 
-@layer base {
-  :root {
-    --background: 210 20% 98%;
-    --foreground: 220 10% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 10% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 10% 10%;
-    --primary: 43 74% 49%;
-    --primary-foreground: 220 10% 10%;
-    --secondary: 220 10% 20%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 40%;
-    --accent: 43 74% 49%;
-    --accent-foreground: 220 10% 10%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 43 74% 49%;
-    --chart-1: 43 74% 49%;
-    --chart-2: 220 10% 30%;
-    --chart-3: 200 50% 50%;
-    --chart-4: 150 40% 50%;
-    --chart-5: 0 50% 50%;
-    --radius: 0.5rem;
-    --sidebar-background: 220 10% 15%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 43 74% 49%;
-    --sidebar-primary-foreground: 220 10% 10%;
-    --sidebar-accent: 220 10% 20%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 10% 25%;
-    --sidebar-ring: 43 74% 49%;
-  }
-
-  .dark {
-    --background: 220 10% 10%;
-    --foreground: 210 20% 98%;
-    --card: 220 10% 14%;
-    --card-foreground: 210 20% 98%;
-    --popover: 220 10% 14%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 43 74% 49%;
-    --primary-foreground: 220 10% 10%;
-    --secondary: 220 10% 20%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 220 10% 20%;
-    --muted-foreground: 220 10% 70%;
-    --accent: 43 74% 49%;
-    --accent-foreground: 220 10% 10%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 10% 20%;
-    --input: 220 10% 20%;
-    --ring: 43 74% 49%;
-    --chart-1: 43 74% 49%;
-    --chart-2: 220 10% 40%;
-    --chart-3: 200 50% 60%;
-    --chart-4: 150 40% 60%;
-    --chart-5: 0 50% 60%;
-    --sidebar-background: 220 10% 12%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 43 74% 49%;
-    --sidebar-primary-foreground: 220 10% 10%;
-    --sidebar-accent: 220 10% 18%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 10% 20%;
-    --sidebar-ring: 43 74% 49%;
-  }
-}
-
-/* Account Themes - Light Gradients */
-body.theme-sb {
-  background: linear-gradient(180deg, #E0F2FE 0%, #F8FAFC 600px) !important;
-}
-
-body.theme-ca {
-  background: linear-gradient(180deg, #E0F2FE 0%, #F8FAFC 600px) !important;
-}
-
-body.theme-rd {
-  background: linear-gradient(180deg, #E0F2FE 0%, #F8FAFC 600px) !important;
-}
-
-body.theme-fd {
-  background: linear-gradient(180deg, #E0F2FE 0%, #F8FAFC 600px) !important;
-}
-
-body.theme-pigmy {
-  background: linear-gradient(180deg, #E0F2FE 0%, #F8FAFC 600px) !important;
-}
-
+/* ===== ACCOUNT THEMES ===== */
+body.theme-sb,
+body.theme-ca,
+body.theme-rd,
+body.theme-fd,
+body.theme-pigmy,
 body.theme-mis {
-  background: linear-gradient(180deg, #E0F2FE 0%, #F8FAFC 600px) !important;
+  background: linear-gradient(180deg, #fde8ec 0%, #FFF8F0 600px) !important;
 }
 
-/* Ensure the main content area in App.tsx is transparent when a theme is active */
 body[class*="theme-"] .content-wrapper {
   background: transparent !important;
   background-color: transparent !important;
 }
 
-* {
-  border-color: hsl(var(--border));
-}
-
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  transition: background 0.3s ease;
-}
-
-/* Hide the invisible reCAPTCHA badge */
-.grecaptcha-badge { 
+/* ===== RECAPTCHA HIDE ===== */
+.grecaptcha-badge {
   visibility: hidden !important;
   opacity: 0 !important;
   display: none !important;
+}
+
+/* ===== MOBILE APP CARD ===== */
+.mobile-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+.mobile-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* ===== STAT CARD VARIANTS ===== */
+.stat-card-plum {
+  background: linear-gradient(135deg, #6D214F 0%, #8f2f68 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(109, 33, 79, 0.25);
+}
+.stat-card-rose {
+  background: linear-gradient(135deg, #E5989B 0%, #f5bcbf 100%);
+  color: #2d0f1e;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(229, 152, 155, 0.25);
+}
+.stat-card-gold {
+  background: linear-gradient(135deg, #F4C95D 0%, #f8dc8a 100%);
+  color: #2d0f1e;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(244, 201, 93, 0.3);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.fade-in-up { animation: fadeInUp 0.4s ease both; }
+
+.skeleton {
+  background: linear-gradient(90deg, #fce8ec 25%, #ffd9e0 50%, #fce8ec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
 }

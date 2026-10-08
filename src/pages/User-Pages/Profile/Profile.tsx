@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Typography, TextField, Button, Avatar, Card, CardContent, CardHeader } from '@mui/material';
+import { Box, Typography, TextField, Button, Avatar, Card, CardContent, IconButton } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
 import UserContext from "../../../context/user/userContext";
 import { useUpdateMember } from '../../../api/Memeber';
 import { LoadingComponent } from '../../../App';
 
-
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useContext(UserContext);
 
   const [formData, setFormData] = useState({
@@ -47,121 +49,136 @@ const Profile: React.FC = () => {
   };
 
   const inputStyles = {
-    bgcolor: '#FFFFFF',
-    borderRadius: '12px',
-    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)',
+    bgcolor: '#FFF8F0',
+    borderRadius: '16px',
     '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#E2E8F0',
+      borderColor: '#f0d0d8',
     },
     '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#BAE6FD',
+      borderColor: '#E5989B',
     },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#0284C7',
+      borderColor: '#6D214F',
+      borderWidth: '2px',
     },
     '& .MuiInputBase-input': {
-      color: '#0F172A',
+      color: '#2d0f1e',
       padding: '14px 18px',
-      fontSize: '1.05rem',
-      fontWeight: 500,
-      letterSpacing: '0.5px'
+      fontSize: '1rem',
+      fontWeight: 600,
     },
   };
 
   return (
-    <Box sx={{ p: { xs: 1, md: 2 }, display: 'flex', justifyContent: 'center', minHeight: '100vh' }}>
+    <Box sx={{ 
+      p: { xs: 2, sm: 3 }, 
+      display: 'flex', 
+      flexDirection: 'column',
+      alignItems: 'center', 
+      minHeight: '100vh',
+      bgcolor: '#FFF8F0',
+      maxWidth: '480px',
+      margin: '0 auto',
+      pb: 10
+    }}>
+      {/* Header Bar */}
+      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1.5, mb: 3 }}>
+        <IconButton 
+          onClick={() => navigate(-1)}
+          sx={{ 
+            bgcolor: '#ffffff', 
+            border: '1.5px solid #f0d0d8',
+            color: '#6D214F',
+            p: 1,
+            '&:hover': { bgcolor: '#fdf2f4' }
+          }}
+        >
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
+            My Profile
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
+            Personal account details & information
+          </Typography>
+        </Box>
+      </Box>
       
       <Card sx={{ 
         width: '100%', 
-        maxWidth: 800, 
         bgcolor: '#FFFFFF', 
-        border: '1px solid #E2E8F0', 
+        border: '1.5px solid #f0d0d8', 
         borderRadius: '24px', 
-        color: '#0F172A',
-        boxShadow: "0 10px 30px rgba(0,0,0,0.05)"
+        color: '#2d0f1e',
+        boxShadow: "0 8px 24px rgba(109,33,79,0.06)"
       }}>
-        
-        <CardHeader 
-          title={
-            <Box sx={{ 
-              display: 'inline-block',
-              border: '2px solid #E2E8F0', 
-              borderRadius: '20px', 
-              px: 4, 
-              py: 0.5,
-              bgcolor: '#F8FAFC'
-            }}>
-              <Typography variant="h6" fontWeight="bold" sx={{ letterSpacing: '1px', color: '#0F172A' }}>MY Profile</Typography>
-            </Box>
-          }
-          sx={{ textAlign: 'center', pb: 0, pt: 3 }}
-        />
-
-        <CardContent sx={{ p: { xs: 2, md: 4 } }}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
           <form onSubmit={handleSubmit}>
             
             {/* Top Banner - Photo, Name, ID */}
             <Box sx={{ 
               display: 'flex', 
-              flexDirection: { xs: 'column', sm: 'row' }, 
               alignItems: 'center',
-              justifyContent: 'flex-start',
-              background: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)',
-              p: { xs: 3, md: 4 },
+              background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 60%, #8f2f68 100%)',
+              p: 2.5,
               borderRadius: '20px',
-              border: '1px solid #BAE6FD',
-              mb: 5,
-              boxShadow: '0 4px 15px rgba(2, 132, 199, 0.05)',
-              gap: { xs: 3, sm: 4 }
+              border: '1px solid rgba(244, 201, 93, 0.25)',
+              mb: 3.5,
+              boxShadow: '0 8px 20px rgba(109, 33, 79, 0.2)',
+              gap: 2.5
             }}>
-                <Box sx={{ position: 'relative' }}>
-                  <Avatar sx={{ 
-                    width: 90, 
-                    height: 90, 
-                    border: '4px solid #FFFFFF', 
-                    bgcolor: '#E0F2FE',
-                    boxShadow: '0 4px 15px rgba(2, 132, 199, 0.15)',
-                    color: '#0284C7',
-                    fontSize: '2.5rem'
-                  }}>
-                    {formData.Name ? formData.Name.charAt(0).toUpperCase() : <PersonIcon sx={{ fontSize: 50 }} />}
-                  </Avatar>
-                </Box>
-                
-                <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-                  <Typography variant="overline" sx={{ color: '#64748B', letterSpacing: '2px', display: 'block', lineHeight: 1.2, mb: 0.5 }}>
-                    Profile
+              <Avatar sx={{ 
+                width: 68, 
+                height: 68, 
+                border: '3px solid #F4C95D', 
+                bgcolor: '#FFF8F0',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                color: '#6D214F',
+                fontSize: '1.8rem',
+                fontWeight: 900
+              }}>
+                {formData.Name ? formData.Name.charAt(0).toUpperCase() : <PersonIcon sx={{ fontSize: 40 }} />}
+              </Avatar>
+              
+              <Box sx={{ color: '#FFF8F0' }}>
+                <Typography variant="overline" sx={{ color: '#E5989B', letterSpacing: '1.5px', display: 'block', lineHeight: 1.1, fontWeight: 700 }}>
+                  VERIFIED MEMBER
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 900, color: '#FFF8F0', lineHeight: 1.2, mb: 0.5 }}>
+                  {formData.Name || 'Member'}
+                </Typography>
+                <Box sx={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center',
+                  bgcolor: 'rgba(244, 201, 93, 0.2)',
+                  border: '1px solid rgba(244, 201, 93, 0.4)',
+                  borderRadius: '8px',
+                  px: 1.2,
+                  py: 0.25,
+                }}>
+                  <Typography variant="caption" sx={{ color: '#F4C95D', fontWeight: 800, letterSpacing: '1px' }}>
+                    ID: {user?.member_code || user?.Member_id || 'N/A'}
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#0F172A', letterSpacing: '1px', lineHeight: 1.2, mb: 1.5 }}>
-                    {formData.Name || 'RAM'}
-                  </Typography>
-                  <Box sx={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center',
-                    bgcolor: '#FFFFFF',
-                    border: '1px solid #BAE6FD',
-                    borderRadius: '8px',
-                    px: 1.5,
-                    py: 0.5,
-                    boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
-                  }}>
-                    <Typography variant="body2" sx={{ color: '#64748B', mr: 1, fontWeight: 'medium' }}>ID:</Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#0284C7', letterSpacing: '1.5px', lineHeight: 1 }}>
-                      {user?.member_code || user?.Member_id || 'N/A'}
-                    </Typography>
-                  </Box>
                 </Box>
+              </Box>
             </Box>
 
             {/* Form Fields Section */}
-            <Box sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
-              gap: 3.5,
-              mb: 5
-            }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, mb: 3.5 }}>
               <Box>
-                <Typography variant="body2" sx={{ mb: 1.5, color: '#0284C7', fontWeight: 700, ml: 1, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.75rem' }}>Date of Birth</Typography>
+                <Typography variant="caption" sx={{ mb: 0.8, color: '#6D214F', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Full Name</Typography>
+                <TextField
+                  name="Name"
+                  value={formData.Name}
+                  onChange={handleInputChange}
+                  fullWidth
+                  sx={inputStyles}
+                />
+              </Box>
+
+              <Box>
+                <Typography variant="caption" sx={{ mb: 0.8, color: '#6D214F', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date of Birth</Typography>
                 <TextField
                   name="dob"
                   type="text"
@@ -173,7 +190,7 @@ const Profile: React.FC = () => {
               </Box>
 
               <Box>
-                <Typography variant="body2" sx={{ mb: 1.5, color: '#0284C7', fontWeight: 700, ml: 1, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.75rem' }}>Email Id</Typography>
+                <Typography variant="caption" sx={{ mb: 0.8, color: '#6D214F', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email Address</Typography>
                 <TextField
                   name="email"
                   type="email"
@@ -184,8 +201,8 @@ const Profile: React.FC = () => {
                 />
               </Box>
 
-              <Box sx={{ gridColumn: { md: '1 / span 2' } }}>
-                <Typography variant="body2" sx={{ mb: 1.5, color: '#0284C7', fontWeight: 700, ml: 1, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.75rem' }}>Country</Typography>
+              <Box>
+                <Typography variant="caption" sx={{ mb: 0.8, color: '#6D214F', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Country</Typography>
                 <TextField
                   name="country"
                   value={formData.country}
@@ -196,35 +213,32 @@ const Profile: React.FC = () => {
               </Box>
             </Box>
 
-
-
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Button
-                type="submit"
-                disabled={updateMember.isPending}
-                sx={{
-                  bgcolor: '#0284C7',
-                  color: '#FFFFFF',
-                  px: 6,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 800,
-                  textTransform: 'none',
-                  borderRadius: '30px',
-                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)',
-                  "&:hover": { 
-                    bgcolor: '#0369A1',
-                    boxShadow: '0 6px 20px rgba(2, 132, 199, 0.4)'
-                  },
-                  "&:disabled": { 
-                    bgcolor: '#E2E8F0',
-                    color: '#94A3B8'
-                  }
-                }}
-              >
-                Submit
-              </Button>
-            </Box>
+            <Button
+              type="submit"
+              fullWidth
+              disabled={updateMember.isPending}
+              sx={{
+                background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                color: '#FFF8F0',
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 900,
+                textTransform: 'none',
+                borderRadius: '16px',
+                boxShadow: '0 8px 24px rgba(109, 33, 79, 0.25)',
+                "&:hover": { 
+                  background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                  transform: 'translateY(-1px)'
+                },
+                "&:disabled": { 
+                  bgcolor: '#f0d0d8',
+                  color: '#8c6b7d'
+                },
+                transition: 'all 0.2s'
+              }}
+            >
+              Update Profile
+            </Button>
 
           </form>
         </CardContent>

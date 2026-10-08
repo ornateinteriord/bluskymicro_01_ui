@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Paper, CircularProgress, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItemButton, Avatar, Divider, Chip } from '@mui/material';
+import { Box, Typography, Button, Paper, CircularProgress, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItemButton, Avatar, Divider, Chip, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { useGetMemberDetails } from '../../../api/Memeber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -7,6 +8,7 @@ import QrCode2Icon from '@mui/icons-material/QrCode2';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { toast } from 'react-toastify';
 import { get, post } from '../../../api/Api';
 import { jwtDecode } from 'jwt-decode';
@@ -26,6 +28,7 @@ const getCurrentUserId = () => {
 };
 
 const MyQR: React.FC = () => {
+  const navigate = useNavigate();
   const currentUserId = getCurrentUserId();
   const { data: memberDetails, isLoading } = useGetMemberDetails(currentUserId);
 
@@ -58,45 +61,47 @@ const MyQR: React.FC = () => {
       toast.error('Please enter a mobile number');
       return;
     }
+    setSearchingMember(true);
+    setFoundMember(null);
     try {
-      setSearchingMember(true);
-      setFoundMember(null);
-      const res = await get(`/chat/search?mobileNumber=${searchMobile.trim()}`);
+      const res = await get(`/chat/search-member?mobile=${encodeURIComponent(searchMobile.trim())}`);
       if (res.success && res.data) {
-        setFoundMember(res.data);
-        toast.success('Member found in chat directory!');
+        const roomRes = await post('/chat/room', {
+          targetMemberId: res.data.Member_id || res.data.memberId || res.data.id,
+          targetRole: res.data.role || 'Member'
+        });
+        if (roomRes.success && roomRes.data) {
+          setFoundMember({
+            ...res.data,
+            chatRoom: roomRes.data
+          });
+        }
       } else {
-        toast.error(res.message || 'Member not found');
+        toast.error('No member found with this mobile number');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'No active member found with this mobile number');
+      toast.error(err?.response?.data?.message || 'Member not found');
     } finally {
       setSearchingMember(false);
     }
   };
 
-  const handleSendQRToRoom = async (roomId: string, recipientName: string) => {
-    if (!roomId) return;
+  const handleSendQRToRoom = async (roomId: string, targetName: string) => {
+    const memberId = TokenService.getMemberId() || memberDetails?.Member_id || memberDetails?.member_id || 'UNKNOWN';
+    const memberName = memberDetails?.Name || memberDetails?.name || memberDetails?.username || 'Member';
+    const qrData = `Ecash-P2P:${memberId}`;
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&margin=10`;
+
+    setSendingRoomId(roomId);
     try {
-      setSendingRoomId(roomId);
-      const mId = TokenService.getMemberId() || memberDetails?.Member_id || memberDetails?.member_id || '';
-      const mName = memberDetails?.Name || memberDetails?.name || memberDetails?.username || 'Member';
-      const qrData = `Ecash-P2P:${mId}`;
-      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&margin=10`;
-      const messageText = `P2P Transfer QR Code\nName: ${mName}\nMember ID: ${mId}\n\nEcash-P2P:${mId}`;
-      const res = await post('/chat/message/send', {
+      const res = await post('/chat/message', {
         roomId,
-        text: messageText,
-        imageUrl: qrImageUrl,
-        messageType: 'image',
+        content: `Here is my Ecash P2P QR Code for transfers.\nMember: ${memberName}\nID: ${memberId}`,
+        attachments: [qrImageUrl]
       });
       if (res.success) {
-        toast.success(`P2P QR Code shared to ${recipientName || 'Chat'} successfully!`);
+        toast.success(`QR Code sent directly to ${targetName}!`);
         setShareOpen(false);
-        setSearchMobile('');
-        setFoundMember(null);
-      } else {
-        toast.error(res.message || 'Failed to share QR code');
       }
     } catch (err) {
       toast.error('Failed to send QR code to chat');
@@ -107,8 +112,8 @@ const MyQR: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <CircularProgress sx={{ color: '#0284C7' }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', bgcolor: '#FFF8F0' }}>
+        <CircularProgress sx={{ color: '#6D214F' }} />
       </Box>
     );
   }
@@ -120,7 +125,7 @@ const MyQR: React.FC = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(qrData);
-    toast.success('QR Code Data copied to clipboard!');
+    toast.success('QR Code data copied to clipboard!');
   };
 
   const handleDownload = async () => {
@@ -142,103 +147,133 @@ const MyQR: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: '600px', mx: 'auto' }}>
+    <Box sx={{ 
+      p: { xs: 2, sm: 3 }, 
+      maxWidth: '480px', 
+      mx: 'auto', 
+      minHeight: '100vh', 
+      bgcolor: '#FFF8F0',
+      pb: 10 
+    }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <IconButton 
+          onClick={() => navigate(-1)}
+          sx={{ 
+            bgcolor: '#ffffff', 
+            border: '1.5px solid #f0d0d8',
+            color: '#6D214F',
+            p: 1,
+            '&:hover': { bgcolor: '#fdf2f4' }
+          }}
+        >
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
+            My P2P QR
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
+            Receive payments from other members
+          </Typography>
+        </Box>
+      </Box>
+
       <Paper
         elevation={0}
         sx={{
-          p: { xs: 3, sm: 5 },
-          borderRadius: '28px',
-          bgcolor: '#F8FAFC',
-          border: '1px solid #E2E8F0',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
+          p: { xs: 3, sm: 4 },
+          borderRadius: '24px',
+          bgcolor: '#ffffff',
+          border: '1.5px solid #f0d0d8',
+          boxShadow: '0 8px 24px rgba(109, 33, 79, 0.06)',
           textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
         }}
       >
-        <Box sx={{ display: 'inline-flex', p: 2, borderRadius: '20px', bgcolor: 'rgba(255, 215, 0, 0.1)', mb: 2 }}>
-          <QrCode2Icon sx={{ fontSize: 40, color: '#0284C7' }} />
+        <Box sx={{ display: 'inline-flex', p: 1.5, borderRadius: '16px', bgcolor: 'rgba(244, 201, 93, 0.25)', mb: 2 }}>
+          <QrCode2Icon sx={{ fontSize: 36, color: '#6D214F' }} />
         </Box>
 
-        <Typography variant="h4" sx={{ color: '#0F172A', fontWeight: 900, mb: 0.5, letterSpacing: '0.5px',fontSize:{xs:20,sm:25} }}>
-          MY P2P QR CODE
+        <Typography variant="h5" sx={{ color: '#6D214F', fontWeight: 900, mb: 0.5 }}>
+          Scan to Pay Me
         </Typography>
-        <Typography variant="body2" sx={{ color: '#475569', mb: 4, maxWidth: '400px', mx: 'auto',fontSize:{xs:12,sm:14} }}>
-          Share this QR code with other Ecash members to receive instant member-to-member transfers directly to your Top Up Wallet.
+        <Typography variant="caption" sx={{ color: '#8c6b7d', mb: 3, display: 'block', maxWidth: '320px', mx: 'auto', lineHeight: 1.4 }}>
+          Share your QR code with members to receive instant wallet transfers to your Top Up Wallet.
         </Typography>
 
         <Box
           sx={{
-            p: 3,
-            bgcolor: '#F1F5F9',
-            borderRadius: '24px',
+            p: 2.5,
+            bgcolor: '#FFF8F0',
+            borderRadius: '20px',
             display: 'inline-block',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            mb: 4,
+            border: '1.5px dashed #E5989B',
+            boxShadow: '0 4px 16px rgba(109, 33, 79, 0.06)',
+            mb: 3,
           }}
         >
           <img
             src={qrImageUrl}
             alt="My P2P QR Code"
-            style={{ width: '220px', height: '220px', display: 'block' }}
+            style={{ width: '200px', height: '200px', display: 'block', borderRadius: '12px' }}
           />
         </Box>
 
-        <Box sx={{ mb: 4, p: 2, borderRadius: '16px', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-          <Typography variant="caption" sx={{ color: '#475569', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', mb: 0.5,fontSize:{xs:12,sm:14} }}>
-            Member Name & ID
+        <Box sx={{ mb: 3, p: 2, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8' }}>
+          <Typography variant="caption" sx={{ color: '#8c6b7d', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700, display: 'block' }}>
+            Account Holder
           </Typography>
-          <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 800,fontSize:{xs:12,sm:14} }}>
-            {memberName} ({memberId})
+          <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900 }}>
+            {memberName}
           </Typography>
+          <Box sx={{ bgcolor: 'rgba(244, 201, 93, 0.3)', px: 1.5, py: 0.3, borderRadius: '8px', display: 'inline-block', mt: 0.5 }}>
+            <Typography variant="caption" sx={{ color: '#6D214F', fontWeight: 800 }}>
+              ID: {memberId}
+            </Typography>
+          </Box>
         </Box>
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+        <Stack spacing={1.5}>
           <Button
             variant="contained"
+            fullWidth
             startIcon={<ContentCopyIcon />}
             onClick={handleCopy}
             sx={{
-              background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-              color: '#FFFFFF',
-              borderRadius: '999px',
-              px: 3.5,
-              py: 1.5,
+              background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+              color: '#FFF8F0',
+              borderRadius: '16px',
+              py: 1.4,
               fontWeight: 900,
-              textTransform: 'uppercase',
-              fontSize: '0.8rem',
-              letterSpacing: '0.5px',
-              boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
+              textTransform: 'none',
+              fontSize: '0.92rem',
+              boxShadow: '0 8px 24px rgba(109, 33, 79, 0.25)',
               '&:hover': {
-                background: 'linear-gradient(45deg, #0284C7 30%, #0369A1 90%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(255, 215, 0, 0.5)',
+                background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                transform: 'translateY(-1px)',
               },
+              transition: 'all 0.2s'
             }}
           >
             Copy QR Data
           </Button>
 
           <Button
-            variant="contained"
-            startIcon={<ChatBubbleOutlineIcon />}
+            variant="outlined"
+            fullWidth
+            startIcon={<ChatBubbleOutlineIcon sx={{ color: '#6D214F' }} />}
             onClick={handleOpenShare}
             sx={{
-              background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-              color: '#FFFFFF',
-              borderRadius: '999px',
-              px: 3.5,
-              py: 1.5,
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              fontSize: '0.8rem',
-              letterSpacing: '0.5px',
-              boxShadow: '0 4px 15px rgba(2, 132, 199, 0.3)',
+              borderColor: '#f0d0d8',
+              color: '#6D214F',
+              borderRadius: '16px',
+              py: 1.3,
+              fontWeight: 800,
+              textTransform: 'none',
+              fontSize: '0.92rem',
               '&:hover': {
-                background: 'linear-gradient(45deg, #0284C7 30%, #0369A1 90%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(2, 132, 199, 0.5)',
+                borderColor: '#6D214F',
+                bgcolor: '#fdf2f4',
               },
             }}
           >
@@ -247,26 +282,24 @@ const MyQR: React.FC = () => {
 
           <Button
             variant="outlined"
-            startIcon={<DownloadIcon />}
+            fullWidth
+            startIcon={<DownloadIcon sx={{ color: '#8c6b7d' }} />}
             onClick={handleDownload}
             sx={{
-              borderColor: '#E2E8F0',
-              color: '#0F172A',
-              borderRadius: '999px',
-              px: 3.5,
-              py: 1.5,
-              fontWeight: 800,
-              textTransform: 'uppercase',
-              fontSize: '0.8rem',
-              letterSpacing: '0.5px',
+              borderColor: '#f0d0d8',
+              color: '#8c6b7d',
+              borderRadius: '16px',
+              py: 1.3,
+              fontWeight: 700,
+              textTransform: 'none',
+              fontSize: '0.92rem',
               '&:hover': {
-                bordercolor: '#0F172A',
-                bgcolor: '#F8FAFC',
-                transform: 'translateY(-2px)',
+                borderColor: '#8c6b7d',
+                bgcolor: '#fdf2f4',
               },
             }}
           >
-            Download QR
+            Download Image
           </Button>
         </Stack>
       </Paper>
@@ -275,67 +308,52 @@ const MyQR: React.FC = () => {
       <Dialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
-        maxWidth="sm"
+        maxWidth="xs"
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: { xs: '20px', sm: '24px' },
-            bgcolor: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
-            color: '#0F172A',
-            m: { xs: 1.5, sm: 4 },
-            width: { xs: 'calc(100% - 24px)', sm: '100%' },
+            borderRadius: '24px',
+            bgcolor: '#ffffff',
+            border: '1.5px solid #f0d0d8',
+            color: '#2d0f1e',
           },
         }}
       >
-        <DialogTitle sx={{ pb: 1, pt: { xs: 2.5, sm: 3 }, px: { xs: 2, sm: 3 }, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ p: { xs: 0.8, sm: 1 }, borderRadius: '12px', bgcolor: 'rgba(2, 132, 199, 0.1)', display: 'flex', flexShrink: 0 }}>
-            <ChatBubbleOutlineIcon sx={{ color: '#00E676', fontSize: { xs: 22, sm: 24 } }} />
+        <DialogTitle sx={{ pb: 1, pt: 2.5, px: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ p: 1, borderRadius: '12px', bgcolor: 'rgba(109, 33, 79, 0.12)', display: 'flex' }}>
+            <ChatBubbleOutlineIcon sx={{ color: '#6D214F', fontSize: 22 }} />
           </Box>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A', lineHeight: 1.2, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
-              Share P2P QR to Chat
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900, color: '#6D214F' }}>
+              Share QR to Chat
             </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: { xs: '0.7rem', sm: '0.75rem' }, display: 'block', lineHeight: 1.3, mt: 0.2 }}>
-              Send your QR code directly to any member in your chat conversations
+            <Typography variant="caption" sx={{ color: '#8c6b7d', display: 'block' }}>
+              Send QR code directly to any conversation
             </Typography>
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
-          <Box sx={{ p: { xs: 1.5, sm: 2 }, mb: 3, borderRadius: '16px', bgcolor: 'rgba(2, 132, 199, 0.08)', border: '1px solid rgba(2, 132, 199, 0.3)', display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
-            <img src={qrImageUrl} alt="QR Preview" style={{ width: 50, height: 50, borderRadius: '8px', background: '#fff', padding: '4px', flexShrink: 0 }} />
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body2" sx={{ fontWeight: 800, color: '#00E676', fontSize: { xs: 13, sm: 14 }, wordBreak: 'break-word' }}>
-                Sharing QR of: {memberName} ({memberId})
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#475569', display: 'block', fontSize: { xs: 11, sm: 12 }, lineHeight: 1.3, mt: 0.2 }}>
-                Recipient will receive your QR image, Member ID & Name
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ my: 2 }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, color: '#475569', fontWeight: 700 }}>
-              Search Member by Mobile Number
+        <DialogContent sx={{ px: 2.5, py: 2 }}>
+          <Box sx={{ my: 1 }}>
+            <Typography variant="caption" sx={{ mb: 0.5, color: '#6D214F', fontWeight: 800, display: 'block', textTransform: 'uppercase' }}>
+              Search Member by Mobile
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <TextField
                 fullWidth
                 size="small"
-                placeholder="Enter registered mobile number..."
+                placeholder="Mobile number..."
                 value={searchMobile}
                 onChange={(e) => setSearchMobile(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearchMember()}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    color: '#0F172A',
-                    bgcolor: '#F8FAFC',
+                    color: '#2d0f1e',
+                    bgcolor: '#FFF8F0',
                     borderRadius: '12px',
-                    '& fieldset': { borderColor: '#E2E8F0' },
-                    '&:hover fieldset': { borderColor: '#00E676' },
-                    '&.Mui-focused fieldset': { borderColor: '#00E676' },
+                    '& fieldset': { borderColor: '#f0d0d8' },
+                    '&:hover fieldset': { borderColor: '#E5989B' },
+                    '&.Mui-focused fieldset': { borderColor: '#6D214F' },
                   },
                 }}
               />
@@ -344,141 +362,122 @@ const MyQR: React.FC = () => {
                 onClick={handleSearchMember}
                 disabled={searchingMember}
                 sx={{
-                  bgcolor: '#0284C7',
-                  color: '#FFFFFF',
+                  background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                  color: '#FFF8F0',
                   fontWeight: 800,
                   borderRadius: '12px',
-                  px: 2.5,
-                  flexShrink: 0,
-                  '&:hover': { bgcolor: '#0369A1' },
+                  px: 2,
+                  '&:hover': { background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)' },
                 }}
               >
-                {searchingMember ? <CircularProgress size={20} sx={{ color: '#FFFFFF' }} /> : <SearchIcon />}
+                {searchingMember ? <CircularProgress size={18} sx={{ color: '#FFF8F0' }} /> : <SearchIcon fontSize="small" />}
               </Button>
             </Box>
 
             {foundMember && foundMember.chatRoom && (
-              <Box sx={{ mt: 2, p: { xs: 1.5, sm: 2 }, borderRadius: '16px', bgcolor: 'rgba(2, 132, 199, 0.08)', border: '1px solid rgba(2, 132, 199, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+              <Box sx={{ mt: 2, p: 1.5, borderRadius: '14px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, minWidth: 0, flex: 1 }}>
-                  <Avatar sx={{ bgcolor: '#00E676', color: '#FFFFFF', fontWeight: 900, width: { xs: 36, sm: 40 }, height: { xs: 36, sm: 40 }, flexShrink: 0 }}>
+                  <Avatar sx={{ bgcolor: '#6D214F', color: '#FFF8F0', fontWeight: 900, width: 36, height: 36 }}>
                     {(foundMember.name || 'U')[0].toUpperCase()}
                   </Avatar>
                   <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography noWrap variant="body2" sx={{ fontWeight: 800, color: '#0F172A', fontSize: { xs: 13, sm: 14 } }}>
-                      {foundMember.name} {foundMember.Member_id || foundMember.memberId || foundMember.member_id ? `(${foundMember.Member_id || foundMember.memberId || foundMember.member_id})` : ''}
+                    <Typography noWrap variant="body2" sx={{ fontWeight: 800, color: '#2d0f1e' }}>
+                      {foundMember.name}
                     </Typography>
-                    <Typography noWrap variant="caption" sx={{ color: '#475569', display: 'block', fontSize: { xs: 11, sm: 12 } }}>
-                      Role: {foundMember.role || 'Member'}
+                    <Typography noWrap variant="caption" sx={{ color: '#8c6b7d' }}>
+                      ID: {foundMember.Member_id || foundMember.memberId || 'N/A'}
                     </Typography>
                   </Box>
                 </Box>
                 <Button
                   variant="contained"
                   size="small"
-                  endIcon={<SendIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
+                  endIcon={<SendIcon sx={{ fontSize: 16 }} />}
                   disabled={sendingRoomId === foundMember.chatRoom.roomId}
                   onClick={() => handleSendQRToRoom(foundMember.chatRoom.roomId, foundMember.name)}
                   sx={{
-                    background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-                    color: '#FFFFFF',
-                    fontWeight: 900,
-                    borderRadius: '999px',
-                    px: { xs: 1.5, sm: 2 },
-                    py: { xs: 0.5, sm: 0.8 },
-                    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-                    flexShrink: 0,
+                    background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                    color: '#FFF8F0',
+                    fontWeight: 800,
+                    borderRadius: '10px',
+                    px: 1.5,
+                    py: 0.5,
+                    fontSize: '0.75rem',
                     textTransform: 'none',
-                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
-                    '&:hover': { background: 'linear-gradient(45deg, #0284C7 30%, #0369A1 90%)' },
+                    '&:hover': { background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)' },
                   }}
                 >
-                  {sendingRoomId === foundMember.chatRoom.roomId ? <CircularProgress size={16} sx={{ color: '#FFFFFF' }} /> : 'Send QR'}
+                  {sendingRoomId === foundMember.chatRoom.roomId ? <CircularProgress size={14} sx={{ color: '#FFF8F0' }} /> : 'Send QR'}
                 </Button>
               </Box>
             )}
           </Box>
 
-          <Divider sx={{ my: 3, borderColor: '#E2E8F0' }}>
-            <Chip label="OR RECENT CHATS" sx={{ bgcolor: '#F8FAFC', color: '#475569', fontWeight: 700, fontSize: '11px' }} />
+          <Divider sx={{ my: 2, borderColor: '#f0d0d8' }}>
+            <Chip label="ACTIVE CONVERSATIONS" sx={{ bgcolor: '#FFF8F0', color: '#8c6b7d', fontWeight: 700, fontSize: '10px' }} />
           </Divider>
 
-          <Typography variant="subtitle2" sx={{ mb: 1, color: '#475569', fontWeight: 700 }}>
-            Select Active Conversation
-          </Typography>
-
           {loadingRooms ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress sx={{ color: '#00E676' }} />
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+              <CircularProgress size={24} sx={{ color: '#6D214F' }} />
             </Box>
           ) : chatRooms.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 3, px: 2, bgcolor: '#F8FAFC', borderRadius: '16px' }}>
-              <Typography variant="body2" sx={{ color: '#475569' }}>
-                No active chat conversations found. Search a member above to start!
+            <Box sx={{ textAlign: 'center', py: 2, px: 2, bgcolor: '#FFF8F0', borderRadius: '12px' }}>
+              <Typography variant="caption" sx={{ color: '#8c6b7d' }}>
+                No active chat conversations found.
               </Typography>
             </Box>
           ) : (
-            <List sx={{ maxHeight: '240px', overflowY: 'auto', pr: 0.5 }}>
+            <List sx={{ maxHeight: '200px', overflowY: 'auto', p: 0 }}>
               {chatRooms.map((room) => {
                 const otherParticipant = room.participantDetails?.find(
                   (p: any) => p.memberId !== currentUserId
                 ) || room.participantDetails?.[0];
 
                 const name = otherParticipant?.name || 'Chat Member';
-                const role = otherParticipant?.role || 'Member';
 
                 return (
                   <ListItemButton
                     key={room.roomId}
                     sx={{
-                      borderRadius: '16px',
+                      borderRadius: '12px',
                       mb: 1,
-                      bgcolor: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      '&:hover': { bgcolor: '#F8FAFC' },
+                      bgcolor: '#FFF8F0',
+                      border: '1px solid #f0d0d8',
+                      '&:hover': { bgcolor: '#fdf2f4' },
                       justifyContent: 'space-between',
-                      px: { xs: 1.5, sm: 2 },
-                      py: 1.5,
-                      gap: 1,
+                      px: 1.5,
+                      py: 1,
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, minWidth: 0, flex: 1 }}>
-                      <Avatar src={otherParticipant?.profileImage} sx={{ bgcolor: '#0284C7', color: '#FFFFFF', fontWeight: 900, width: { xs: 36, sm: 40 }, height: { xs: 36, sm: 40 }, flexShrink: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, minWidth: 0, flex: 1 }}>
+                      <Avatar sx={{ bgcolor: '#6D214F', color: '#FFF8F0', fontWeight: 900, width: 34, height: 34, fontSize: '0.85rem' }}>
                         {name[0].toUpperCase()}
                       </Avatar>
                       <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography noWrap variant="body2" sx={{ fontWeight: 800, color: '#0F172A', fontSize: { xs: 13, sm: 14 } }}>
-                          {name} {otherParticipant?.memberId || otherParticipant?.Member_id ? `(${otherParticipant?.memberId || otherParticipant?.Member_id})` : ''}
-                        </Typography>
-                        <Typography noWrap variant="caption" sx={{ color: '#475569', display: 'block', fontSize: { xs: 11, sm: 12 } }}>
-                          {role} • {room.lastMessage ? (room.lastMessage.length > 25 ? room.lastMessage.substring(0, 25) + '...' : room.lastMessage) : 'No messages yet'}
+                        <Typography noWrap variant="body2" sx={{ fontWeight: 800, color: '#2d0f1e', fontSize: '0.85rem' }}>
+                          {name}
                         </Typography>
                       </Box>
                     </Box>
-
                     <Button
                       variant="contained"
                       size="small"
-                      endIcon={<SendIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />}
                       disabled={sendingRoomId === room.roomId}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSendQRToRoom(room.roomId, name);
-                      }}
+                      onClick={() => handleSendQRToRoom(room.roomId, name)}
                       sx={{
-                        background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-                        color: '#FFFFFF',
-                        fontWeight: 900,
-                        borderRadius: '999px',
-                        px: { xs: 1.5, sm: 2 },
-                        py: { xs: 0.5, sm: 0.6 },
-                        fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-                        flexShrink: 0,
+                        background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                        color: '#FFF8F0',
+                        fontWeight: 800,
+                        borderRadius: '10px',
+                        px: 1.5,
+                        py: 0.4,
+                        fontSize: '0.72rem',
                         textTransform: 'none',
-                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
-                        '&:hover': { background: 'linear-gradient(45deg, #0284C7 30%, #0369A1 90%)' },
+                        '&:hover': { background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)' },
                       }}
                     >
-                      {sendingRoomId === room.roomId ? <CircularProgress size={16} sx={{ color: '#FFFFFF' }} /> : 'Send'}
+                      {sendingRoomId === room.roomId ? <CircularProgress size={14} sx={{ color: '#FFF8F0' }} /> : 'Send QR'}
                     </Button>
                   </ListItemButton>
                 );
@@ -486,20 +485,8 @@ const MyQR: React.FC = () => {
             </List>
           )}
         </DialogContent>
-
-        <DialogActions sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 3 }, justifyContent: 'center' }}>
-          <Button
-            onClick={() => setShareOpen(false)}
-            sx={{
-              color: '#475569',
-              fontWeight: 800,
-              px: 4,
-              py: 0.8,
-              borderRadius: '999px',
-              border: '1px solid #E2E8F0',
-              '&:hover': { color: '#0F172A', bgcolor: '#F8FAFC', borderColor: '#E2E8F0' },
-            }}
-          >
+        <DialogActions sx={{ px: 2.5, pb: 2 }}>
+          <Button onClick={() => setShareOpen(false)} sx={{ color: '#8c6b7d', fontWeight: 700, textTransform: 'none' }}>
             Close
           </Button>
         </DialogActions>

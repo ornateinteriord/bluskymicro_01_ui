@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Paper, TextField, MenuItem, CircularProgress, Stack, Avatar, Divider } from '@mui/material';
+import { Box, Typography, Button, Paper, TextField, MenuItem, CircularProgress, Stack, Avatar, Divider, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { useGetWalletOverview, useGetMemberDetails, useLookupMemberForTransfer, useTransferP2PWallet } from '../../../api/Memeber';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
-import SendIcon from '@mui/icons-material/Send';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import jsQR from 'jsqr';
@@ -24,6 +24,7 @@ const getCurrentUserId = () => {
 };
 
 const P2PTransfer: React.FC = () => {
+  const navigate = useNavigate();
   const currentUserId = getCurrentUserId();
   const { data: walletOverview, isLoading: isWalletLoading } = useGetWalletOverview(currentUserId);
   const { data: memberDetails } = useGetMemberDetails(currentUserId);
@@ -59,14 +60,14 @@ const P2PTransfer: React.FC = () => {
       return;
     }
     setStep(2);
-    setScanMode('camera');
-    startCamera();
   };
 
   const startCamera = async () => {
     setIsScanning(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute('playsinline', 'true');
@@ -74,8 +75,7 @@ const P2PTransfer: React.FC = () => {
         requestAnimationFrame(tick);
       }
     } catch (err) {
-      console.error('Camera access error:', err);
-      toast.info('Camera not accessible. Please enter Member ID manually or upload QR image.');
+      toast.error('Unable to access camera. Please allow camera permissions or enter ID manually.');
       setScanMode('manual');
       setIsScanning(false);
     }
@@ -85,75 +85,70 @@ const P2PTransfer: React.FC = () => {
     setIsScanning(false);
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
     }
   };
 
   const tick = () => {
-    if (!videoRef.current || videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
-      if (isScanning) requestAnimationFrame(tick);
-      return;
-    }
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      canvas.height = video.videoHeight;
-      canvas.width = video.videoWidth;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = decoder(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-
-      if (code && code.data) {
-        stopCamera();
-        handleLookup(code.data);
-        return;
+    if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+      if (canvasRef.current) {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          canvas.height = videoRef.current.videoHeight;
+          canvas.width = videoRef.current.videoWidth;
+          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = decoder(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'dontInvert',
+          });
+          if (code && code.data) {
+            stopCamera();
+            handleLookup(code.data);
+            return;
+          }
+        }
       }
     }
-    if (isScanning) requestAnimationFrame(tick);
+    if (isScanning) {
+      requestAnimationFrame(tick);
+    }
   };
 
   useEffect(() => {
+    if (step === 2 && scanMode === 'camera') {
+      startCamera();
+    } else {
+      stopCamera();
+    }
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [step, scanMode]);
 
-  const handleLookup = async (identifier: string) => {
-    if (!identifier.trim()) {
-      toast.error('Please enter a valid Member ID or scan QR code');
+  const handleLookup = async (memberIdToLookup: string) => {
+    const cleanId = memberIdToLookup.trim();
+    if (!cleanId) {
+      toast.error('Please enter a valid Member ID');
       return;
     }
+
+    if (cleanId.toUpperCase() === (memberDetails?.Member_id || memberDetails?.member_id || '').toUpperCase()) {
+      toast.error('You cannot transfer to yourself!');
+      return;
+    }
+
     try {
-      const res = await lookupMutation.mutateAsync({ identifier: identifier.trim() });
-      const memberData = res?.data || res?.member || res;
-      if (memberData && (memberData.Member_id || memberData.member_id || memberData.Name || memberData.name)) {
-        const targetId = memberData.Member_id || memberData.member_id || memberData.id;
-        const targetName = memberData.Name || memberData.name || memberData.username || 'Member';
-        const myId = memberDetails?.Member_id || memberDetails?.member_id;
-
-        if (targetId && myId && targetId === myId) {
-          toast.error('You cannot transfer funds to yourself!');
-          if (scanMode === 'camera') startCamera();
-          return;
-        }
-
-        setRecipient({
-          ...memberData,
-          Member_id: targetId,
-          member_id: targetId,
-          Name: targetName,
-          name: targetName,
-        });
+      const result = await lookupMutation.mutateAsync({ identifier: cleanId });
+      if (result) {
+        setRecipient(result);
         setStep(3);
       } else {
-        toast.error('Member details could not be retrieved.');
+        toast.error('Member not found. Please verify the ID/QR.');
       }
-    } catch (err) {
-      if (scanMode === 'camera') startCamera();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Member not found. Please verify the ID/QR.');
     }
   };
 
@@ -165,6 +160,7 @@ const P2PTransfer: React.FC = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -172,31 +168,14 @@ const P2PTransfer: React.FC = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          // Fill canvas with white first to prevent transparent PNGs from turning black-on-black
           canvas.width = img.width;
           canvas.height = img.height;
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0);
-          
-          let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          let code = decoder(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' });
-
-          // If standard size fails, try scaling down/up for better jsQR recognition
-          if (!code || !code.data) {
-            const targetSize = Math.max(400, Math.min(1000, img.width));
-            const scale = targetSize / img.width;
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            code = decoder(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' });
-          }
-
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = decoder(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'dontInvert',
+          });
           if (code && code.data) {
-            toast.success('QR Code read successfully!');
             handleLookup(code.data);
           } else {
             toast.error('No valid QR code found in image. Please make sure the QR code is clear.');
@@ -213,7 +192,6 @@ const P2PTransfer: React.FC = () => {
     if (!recipient) return;
     try {
       let idToken = 'BYPASS_TOKEN';
-      // Firebase OTP bypass for P2P as requested
       await transferMutation.mutateAsync({
         senderId: memberDetails?.Member_id || memberDetails?.member_id || '',
         recipientId: recipient.Member_id || recipient.member_id || '',
@@ -221,7 +199,6 @@ const P2PTransfer: React.FC = () => {
         amount: parseFloat(amount),
         idToken,
       });
-      // Reset after success
       setStep(1);
       setAmount('');
       setRecipient(null);
@@ -233,68 +210,70 @@ const P2PTransfer: React.FC = () => {
 
   if (isWalletLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <CircularProgress sx={{ color: '#0284C7' }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', bgcolor: '#FFF8F0' }}>
+        <CircularProgress sx={{ color: '#6D214F' }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ px: { xs: 1.5, sm: 4 }, py: { xs: 2, sm: 4 }, maxWidth: '650px', mx: 'auto', width: '100%' }}>
+    <Box sx={{ 
+      px: { xs: 2, sm: 3 }, 
+      py: { xs: 2.5, sm: 3.5 }, 
+      maxWidth: '480px', 
+      mx: 'auto', 
+      width: '100%', 
+      minHeight: '100vh', 
+      bgcolor: '#FFF8F0',
+      pb: 10 
+    }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <IconButton 
+          onClick={() => {
+            if (step > 1) {
+              stopCamera();
+              setStep((prev) => (prev - 1) as any);
+            } else {
+              navigate(-1);
+            }
+          }}
+          sx={{ 
+            bgcolor: '#ffffff', 
+            border: '1.5px solid #f0d0d8',
+            color: '#6D214F',
+            p: 1,
+            '&:hover': { bgcolor: '#fdf2f4' }
+          }}
+        >
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
+            P2P Transfer
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
+            Instant member-to-member wallet transfer
+          </Typography>
+        </Box>
+      </Box>
+
       <Paper
         elevation={0}
         sx={{
-          p: { xs: 2.5, sm: 5 },
-          borderRadius: { xs: '20px', sm: '28px' },
-          bgcolor: '#F8FAFC',
-          border: '1px solid #E2E8F0',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
-          position: 'relative',
-          overflow: 'hidden',
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+          p: { xs: 2.5, sm: 3 },
+          borderRadius: '24px',
+          bgcolor: '#ffffff',
+          border: '1.5px solid #f0d0d8',
+          boxShadow: '0 8px 24px rgba(109, 33, 79, 0.06)',
         }}
       >
-        {step > 1 && (
-            <Button
-              onClick={() => {
-                stopCamera();
-                setStep((prev) => (prev - 1) as any);
-              }}
-              sx={{
-                minWidth: 'auto',
-                p: { xs: 0.8, sm: 1 },
-                borderRadius: '12px',
-                mb:2,
-                bgcolor: 'rgba(255, 215, 0, 0.1)',
-                color: '#0284C7',
-                '&:hover': { bgcolor: 'rgba(255, 215, 0, 0.2)' },
-              }}
-            >
-              <ArrowBackIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
-            </Button>
-          )}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2.5, sm: 3 }, gap: { xs: 1, sm: 2 } }}>
-          <Box sx={{ p: { xs: 1.2, sm: 1.5 }, borderRadius: '16px', bgcolor: 'rgba(255, 215, 0, 0.1)', display: 'flex', flexShrink: 0 }}>
-            <SendIcon sx={{ fontSize: { xs: 22, sm: 28 }, color: '#0284C7' }} />
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h5" sx={{ color: '#0F172A', fontWeight: 900, fontSize: { xs: 18, sm: 25 }, lineHeight: 1.2 }}>
-              P2P TRANSFER
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: { xs: 11, sm: 14 }, display: 'block', mt: 0.3, lineHeight: 1.3 }}>
-              Instant Member to Member Transfer
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ borderColor: '#E2E8F0', mb: { xs: 2.5, sm: 4 } }} />
-
         {/* STEP 1: CHOOSE WALLET & AMOUNT */}
         {step === 1 && (
           <form onSubmit={handleStep1Submit}>
-            <Stack spacing={3}>
+            <Stack spacing={2.5}>
               <Box>
-                <Typography variant="subtitle2" sx={{ color: '#475569', mb: 1, fontWeight: 700 }}>
+                <Typography variant="caption" sx={{ color: '#6D214F', mb: 0.8, fontWeight: 800, display: 'block', textTransform: 'uppercase' }}>
                   Select Source Wallet
                 </Typography>
                 <TextField
@@ -304,47 +283,48 @@ const P2PTransfer: React.FC = () => {
                   onChange={(e) => setSourceWallet(e.target.value as any)}
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      color: '#0F172A',
-                      bgcolor: '#F8FAFC',
+                      color: '#2d0f1e',
+                      bgcolor: '#FFF8F0',
                       borderRadius: '16px',
-                      '& fieldset': { borderColor: '#E2E8F0' },
-                      '&:hover fieldset': { bordercolor: '#0284C7' },
-                      '&.Mui-focused fieldset': { bordercolor: '#0284C7' },
+                      fontWeight: 700,
+                      '& fieldset': { borderColor: '#f0d0d8' },
+                      '&:hover fieldset': { borderColor: '#E5989B' },
+                      '&.Mui-focused fieldset': { borderColor: '#6D214F', borderWidth: '2px' },
                     },
-                    '& .MuiSelect-icon': { color: '#0284C7' },
+                    '& .MuiSelect-icon': { color: '#6D214F' },
                   }}
                 >
-                  <MenuItem value="Top Up Wallet" sx={{ bgcolor: '#F8FAFC', color: '#0F172A', '&:hover': { bgcolor: 'rgba(255,215,0,0.1)' } }}>
+                  <MenuItem value="Top Up Wallet" sx={{ bgcolor: '#FFF8F0', color: '#2d0f1e' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                       <span>Top Up Wallet</span>
-                      <span style={{ color: '#00E676', fontWeight: 'bold', marginLeft: '10px' }}>
-                        {Number(walletOverview?.topUpBalance || 0).toFixed(2)}
+                      <span style={{ color: '#6D214F', fontWeight: 'bold', marginLeft: '10px' }}>
+                        ₹{Number(walletOverview?.topUpBalance || 0).toFixed(2)}
                       </span>
                     </Box>
                   </MenuItem>
-                  <MenuItem value="Withdrawal Wallet" sx={{ bgcolor: '#F8FAFC', color: '#0F172A', '&:hover': { bgcolor: 'rgba(255,215,0,0.1)' } }}>
+                  <MenuItem value="Withdrawal Wallet" sx={{ bgcolor: '#FFF8F0', color: '#2d0f1e' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                       <span>Payouts</span>
-                      <span style={{ color: '#0284C7', fontWeight: 'bold', marginLeft: '10px' }}>
-                        {Number(walletOverview?.balance || 0).toFixed(2)}
+                      <span style={{ color: '#6D214F', fontWeight: 'bold', marginLeft: '10px' }}>
+                        ₹{Number(walletOverview?.balance || 0).toFixed(2)}
                       </span>
                     </Box>
                   </MenuItem>
                 </TextField>
               </Box>
 
-              <Box sx={{ p: 2, borderRadius: '16px', bgcolor: 'rgba(255, 215, 0, 0.05)', border: '1px dashed rgba(255, 215, 0, 0.3)' }}>
-                <Typography variant="caption" sx={{ color: '#475569', display: 'block', mb: 0.5 ,fontSize:{xs:12,sm:14}}}>
+              <Box sx={{ p: 2, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700, textTransform: 'uppercase' }}>
                   Available Balance
                 </Typography>
-                <Typography variant="h5" sx={{ color: '#0284C7', fontWeight: 900 }}>
-                  {maxBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <Typography variant="h6" sx={{ color: '#6D214F', fontWeight: 900 }}>
+                  ₹{maxBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Typography>
               </Box>
 
               <Box>
-                <Typography variant="subtitle2" sx={{ color: '#475569', mb: 1, fontWeight: 700,fontSize:{xs:12,sm:14} }}>
-                  Enter Amount (?)
+                <Typography variant="caption" sx={{ color: '#6D214F', mb: 0.8, fontWeight: 800, display: 'block', textTransform: 'uppercase' }}>
+                  Enter Amount (₹)
                 </Typography>
                 <TextField
                   fullWidth
@@ -355,12 +335,14 @@ const P2PTransfer: React.FC = () => {
                   inputProps={{ step: 'any', min: '0.01', max: maxBalance }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      color: '#0F172A',
-                      bgcolor: '#F8FAFC',
+                      color: '#2d0f1e',
+                      bgcolor: '#FFF8F0',
                       borderRadius: '16px',
-                      '& fieldset': { borderColor: '#E2E8F0' },
-                      '&:hover fieldset': { bordercolor: '#0284C7' },
-                      '&.Mui-focused fieldset': { bordercolor: '#0284C7' },
+                      fontWeight: 800,
+                      fontSize: '1.2rem',
+                      '& fieldset': { borderColor: '#f0d0d8' },
+                      '&:hover fieldset': { borderColor: '#E5989B' },
+                      '&.Mui-focused fieldset': { borderColor: '#6D214F', borderWidth: '2px' },
                     },
                   }}
                 />
@@ -372,19 +354,19 @@ const P2PTransfer: React.FC = () => {
                 fullWidth
                 endIcon={<QrCodeScannerIcon />}
                 sx={{
-                  background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-                  color: '#FFFFFF',
+                  background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                  color: '#FFF8F0',
                   borderRadius: '16px',
-                  py: 1.8,
+                  py: 1.5,
                   fontWeight: 900,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  boxShadow: '0 6px 20px rgba(255, 215, 0, 0.3)',
-                  fontSize: { xs: 12, sm: 14 },
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  boxShadow: '0 8px 24px rgba(109, 33, 79, 0.3)',
                   '&:hover': {
-                    background: 'linear-gradient(45deg, #0284C7 30%, #0369A1 90%)',
-                    boxShadow: '0 8px 25px rgba(255, 215, 0, 0.5)',
+                    background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                    transform: 'translateY(-1px)'
                   },
+                  transition: 'all 0.2s'
                 }}
               >
                 Proceed to Scan / Lookup
@@ -397,7 +379,7 @@ const P2PTransfer: React.FC = () => {
         {step === 2 && (
           <Box sx={{ textAlign: 'center' }}>
             <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload} />
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: { xs: 1, sm: 2 }, mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5, mb: 3 }}>
               <Button
                 variant={scanMode === 'camera' ? 'contained' : 'outlined'}
                 onClick={() => {
@@ -405,15 +387,15 @@ const P2PTransfer: React.FC = () => {
                   startCamera();
                 }}
                 sx={{
-                  borderRadius: '999px',
-                  px: 2,
+                  borderRadius: '12px',
+                  px: 2.5,
                   fontWeight: 800,
-                  fontSize:{xs:12,sm:14},
+                  fontSize: '0.85rem',
                   textTransform: 'none',
-                  bgcolor: scanMode === 'camera' ? '#FFD700' : 'transparent',
-                  color: scanMode === 'camera' ? '#050916' : '#0284C7',
-                  borderColor: '#0284C7',
-                  '&:hover': { bgcolor: scanMode === 'camera' ? '#0369A1' : 'rgba(2,132,199,0.1)' },
+                  bgcolor: scanMode === 'camera' ? '#6D214F' : 'transparent',
+                  color: scanMode === 'camera' ? '#FFF8F0' : '#6D214F',
+                  borderColor: '#6D214F',
+                  '&:hover': { bgcolor: scanMode === 'camera' ? '#4e1739' : '#fdf2f4', borderColor: '#6D214F' },
                 }}
               >
                 Scan QR Camera
@@ -425,15 +407,15 @@ const P2PTransfer: React.FC = () => {
                   setScanMode('manual');
                 }}
                 sx={{
-                  borderRadius: '999px',
-                  px: 2,
+                  borderRadius: '12px',
+                  px: 2.5,
                   fontWeight: 800,
+                  fontSize: '0.85rem',
                   textTransform: 'none',
-                  fontSize:{xs:12,sm:14},
-                  bgcolor: scanMode === 'manual' ? '#FFD700' : 'transparent',
-                  color: scanMode === 'manual' ? '#050916' : '#0284C7',
-                  borderColor: '#0284C7',
-                  '&:hover': { bgcolor: scanMode === 'manual' ? '#0369A1' : 'rgba(2,132,199,0.1)' },
+                  bgcolor: scanMode === 'manual' ? '#6D214F' : 'transparent',
+                  color: scanMode === 'manual' ? '#FFF8F0' : '#6D214F',
+                  borderColor: '#6D214F',
+                  '&:hover': { bgcolor: scanMode === 'manual' ? '#4e1739' : '#fdf2f4', borderColor: '#6D214F' },
                 }}
               >
                 Enter ID / Upload
@@ -441,17 +423,17 @@ const P2PTransfer: React.FC = () => {
             </Box>
 
             {scanMode === 'camera' && (
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 2 }}>
                 <Box
                   sx={{
                     width: '100%',
-                    maxWidth: '320px',
-                    height: '320px',
+                    maxWidth: '280px',
+                    height: '280px',
                     mx: 'auto',
                     borderRadius: '24px',
                     overflow: 'hidden',
-                    border: '2px solid #FFD700',
-                    boxShadow: '0 10px 30px rgba(255, 215, 0, 0.2)',
+                    border: '3px solid #6D214F',
+                    boxShadow: '0 10px 30px rgba(109, 33, 79, 0.2)',
                     position: 'relative',
                     bgcolor: '#000',
                     display: 'flex',
@@ -463,11 +445,11 @@ const P2PTransfer: React.FC = () => {
                   <canvas ref={canvasRef} style={{ display: 'none' }} />
                   {lookupMutation.isPending && (
                     <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CircularProgress sx={{ color: '#0284C7' }} />
+                      <CircularProgress sx={{ color: '#F4C95D' }} />
                     </Box>
                   )}
                 </Box>
-                <Typography variant="caption" sx={{ color: '#475569', mt: 1.5, display: 'block', mb: 2 ,fontSize:{xs:12,sm:14}}}>
+                <Typography variant="caption" sx={{ color: '#8c6b7d', mt: 1.5, display: 'block', mb: 2, fontWeight: 600 }}>
                   Align Member QR Code inside the camera frame
                 </Typography>
                 <Button
@@ -475,24 +457,25 @@ const P2PTransfer: React.FC = () => {
                   variant="outlined"
                   onClick={() => fileInputRef.current?.click()}
                   sx={{
-                    bordercolor: '#0284C7',
-                    color: '#0284C7',
-                    borderRadius: '16px',
+                    borderColor: '#E5989B',
+                    color: '#6D214F',
+                    borderRadius: '14px',
                     py: 1,
-                    fontSize:{xs:12,sm:14},
+                    fontSize: '0.85rem',
                     px: 3,
                     fontWeight: 800,
-                    '&:hover': { borderColor: '#0369A1', bgcolor: 'rgba(255,215,0,0.1)' },
+                    textTransform: 'none',
+                    '&:hover': { borderColor: '#6D214F', bgcolor: '#fdf2f4' },
                   }}
                 >
-                  Upload QR Image from Desktop
+                  Upload QR Image from Files
                 </Button>
               </Box>
             )}
 
             {scanMode === 'manual' && (
               <form onSubmit={handleManualLookupSubmit}>
-                <Stack spacing={3} sx={{ mb: 3 }}>
+                <Stack spacing={2.5} sx={{ mb: 2 }}>
                   <TextField
                     fullWidth
                     placeholder="Enter Member ID (e.g. MEM123456)"
@@ -500,12 +483,13 @@ const P2PTransfer: React.FC = () => {
                     onChange={(e) => setManualId(e.target.value)}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        color: '#0F172A',
-                        bgcolor: '#F8FAFC',
+                        color: '#2d0f1e',
+                        bgcolor: '#FFF8F0',
                         borderRadius: '16px',
-                        '& fieldset': { borderColor: '#E2E8F0' },
-                        '&:hover fieldset': { bordercolor: '#0284C7' },
-                        '&.Mui-focused fieldset': { bordercolor: '#0284C7' },
+                        fontWeight: 700,
+                        '& fieldset': { borderColor: '#f0d0d8' },
+                        '&:hover fieldset': { borderColor: '#E5989B' },
+                        '&.Mui-focused fieldset': { borderColor: '#6D214F', borderWidth: '2px' },
                       },
                     }}
                   />
@@ -515,30 +499,37 @@ const P2PTransfer: React.FC = () => {
                     variant="contained"
                     disabled={lookupMutation.isPending}
                     sx={{
-                      background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-                      color: '#FFFFFF',
+                      background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                      color: '#FFF8F0',
                       borderRadius: '16px',
                       py: 1.5,
                       fontWeight: 900,
+                      textTransform: 'none',
+                      fontSize: '0.95rem',
+                      boxShadow: '0 6px 20px rgba(109, 33, 79, 0.25)',
+                      '&:hover': { background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)' }
                     }}
                   >
-                    {lookupMutation.isPending ? <CircularProgress size={24} sx={{ color: '#FFFFFF' }} /> : 'Lookup Member'}
+                    {lookupMutation.isPending ? <CircularProgress size={24} sx={{ color: '#FFF8F0' }} /> : 'Lookup Member'}
                   </Button>
 
-                  <Divider sx={{ borderColor: '#E2E8F0', my: 1 }}>OR</Divider>
+                  <Divider sx={{ borderColor: '#f0d0d8', my: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700 }}>OR</Typography>
+                  </Divider>
 
                   <Button
                     type="button"
                     variant="outlined"
                     onClick={() => fileInputRef.current?.click()}
                     sx={{
-                      borderColor: '#E2E8F0',
-                      color: '#0F172A',
+                      borderColor: '#f0d0d8',
+                      color: '#6D214F',
                       borderRadius: '16px',
-                      py: 1.5,
-                      fontSize:{xs:12,sm:14},
+                      py: 1.3,
+                      fontSize: '0.85rem',
                       fontWeight: 800,
-                      '&:hover': { bordercolor: '#0284C7', bgcolor: 'rgba(255,215,0,0.05)' },
+                      textTransform: 'none',
+                      '&:hover': { borderColor: '#6D214F', bgcolor: '#fdf2f4' },
                     }}
                   >
                     Upload QR Image
@@ -554,55 +545,55 @@ const P2PTransfer: React.FC = () => {
           <Box>
             <Box
               sx={{
-                p: { xs: 2, sm: 3 },
-                borderRadius: { xs: '16px', sm: '20px' },
-                bgcolor: '#F8FAFC',
-                border: '1px solid #E2E8F0',
-                mb: { xs: 2.5, sm: 3 },
+                p: 2.5,
+                borderRadius: '20px',
+                bgcolor: '#FFF8F0',
+                border: '1.5px solid #f0d0d8',
+                mb: 3,
               }}
             >
               <Box sx={{ textAlign: 'center', mb: 2 }}>
-                <Avatar sx={{ width: { xs: 54, sm: 64 }, height: { xs: 54, sm: 64 }, bgcolor: '#0284C7', color: '#FFFFFF', mx: 'auto', mb: 1, fontWeight: 900, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                <Avatar sx={{ width: 64, height: 64, bgcolor: '#6D214F', color: '#FFF8F0', mx: 'auto', mb: 1, fontWeight: 900, fontSize: '1.5rem', border: '2px solid #F4C95D' }}>
                   {(recipient.name || recipient.username || 'U')[0].toUpperCase()}
                 </Avatar>
-                <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 900, fontSize: { xs: 16, sm: 20 }, wordBreak: 'break-word' }}>
+                <Typography variant="h6" sx={{ color: '#2d0f1e', fontWeight: 900 }}>
                   {recipient.name || recipient.username}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#0284C7', fontWeight: 700, display: 'block', mt: 0.2, fontSize: { xs: 11, sm: 13 } }}>
+                <Typography variant="caption" sx={{ color: '#6D214F', fontWeight: 800, display: 'block', mt: 0.2 }}>
                   Member ID: {recipient.member_id}
                 </Typography>
               </Box>
 
-              <Divider sx={{ borderColor: '#E2E8F0', my: { xs: 1.5, sm: 2 } }} />
+              <Divider sx={{ borderColor: '#f0d0d8', my: 2 }} />
 
               <Stack spacing={1.5}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ gap: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#475569', fontSize: { xs: 13, sm: 14 }, flexShrink: 0 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700, textTransform: 'uppercase' }}>
                     Transfer Amount:
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#0F172A', fontWeight: 900, fontSize: { xs: 13, sm: 15 }, textAlign: 'right', wordBreak: 'break-word' }}>
-                    {parseFloat(amount).toFixed(2)}
+                  <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900 }}>
+                    ₹{parseFloat(amount).toFixed(2)}
                   </Typography>
                 </Stack>
 
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ gap: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#475569', fontSize: { xs: 13, sm: 14 }, flexShrink: 0 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700, textTransform: 'uppercase' }}>
                     From Wallet:
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#00E676', fontWeight: 800, fontSize: { xs: 13, sm: 15 }, textAlign: 'right' }}>
+                  <Typography variant="body2" sx={{ color: '#2d0f1e', fontWeight: 800 }}>
                     {sourceWallet === 'Top Up Wallet' ? 'Top Up Wallet' : 'Payouts'}
                   </Typography>
                 </Stack>
 
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ gap: 1, pt: 1, borderTop: '1px dashed rgba(255, 255, 255, 0.1)' }}>
-                  <Typography variant="body2" sx={{ color: '#475569', fontSize: { xs: 13, sm: 14 }, flexShrink: 0, pt: 0.3 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 1, borderTop: '1px dashed #f0d0d8' }}>
+                  <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700, textTransform: 'uppercase' }}>
                     Recipient Gets:
                   </Typography>
                   <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="body2" sx={{ color: '#0284C7', fontWeight: 900, fontSize: { xs: 14, sm: 16 } }}>
-                      {parseFloat(amount).toFixed(2)}
+                    <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900 }}>
+                      ₹{parseFloat(amount).toFixed(2)}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255, 215, 0, 0.8)', fontWeight: 700, fontSize: { xs: 11, sm: 12 }, display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700, display: 'block', fontSize: '11px' }}>
                       (Top Up Wallet)
                     </Typography>
                   </Box>
@@ -617,22 +608,22 @@ const P2PTransfer: React.FC = () => {
               disabled={transferMutation.isPending}
               endIcon={transferMutation.isPending ? null : <CheckCircleOutlineIcon />}
               sx={{
-                background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                color: '#FFF8F0',
                 borderRadius: '16px',
-                py: { xs: 1.5, sm: 1.8 },
+                py: 1.6,
                 fontWeight: 900,
-                textTransform: 'uppercase',
-                fontSize: { xs: '0.9rem', sm: '1rem' },
-                letterSpacing: '0.5px',
-                boxShadow: '0 6px 20px rgba(2, 132, 199, 0.3)',
+                textTransform: 'none',
+                fontSize: '1rem',
+                boxShadow: '0 8px 24px rgba(109, 33, 79, 0.3)',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #0284C7 30%, #0369A1 90%)',
-                  boxShadow: '0 8px 25px rgba(2, 132, 199, 0.5)',
+                  background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                  transform: 'translateY(-1px)'
                 },
+                transition: 'all 0.2s'
               }}
             >
-              {transferMutation.isPending ? <CircularProgress size={24} sx={{ color: '#FFFFFF' }} /> : `Confirm & Send ${parseFloat(amount).toFixed(2)}`}
+              {transferMutation.isPending ? <CircularProgress size={24} sx={{ color: '#FFF8F0' }} /> : `Confirm & Send ₹${parseFloat(amount).toFixed(2)}`}
             </Button>
           </Box>
         )}

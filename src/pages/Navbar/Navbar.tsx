@@ -59,9 +59,9 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
         position="fixed"
         elevation={0}
         sx={{
-          background: "#FFFFFF", // Light theme background
-          borderBottom: '1px solid #E2E8F0',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          background: "#FFFFFF",
+          borderBottom: '1px solid #fce8ec',
+          boxShadow: '0 2px 12px rgba(109, 33, 79, 0.06)',
           zIndex: (theme) => theme.zIndex.drawer + 1
         }}
       >
@@ -86,7 +86,7 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                   borderRadius: '12px',
                   transition: 'background 0.2s',
                   '&:hover': {
-                    bgcolor: '#F1F5F9'
+                    bgcolor: '#fde8ec'
                   }
                 }}
               >
@@ -94,11 +94,11 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                   sx={{
                     width: { xs: 36, md: 40 },
                     height: { xs: 36, md: 40 },
-                    bgcolor: '#0284C7', // Light Blue profile background
-                    color: '#ffffff',
+                    bgcolor: '#6D214F',
+                    color: '#FFF8F0',
                     fontWeight: 900,
                     fontSize: { xs: '0.95rem', md: '1.1rem' },
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    boxShadow: '0 2px 8px rgba(109, 33, 79, 0.2)'
                   }}
                 >
                   {memberDetails?.Name?.charAt(0).toUpperCase() || 'U'}
@@ -116,19 +116,19 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <IconButton
                   onClick={() => navigate('/user/support-chat')}
-                  sx={{ color: "#1E293B", '&:hover': { bgcolor: '#F1F5F9' } }}
+                  sx={{ color: "#6D214F", '&:hover': { bgcolor: '#fde8ec' } }}
                 >
                   <Headphones size={22} />
                 </IconButton>
                 <IconButton
                   onClick={() => navigate('/user/dashboard')}
-                  sx={{ color: "#1E293B", '&:hover': { bgcolor: '#F1F5F9' } }}
+                  sx={{ color: "#6D214F", '&:hover': { bgcolor: '#fde8ec' } }}
                 >
                   <Home size={22} />
                 </IconButton>
                 <IconButton
                   onClick={handleLogout}
-                  sx={{ color: "#ef4444", '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' } }}
+                  sx={{ color: "#e53e3e", '&:hover': { bgcolor: 'rgba(229, 62, 62, 0.1)' } }}
                 >
                   <LogOutIcon size={22} />
                 </IconButton>
@@ -154,8 +154,8 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                     fontSize: { xs: '1.4rem', md: '1.85rem' },
                     cursor: "pointer",
                     letterSpacing: '1.5px',
-                    color: '#0284C7',
-                    textShadow: '0 2px 4px rgba(2, 132, 199, 0.1)'
+                    color: '#6D214F',
+                    textShadow: '0 2px 4px rgba(109, 33, 79, 0.15)'
                   }}
                 >
                   Ecash
@@ -183,12 +183,12 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                       sx={{
                         width: { xs: 32, md: 38 },
                         height: { xs: 32, md: 38 },
-                        bgcolor: '#FFC000', 
-                        color: '#0a2558',
+                        bgcolor: '#F4C95D',
+                        color: '#2d0f1e',
                         fontWeight: 900,
                         fontSize: { xs: '0.85rem', md: '1rem' },
-                        border: '2px solid rgba(255,255,255,0.4)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                        border: '2px solid rgba(109, 33, 79, 0.2)',
+                        boxShadow: '0 2px 8px rgba(244, 201, 93, 0.3)'
                       }}
                     >
                       {memberDetails?.Name?.charAt(0).toUpperCase() || 'U'}
@@ -201,13 +201,13 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                         {memberDetails?.Member_id || ""}
                       </Typography>
                     </Box> */}
-                    <ChevronDown size={18} color="white" style={{ opacity: 0.8 }} />
+                    <ChevronDown size={18} color="#6D214F" style={{ opacity: 0.8 }} />
                   </Box>
                 )}
                 {isLoggedIn && (
                   <IconButton
                     onClick={handleLogout}
-                    sx={{ color: "#ef4444", ml: 1, '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' } }}
+                    sx={{ color: "#e53e3e", ml: 1, '&:hover': { bgcolor: 'rgba(229, 62, 62, 0.1)' } }}
                   >
                     <LogOutIcon size={22} />
                   </IconButton>
@@ -225,15 +225,15 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
           PaperProps={{
             elevation: 0,
             sx: {
-              bgcolor: 'rgba(232, 218, 119, 1)', // Light blue (AliceBlue) with transparency
+              bgcolor: '#FFF8F0',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
               borderRadius: '16px',
               mt: 1.5,
               p: 0.5,
               minWidth: '240px',
-              border: '1px solid rgba(255, 255, 255, 0.5)',
-              boxShadow: '0 10px 30px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05)',
+              border: '1px solid #fce8ec',
+              boxShadow: '0 10px 30px -5px rgba(109, 33, 79, 0.12), 0 8px 10px -6px rgba(109, 33, 79, 0.06)',
               '& .MuiMenuItem-root': {
                 py: 1.2,
                 px: 2,
@@ -242,14 +242,14 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                 borderRadius: '8px',
                 fontWeight: 600,
                 fontSize: '0.95rem',
-                color: '#334155',
+                color: '#2d0f1e',
                 '&:hover': {
-                  bgcolor: '#e2e8f0',
-                  color: '#0f172a',
+                  bgcolor: '#fde8ec',
+                  color: '#6D214F',
                 },
               },
               '& .MuiDivider-root': {
-                borderColor: '#e2e8f0',
+                borderColor: '#fce8ec',
                 my: 1,
                 mx: 1,
               }
@@ -271,21 +271,21 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
                 width: 60,
                 height: 60,
                 marginBottom: "12px",
-                background: 'linear-gradient(135deg, #0a2558 0%, #2c8786 100%)',
-                border: '2px solid rgba(255,255,255,0.8)',
+                background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                border: '2px solid #F4C95D',
                 borderRadius: '14px',
-                color: '#ffffff',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+                color: '#FFF8F0',
+                boxShadow: '0 4px 14px rgba(109, 33, 79, 0.25)'
               }}
             >
               {memberDetails?.Name
                 ? memberDetails.Name.charAt(0).toUpperCase()
                 : ""}
             </Avatar>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0a2558', fontSize: '1.1rem' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#6D214F', fontSize: '1.1rem' }}>
               {memberDetails?.Name || "Member"}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#7c93b3', fontWeight: 600 }}>
+            <Typography variant="caption" sx={{ color: '#b08090', fontWeight: 600 }}>
                ID: {memberDetails?.Member_id || ""}
             </Typography>
           </div>
@@ -297,7 +297,7 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
             else if (userRole === "AGENT") navigate("/agent/profile");
             setAnchorEl(null);
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(2, 132, 199, 0.1)', color: '#0284C7', mr: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(109, 33, 79, 0.1)', color: '#6D214F', mr: 1.5 }}>
               <User size={18} />
             </Box>
             My Profile
@@ -307,7 +307,7 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
              navigate("/chat");
              setAnchorEl(null);
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(16, 185, 129, 0.1)', color: '#10B981', mr: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(229, 152, 155, 0.15)', color: '#c97579', mr: 1.5 }}>
               <MessageCircle size={18} />
             </Box>
             Chat
@@ -320,7 +320,7 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
               setAnchorEl(null);
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', mr: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(244, 201, 93, 0.15)', color: '#d4a83a', mr: 1.5 }}>
               <Settings size={18} />
             </Box>
             Change Password

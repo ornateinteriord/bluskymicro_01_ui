@@ -1,36 +1,49 @@
 import { createTheme } from "@mui/material/styles";
 
+// Brand Palette
+// #6D214F  → Deep Plum (Primary)
+// #E5989B  → Soft Rose (Secondary / Accent)
+// #FFF8F0  → Warm Cream (Background)
+// #F4C95D  → Golden Yellow (Highlight / Warning)
+
 export const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#0284C7", // Light Blue
-      contrastText: "#FFFFFF",
+      main: "#6D214F",
+      light: "#8f2f68",
+      dark: "#4e1739",
+      contrastText: "#FFF8F0",
     },
     secondary: {
-      main: "#0F172A", // Dark Slate/Navy
-      contrastText: "#FFFFFF",
+      main: "#E5989B",
+      light: "#f5bcbf",
+      dark: "#c97579",
+      contrastText: "#2d0f1e",
     },
     background: {
-      default: "#F8FAFC", // Light Gray/Off-white
-      paper: "#FFFFFF", // White
+      default: "#FFF8F0",
+      paper: "#FFFFFF",
     },
     text: {
-      primary: "#0F172A",
-      secondary: "#475569",
-    },
-    error: {
-      main: "#ff4444",
-    },
-    success: {
-      main: "#00C851",
+      primary: "#2d0f1e",
+      secondary: "#7a5060",
     },
     warning: {
-      main: "#ffbb33",
+      main: "#F4C95D",
+      dark: "#d4a83a",
+      contrastText: "#2d0f1e",
+    },
+    error: {
+      main: "#e53e3e",
+    },
+    success: {
+      main: "#38a169",
     },
     info: {
-      main: "#33b5e5",
+      main: "#E5989B",
     },
+    divider: "#f0d0d8",
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
@@ -45,29 +58,41 @@ export const theme = createTheme({
       textTransform: "none",
     },
   },
+  shape: {
+    borderRadius: 12,
+  },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "8px",
+          borderRadius: "12px",
           padding: "10px 24px",
+          fontWeight: 700,
           transition: "all 0.3s ease-in-out",
+          textTransform: "none",
         },
         contained: {
-          backgroundColor: "#0284C7",
-          color: "#FFFFFF",
+          background: "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)",
+          color: "#FFF8F0",
+          boxShadow: "0 4px 14px rgba(109, 33, 79, 0.25)",
           "&:hover": {
-            backgroundColor: "#0369A1",
+            background: "linear-gradient(135deg, #4e1739 0%, #6D214F 100%)",
             transform: "translateY(-2px)",
-            boxShadow: "0 6px 20px rgba(2, 132, 199, 0.3)",
+            boxShadow: "0 8px 20px rgba(109, 33, 79, 0.35)",
           },
         },
         outlined: {
-          borderColor: "#0284C7",
-          color: "#0284C7",
+          borderColor: "#6D214F",
+          color: "#6D214F",
           "&:hover": {
-            backgroundColor: "rgba(2, 132, 199, 0.1)",
-            borderColor: "#0284C7",
+            backgroundColor: "rgba(109, 33, 79, 0.06)",
+            borderColor: "#6D214F",
+          },
+        },
+        text: {
+          color: "#6D214F",
+          "&:hover": {
+            backgroundColor: "rgba(109, 33, 79, 0.06)",
           },
         },
       },
@@ -76,9 +101,14 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: "#FFFFFF",
-          borderRadius: "12px",
-          border: "1px solid #E2E8F0",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+          borderRadius: "18px",
+          border: "1px solid #fce8ec",
+          boxShadow: "0 2px 8px rgba(109, 33, 79, 0.08)",
+          transition: "all 0.25s ease",
+          "&:hover": {
+            boxShadow: "0 8px 24px rgba(109, 33, 79, 0.12)",
+            transform: "translateY(-1px)",
+          },
         },
       },
     },
@@ -94,18 +124,17 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: "#FFFFFF",
-          borderBottom: "1px solid #E2E8F0",
-          boxShadow: "none",
-          color: "#0F172A",
+          borderBottom: "1px solid #fce8ec",
+          boxShadow: "0 2px 12px rgba(109, 33, 79, 0.06)",
+          color: "#2d0f1e",
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: "#FFFFFF",
-          borderRight: "1px solid #E2E8F0",
-          color: "#0F172A",
+          backgroundColor: "#4e1739",
+          color: "#FFF8F0",
         },
       },
     },
@@ -113,14 +142,93 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
+            borderRadius: "12px",
             "& fieldset": {
-              borderColor: "#CBD5E1",
+              borderColor: "#f0d0d8",
             },
             "&:hover fieldset": {
-              borderColor: "rgba(2, 132, 199, 0.5)",
+              borderColor: "#E5989B",
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#0284C7",
+              borderColor: "#6D214F",
+              borderWidth: "2px",
+            },
+          },
+          "& .MuiInputLabel-root.Mui-focused": {
+            color: "#6D214F",
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: "8px",
+          fontWeight: 600,
+        },
+        colorPrimary: {
+          backgroundColor: "rgba(109, 33, 79, 0.1)",
+          color: "#6D214F",
+        },
+        colorSecondary: {
+          backgroundColor: "rgba(229, 152, 155, 0.15)",
+          color: "#c97579",
+        },
+      },
+    },
+    MuiBottomNavigation: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#FFFFFF",
+          borderTop: "1px solid #fce8ec",
+          boxShadow: "0 -4px 16px rgba(109, 33, 79, 0.08)",
+        },
+      },
+    },
+    MuiBottomNavigationAction: {
+      styleOverrides: {
+        root: {
+          color: "#b08090",
+          "&.Mui-selected": {
+            color: "#6D214F",
+          },
+        },
+      },
+    },
+    MuiAvatar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#6D214F",
+          color: "#FFF8F0",
+        },
+      },
+    },
+    MuiLinearProgress: {
+      styleOverrides: {
+        root: {
+          borderRadius: "99px",
+          backgroundColor: "#fce8ec",
+        },
+        bar: {
+          background: "linear-gradient(90deg, #6D214F, #E5989B)",
+          borderRadius: "99px",
+        },
+      },
+    },
+    MuiCircularProgress: {
+      styleOverrides: {
+        root: {
+          color: "#6D214F",
+        },
+      },
+    },
+    MuiSwitch: {
+      styleOverrides: {
+        switchBase: {
+          "&.Mui-checked": {
+            color: "#6D214F",
+            "& + .MuiSwitch-track": {
+              backgroundColor: "#E5989B",
             },
           },
         },

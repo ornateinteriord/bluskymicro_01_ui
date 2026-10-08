@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { TextField, Button, Card, CardContent, CardHeader, InputAdornment, Box,  } from '@mui/material';
+import { TextField, Button, Card, CardContent, InputAdornment, Box, Typography, IconButton } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import KeyIcon from '@mui/icons-material/Key';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
 import { useUpdateMember } from '../../../api/Memeber';
 import { toast } from 'react-toastify';
 import { LoadingComponent } from '../../../App';
 
 const ChangePassword: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     oldPassword: '',
     newPassword: '',
@@ -37,121 +40,168 @@ const ChangePassword: React.FC = () => {
   };
 
   const inputStyles = {
-    bgcolor: '#F8FAFC',
-    borderRadius: '8px',
-    color: '#0F172A',
+    bgcolor: '#FFF8F0',
+    borderRadius: '16px',
     '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#E2E8F0',
+      borderColor: '#f0d0d8',
     },
     '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#E2E8F0',
+      borderColor: '#E5989B',
     },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      bordercolor: '#0284C7',
+      borderColor: '#6D214F',
+      borderWidth: '2px',
     },
     '& .MuiInputBase-input': {
-      color: '#0F172A',
+      color: '#2d0f1e',
+      fontWeight: 600,
     },
     '& .MuiInputLabel-root': {
-      color: '#475569',
+      color: '#8c6b7d',
     },
     '& .MuiInputLabel-root.Mui-focused': {
-      color: '#0284C7',
+      color: '#6D214F',
     }
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 }, display: 'flex', justifyContent: 'center', bgcolor: '#F8FAFC', minHeight: '100vh' }}>
-      <Card sx={{ maxWidth: 600, width: '100%', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0', boxShadow: "0 15px 35px rgba(0,0,0,0.2)", borderRadius: '28px', color: '#0F172A', mt: { xs: 4, md: 10 }, alignSelf: 'flex-start' }}>
-        <CardHeader 
-          title="CHANGE PASSWORD" 
-          sx={{ bgcolor: '#F8FAFC', color: '#0F172A', py: 2.5, textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
-          titleTypographyProps={{ variant: 'subtitle1', fontWeight: 900, letterSpacing: '1px' }}
-        />
-        <CardContent sx={{ p: 4 }}>
+    <Box sx={{ 
+      p: { xs: 2, sm: 3 }, 
+      bgcolor: '#FFF8F0', 
+      minHeight: '100vh',
+      maxWidth: '480px',
+      margin: '0 auto',
+      pb: 10
+    }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <IconButton 
+          onClick={() => navigate(-1)}
+          sx={{ 
+            bgcolor: '#ffffff', 
+            border: '1.5px solid #f0d0d8',
+            color: '#6D214F',
+            p: 1,
+            '&:hover': { bgcolor: '#fdf2f4' }
+          }}
+        >
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
+            Change Password
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
+            Update your account security password
+          </Typography>
+        </Box>
+      </Box>
+
+      <Card sx={{ 
+        width: '100%', 
+        bgcolor: '#ffffff', 
+        border: '1.5px solid #f0d0d8', 
+        boxShadow: "0 8px 24px rgba(109,33,79,0.06)", 
+        borderRadius: '24px', 
+      }}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
           <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <TextField
-              label="Old Password"
-              name="oldPassword"
-              type="password"
-              value={formData.oldPassword}
-              onChange={handleInputChange}
-              fullWidth
-              variant="outlined"
-              placeholder="Enter your current password"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <VpnKeyIcon sx={{ color: '#475569' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={inputStyles}
-            />
-            <TextField
-              label="New Password"
-              name="newPassword"
-              type="password"
-              value={formData.newPassword}
-              onChange={handleInputChange}
-              fullWidth
-              variant="outlined"
-              placeholder="Enter your new password"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockIcon sx={{ color: '#475569' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={inputStyles}
-            />
-            <TextField
-              label="Confirm Password"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              fullWidth
-              variant="outlined"
-              placeholder="Confirm your new password"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <KeyIcon sx={{ color: '#475569' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={inputStyles}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, pt: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={!formData.oldPassword || !formData.newPassword || !formData.confirmPassword || updateMember.isPending}
-                sx={{
-                  bgcolor: '#0284C7',
-                  color: '#FFFFFF',
-                  px: 5,
-                  py: 1.2,
-                  fontWeight: 800,
-                  textTransform: 'none',
-                  borderRadius: '999px',
-                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)',
-                  width: { xs: '100%', sm: 'auto' },
-                  '&:hover': {
-                    bgcolor: '#0369A1',
-                    boxShadow: '0 6px 20px rgba(2, 132, 199, 0.6)'
-                  },
-                  "&:disabled": {
-                    bgcolor: 'rgba(2, 132, 199, 0.3)',
-                    color: '#475569'
-                  }
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.8, color: '#6D214F', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase' }}>
+                Current Password
+              </Typography>
+              <TextField
+                name="oldPassword"
+                type="password"
+                value={formData.oldPassword}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                placeholder="Enter current password"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <VpnKeyIcon sx={{ color: '#8c6b7d' }} />
+                    </InputAdornment>
+                  ),
                 }}
-              >
-                Update Password
-              </Button>
+                sx={inputStyles}
+              />
             </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.8, color: '#6D214F', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase' }}>
+                New Password
+              </Typography>
+              <TextField
+                name="newPassword"
+                type="password"
+                value={formData.newPassword}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                placeholder="Enter new password"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <KeyIcon sx={{ color: '#8c6b7d' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={inputStyles}
+              />
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.8, color: '#6D214F', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase' }}>
+                Confirm New Password
+              </Typography>
+              <TextField
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                fullWidth
+                variant="outlined"
+                placeholder="Re-enter new password"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon sx={{ color: '#8c6b7d' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={inputStyles}
+              />
+            </Box>
+
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleSubmit}
+              disabled={updateMember.isPending}
+              sx={{
+                background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                color: '#FFF8F0',
+                py: 1.5,
+                fontWeight: 900,
+                fontSize: '1rem',
+                textTransform: 'none',
+                borderRadius: '16px',
+                boxShadow: '0 8px 24px rgba(109, 33, 79, 0.25)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  bgcolor: '#f0d0d8',
+                  color: '#8c6b7d'
+                },
+                transition: 'all 0.2s'
+              }}
+            >
+              Update Password
+            </Button>
           </form>
         </CardContent>
         {updateMember.isPending && <LoadingComponent />}

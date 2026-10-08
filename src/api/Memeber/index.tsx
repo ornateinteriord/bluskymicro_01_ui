@@ -696,9 +696,13 @@ export const useImageKitUpload = (username: string) => {
 };
 
 // Hook for uploading KYC documents
-export const useUploadKYCDocument = (memberId: string, documentType: string) => {
-  return useMutation<{ url: string }, Error, File>({
-    mutationFn: async (file: File) => {
+export const useUploadKYCDocument = (defaultMemberId?: string, defaultDocumentType?: string) => {
+  return useMutation<{ url: string; documentUrl?: string }, Error, { file: File; memberId?: string; documentType?: string } | File>({
+    mutationFn: async (payload: { file: File; memberId?: string; documentType?: string } | File) => {
+      const file = payload instanceof File ? payload : payload.file;
+      const memberId = (payload instanceof File ? defaultMemberId : payload.memberId) || defaultMemberId || "member";
+      const documentType = (payload instanceof File ? defaultDocumentType : payload.documentType) || defaultDocumentType || "doc";
+
       const authRes = await get("/image-kit-auth");
       const { signature, expire, token } = authRes;
 
@@ -716,11 +720,15 @@ export const useUploadKYCDocument = (memberId: string, documentType: string) => 
         data
       );
 
-      return uploadRes.data;
+      const resData = uploadRes.data;
+      if (resData && !resData.documentUrl && resData.url) {
+        resData.documentUrl = resData.url;
+      }
+      return resData;
     },
     onError: (error: any) => {
-      toast.error(`Failed to upload ${documentType}. Please try again.`);
-      console.error(`Error uploading ${documentType}:`, error);
+      toast.error(`Failed to upload document. Please try again.`);
+      console.error(`Error uploading document:`, error);
     },
   });
 };

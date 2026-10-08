@@ -188,29 +188,44 @@ const Wallet = () => {
   return (
     <Card
       sx={{
-        margin: isMobile ? "0.5rem" : "1rem",
-        backgroundcolor: '#0F172A',
-        mt: 1, // Further reduced top margin
+        margin: isMobile ? "0.5rem" : "1.5rem",
+        bgcolor: '#ffffff',
+        borderRadius: "24px",
+        border: "1px solid #f0d0d8",
+        boxShadow: "0 8px 30px rgba(109,33,79,0.06)",
+        mt: 1,
       }}
     >
-      <CardContent sx={{ padding: isMobile ? "12px" : "24px" }}>
+      <CardContent sx={{ padding: isMobile ? "14px" : "28px" }}>
         {/* Withdrawal Section */}
         {isWithdrawalView && (
         <div>
-          <Box sx={{ marginBottom: "1rem", backgroundColor: "#0a2558", color: '#ffff', padding: "12px 16px", borderRadius: "8px", fontWeight: "bold", fontSize: "1.1rem", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: "8px" }}>
+          <Box sx={{
+            marginBottom: "1.5rem",
+            background: "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)",
+            color: '#FFF8F0',
+            padding: "14px 18px",
+            borderRadius: "16px",
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            boxShadow: "0 4px 14px rgba(109,33,79,0.25)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px"
+          }}>
             <IconButton 
               onClick={() => {
                 if (step === 2) setStep(1);
                 else setSearchParams({});
               }} 
               size="small" 
-              sx={{ color: 'white' }}
+              sx={{ color: '#FFF8F0' }}
             >
               <ArrowBackIcon fontSize="small" />
             </IconButton>
             Withdrawal Request {!isWithdrawalAllowed && "(Temporarily Disabled)"}
           </Box>
-          <div style={{ padding: "0 1rem 1rem 1rem" }}>
+          <div style={{ padding: "0 0.5rem 1rem 0.5rem" }}>
             {step === 1 ? (
               <Fade in={step === 1}>
             <form
@@ -229,9 +244,14 @@ const Wallet = () => {
                 InputProps={{ readOnly: true }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&:hover fieldset": { borderColor: isWithdrawalAllowed ? "#0a2558" : "#ff9800" },
-                    "&.Mui-focused fieldset": { borderColor: isWithdrawalAllowed ? "#0a2558" : "#ff9800" },
+                    borderRadius: "14px",
+                    bgcolor: "#FFF8F0",
+                    "& fieldset": { borderColor: "#f0d0d8", borderWidth: "1.5px" },
+                    "&:hover fieldset": { borderColor: "#E5989B" },
+                    "&.Mui-focused fieldset": { borderColor: "#6D214F", borderWidth: "2px" },
                   },
+                  "& .MuiInputLabel-root": { color: "#7a5060", fontWeight: 600 },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#6D214F" },
                 }}
               />
 
@@ -248,9 +268,14 @@ const Wallet = () => {
                 helperText={parseFloat(amount) > displayBalance ? "Insufficient Balance" : (amount && parseFloat(amount) < 500) ? "Minimum withdrawal amount is ₹500" : ""}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&:hover fieldset": { borderColor: isWithdrawalAllowed ? "#0a2558" : "#ff9800" },
-                    "&.Mui-focused fieldset": { borderColor: isWithdrawalAllowed ? "#0a2558" : "#ff9800" },
+                    borderRadius: "14px",
+                    bgcolor: "#FFF8F0",
+                    "& fieldset": { borderColor: "#f0d0d8", borderWidth: "1.5px" },
+                    "&:hover fieldset": { borderColor: "#E5989B" },
+                    "&.Mui-focused fieldset": { borderColor: "#6D214F", borderWidth: "2px" },
                   },
+                  "& .MuiInputLabel-root": { color: "#7a5060", fontWeight: 600 },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#6D214F" },
                 }}
               />
 
@@ -369,17 +394,20 @@ const Wallet = () => {
                   }
                   onClick={handleSendOTP}
                   sx={{
-                    backgroundColor: isWithdrawalAllowed && isReferralConditionMet ? "#0a2558" : "#ff9800",
-                    color: "white",
+                    background: isWithdrawalAllowed && isReferralConditionMet ? "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)" : "#F4C95D",
+                    color: isWithdrawalAllowed && isReferralConditionMet ? "#FFF8F0" : "#2d0f1e",
                     "&:hover": {
-                      backgroundColor: isWithdrawalAllowed && isReferralConditionMet ? "#581c87" : "#f57c00"
+                      background: isWithdrawalAllowed && isReferralConditionMet ? "linear-gradient(135deg, #4e1739 0%, #6D214F 100%)" : "#e6be4e"
                     },
-                    height: "48px",
+                    borderRadius: "14px",
+                    height: "50px",
                     fontSize: "1rem",
-                    fontWeight: "bold"
+                    fontWeight: 800,
+                    textTransform: "none",
+                    boxShadow: "0 4px 14px rgba(109,33,79,0.25)"
                   }}
                 >
-                  {isSendingOTP ? <CircularProgress size={24} sx={{ color: 'white' }} /> :
+                  {isSendingOTP ? <CircularProgress size={24} sx={{ color: '#FFF8F0' }} /> :
                   (!isWithdrawalAllowed || !isReferralConditionMet) ? "Disabled" : "Proceed to Withdraw"}
                 </Button>
               </Box>
@@ -389,8 +417,8 @@ const Wallet = () => {
               <Fade in={step === 2}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
                   <Box textAlign="center">
-                    <Typography variant="h6" sx={{ color: '#0a2558', mb: 1, fontWeight: 'bold' }}>Security Verification</Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    <Typography variant="h6" sx={{ color: '#6D214F', mb: 1, fontWeight: 800 }}>Security Verification</Typography>
+                    <Typography variant="body2" sx={{ color: '#7a5060' }}>
                       Enter the 6-digit OTP sent to your registered email address.
                     </Typography>
                   </Box>
@@ -406,17 +434,21 @@ const Wallet = () => {
                         sx: {
                           maxWidth: '45px',
                           '& .MuiOutlinedInput-root': {
-                            borderRadius: '8px',
+                            borderRadius: '12px',
+                            bgcolor: '#FFF8F0',
                             fontSize: '1.2rem',
                             fontWeight: 'bold',
+                            '& fieldset': { borderColor: '#f0d0d8' },
+                            '&:hover fieldset': { borderColor: '#E5989B' },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#0a2558',
+                              borderColor: '#6D214F',
                               borderWidth: '2px'
                             },
                           },
                           '& .MuiOutlinedInput-input': {
                             textAlign: 'center',
                             px: 0,
+                            color: '#2d0f1e'
                           }
                         }
                       }}
@@ -429,16 +461,20 @@ const Wallet = () => {
                       onClick={handleWithdraw}
                       disabled={withdrawMutation.isPending || otp.length !== 6}
                       sx={{
-                        backgroundColor: "#0a2558",
-                        minWidth: "150px",
-                        py: 1.2,
+                        background: "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)",
+                        color: "#FFF8F0",
+                        fontWeight: 800,
+                        borderRadius: "12px",
+                        minWidth: "160px",
+                        py: 1.3,
+                        textTransform: "none",
                         "&:hover": {
-                          backgroundColor: "#581c87"
+                          background: "linear-gradient(135deg, #4e1739 0%, #6D214F 100%)"
                         },
-                        "&:disabled": { backgroundColor: "#cccccc" },
+                        "&:disabled": { backgroundColor: "#f0d0d8", color: "#a88098" },
                       }}
                     >
-                      {withdrawMutation.isPending ? <CircularProgress size={24} sx={{ color: '#0F172A' }} /> : 'Confirm Withdrawal'}
+                      {withdrawMutation.isPending ? <CircularProgress size={24} sx={{ color: '#FFF8F0' }} /> : 'Confirm Withdrawal'}
                     </Button>
                   </Box>
                 </Box>
@@ -451,18 +487,20 @@ const Wallet = () => {
         {/* Transaction History */}
         {!isWithdrawalView && (
         <>
-        <div style={{ marginBottom: "1rem", color: "#000", fontWeight: "bold", fontSize: "1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ marginBottom: "1.2rem", color: "#2d0f1e", fontWeight: 800, fontSize: "1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span>Transaction History</span>
           <Button 
             variant="contained" 
             onClick={() => setSearchParams({ type: 'withdrawal' })}
             sx={{
-              backgroundColor: "#0a2558",
-              color: "white",
-              "&:hover": { backgroundColor: "#581c87" },
-              borderRadius: "8px",
-              fontWeight: "bold",
-              textTransform: "none"
+              background: "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)",
+              color: "#FFF8F0",
+              "&:hover": { background: "linear-gradient(135deg, #4e1739 0%, #6D214F 100%)" },
+              borderRadius: "12px",
+              fontWeight: 800,
+              textTransform: "none",
+              px: 3,
+              boxShadow: "0 4px 12px rgba(109,33,79,0.2)"
             }}
           >
             Withdraw

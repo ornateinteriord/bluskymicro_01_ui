@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, Grid, TextField, Button, IconButton, CircularProgress, Dialog, DialogTitle, DialogContent,  } from '@mui/material';
+import { Box, Typography, Paper, TextField, Button, IconButton, CircularProgress, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
 import TokenService from '../../../api/token/tokenService';
 import { useGetWalletOverview } from '../../../api/Memeber';
 import { useRequestAddOnMutation, useGetLoadFundConfig, useUploadPaymentScreenshot } from '../../../api/Packages';
@@ -10,6 +12,7 @@ import { toast } from 'react-toastify';
 import jeeScImage from '../../../assets/jee_sc.png';
 
 const LoadFundPage: React.FC = () => {
+  const navigate = useNavigate();
   const memberId = TokenService.getMemberId();
   const { isLoading: isConfigLoading } = useGetLoadFundConfig();
   const { data: walletOverview } = useGetWalletOverview(memberId || '');
@@ -47,8 +50,6 @@ const LoadFundPage: React.FC = () => {
       return;
     }
 
-    // No need to check for balance here since we are loading funds
-
     if (!txNo.trim()) {
       toast.error('Please enter the transaction number (TX No)');
       return;
@@ -59,22 +60,26 @@ const LoadFundPage: React.FC = () => {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      const uploadResult = await uploadScreenshot.mutateAsync(screenshotFile);
+      setIsSubmitting(true);
+      const uploadRes = await uploadScreenshot.mutateAsync(screenshotFile);
+      const screenshotUrl = uploadRes?.url || '';
+
       await requestAddOn.mutateAsync({
         member_id: memberId || '',
         requested_amount: Number(amount),
-        tx_no: txNo,
-        screenshot_url: uploadResult.url,
+        tx_no: txNo.trim(),
+        screenshot_url: screenshotUrl,
+        payment_method: 'UPI/QR',
       });
 
+      toast.success('Deposit request submitted successfully for approval!');
       setAmount('');
       setTxNo('');
       setScreenshotFile(null);
       setScreenshotPreview(null);
     } catch (err: any) {
-      console.error('Submit error:', err);
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to submit load fund request');
     } finally {
       setIsSubmitting(false);
     }
@@ -83,258 +88,257 @@ const LoadFundPage: React.FC = () => {
   return (
     <Box
       sx={{
-        pb: 6,
-        bgcolor: '#F8FAFC',
+        pb: 8,
+        bgcolor: '#FFF8F0',
         minHeight: '100vh',
-        px: { xs: 2.5, md: 5, lg: 10 },
-        pt: { xs: 4, md: 4 },
-        maxWidth: '1800px',
+        px: { xs: 2, sm: 3 },
+        pt: { xs: 2.5, sm: 3.5 },
+        maxWidth: '480px',
         margin: '0 auto',
       }}
     >
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 900, color: '#0F172A', mb: 1 }}>
-          Load Fund
-        </Typography>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <IconButton 
+          onClick={() => navigate(-1)}
+          sx={{ 
+            bgcolor: '#ffffff', 
+            border: '1.5px solid #f0d0d8',
+            color: '#6D214F',
+            p: 1,
+            '&:hover': { bgcolor: '#fdf2f4' }
+          }}
+        >
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
+            Load Funds
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
+            Top up your wallet via instant UPI transfer
+          </Typography>
+        </Box>
       </Box>
 
       {isConfigLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress sx={{ color: '#0284C7' }} />
+          <CircularProgress sx={{ color: '#6D214F' }} />
         </Box>
       ) : (
-        <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} md={8}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: { xs: 3, md: 5 },
-                bgcolor: '#F8FAFC',
-                borderRadius: '24px',
-                border: '1px solid #E2E8F0',
-                height: '100%',
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2.5, sm: 3 },
+            bgcolor: '#ffffff',
+            borderRadius: '24px',
+            border: '1.5px solid #f0d0d8',
+            boxShadow: '0 4px 20px rgba(109,33,79,0.06)',
+          }}
+        >
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            {/* Balance Badge */}
+            <Box sx={{ p: 2, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700, textTransform: 'uppercase' }}>Current Top Up Balance</Typography>
+              <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900 }}>
+                ₹{Number(walletOverview?.topUpBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Typography>
+            </Box>
+
+            {/* Scan to Pay QR Code */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', p: 2.5, border: '1.5px dashed #E5989B', borderRadius: '20px', bgcolor: '#FFF8F0', gap: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#6D214F', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Scan to Pay via UPI
+              </Typography>
+              <Box sx={{ width: '100%', maxWidth: 220, bgcolor: '#FFFFFF', borderRadius: '16px', p: 1.5, boxShadow: '0 4px 14px rgba(109,33,79,0.08)', border: '1px solid #f0d0d8' }}>
+                <Box component="img" src={jeeScImage} alt="Payment QR Code" sx={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+              </Box>
+              <Box sx={{ bgcolor: 'rgba(244, 201, 93, 0.25)', px: 2, py: 0.75, borderRadius: '10px', border: '1px solid rgba(244, 201, 93, 0.6)' }}>
+                <Typography variant="body2" sx={{ color: '#6D214F', fontWeight: 800, letterSpacing: '0.5px' }}>
+                  UPI ID: <span style={{ textDecoration: 'underline' }}>ecash01qr@fbl</span>
+                </Typography>
+              </Box>
+            </Box>
+
+            <TextField
+              fullWidth
+              label="Amount (₹)"
+              variant="outlined"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              type="number"
+              placeholder="e.g. 5000"
+              slotProps={{
+                inputLabel: {
+                  sx: { color: '#8c6b7d', '&.Mui-focused': { color: '#6D214F' } }
+                }
               }}
-            >
-              <Typography variant="h5" sx={{ fontWeight: 800, color: '#0F172A', mb: 3, textAlign: 'center' }}>
-                Load Fund Request
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: '#2d0f1e',
+                  fontWeight: 700,
+                  bgcolor: '#FFF8F0',
+                  borderRadius: '16px',
+                  '& fieldset': { borderColor: '#f0d0d8' },
+                  '&:hover fieldset': { borderColor: '#E5989B' },
+                  '&.Mui-focused fieldset': { borderColor: '#6D214F', borderWidth: '2px' },
+                },
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="UTR / Transaction Reference No."
+              variant="outlined"
+              value={txNo}
+              onChange={(e) => setTxNo(e.target.value)}
+              placeholder="Enter 12-digit UTR or Txn Ref"
+              slotProps={{
+                inputLabel: {
+                  sx: { color: '#8c6b7d', '&.Mui-focused': { color: '#6D214F' } }
+                }
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: '#2d0f1e',
+                  fontWeight: 700,
+                  bgcolor: '#FFF8F0',
+                  borderRadius: '16px',
+                  '& fieldset': { borderColor: '#f0d0d8' },
+                  '&:hover fieldset': { borderColor: '#E5989B' },
+                  '&.Mui-focused fieldset': { borderColor: '#6D214F', borderWidth: '2px' },
+                },
+              }}
+            />
+
+            {/* Receipt Image upload */}
+            <Box>
+              <Typography variant="caption" sx={{ color: '#6D214F', mb: 1, fontWeight: 800, display: 'block', textTransform: 'uppercase' }}>
+                Upload Payment Screenshot
               </Typography>
 
-              <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
-                <Box>
-                  <TextField
-                    fullWidth
-                    label="Top Up Balance"
-                    variant="outlined"
-                    value={`${Number(walletOverview?.topUpBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                    disabled
-                    sx={{
-                      mb: 2,
-                      '& .MuiOutlinedInput-root': {
-                        color: '#0F172A',
-                        fontWeight: 900,
-                        fontSize: '1.2rem',
-                        borderRadius: '14px',
-                        '& fieldset': { borderColor: '#E2E8F0' },
-                        '&.Mui-disabled': { color: '#0F172A', WebkitTextFillcolor: '#0F172A' },
-                        '& input.Mui-disabled': { color: '#0F172A', WebkitTextFillcolor: '#0F172A' }
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: '#475569',
-                        '&.Mui-disabled': { color: '#475569' }
-                      }
-                    }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Amount (Ecash / ₹)"
-                    variant="outlined"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    type="number"
-                    placeholder="Enter amount loaded"
-                    slotProps={{
-                      inputLabel: {
-                        sx: { color: '#475569', '&.Mui-focused': { color: '#0284C7' } }
-                      }
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        color: '#0F172A',
-                        borderRadius: '14px',
-                        '& fieldset': { borderColor: '#E2E8F0' },
-                        '&:hover fieldset': { borderColor: '#E2E8F0' },
-                        '&.Mui-focused fieldset': { bordercolor: '#0284C7' },
-                      },
-                    }}
-                  />
-
-                </Box>
-
-                <TextField
-                  fullWidth
-                  label="TX No / Transaction Hash"
-                  variant="outlined"
-                  value={txNo}
-                  onChange={(e) => setTxNo(e.target.value)}
-                  placeholder="Enter transaction receipt hash"
-                  slotProps={{
-                    inputLabel: {
-                      sx: { color: '#475569', '&.Mui-focused': { color: '#0284C7' } }
-                    }
-                  }}
+              {screenshotPreview ? (
+                <Box
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: '#0F172A',
-                      borderRadius: '14px',
-                      '& fieldset': { borderColor: '#E2E8F0' },
-                      '&:hover fieldset': { borderColor: '#E2E8F0' },
-                      '&.Mui-focused fieldset': { bordercolor: '#0284C7' },
-                    },
+                    position: 'relative',
+                    width: '100%',
+                    height: 180,
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: '1.5px solid #E5989B',
+                    bgcolor: '#FFF8F0',
                   }}
-                />
-
-                {/* Scan to Pay QR Code */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', p: 3, border: '1px solid #E2E8F0', borderRadius: '20px', bgcolor: '#FFFFFF', gap: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A' }}>
-                    Scan to Pay
-                  </Typography>
-                  <Box sx={{ width: '100%', maxWidth: 280, bgcolor: '#FFFFFF', borderRadius: '16px', p: 2, boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0' }}>
-                    <Box component="img" src={jeeScImage} alt="Payment QR Code" sx={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
-                  </Box>
-                  <Typography variant="h6" sx={{ color: '#0284C7', fontWeight: 800 }}>
-                    UPI ID: ecash01qr@fbl
-                  </Typography>
+                >
+                  <Box
+                    component="img"
+                    src={screenshotPreview}
+                    alt="Screenshot Preview"
+                    sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                  <IconButton
+                    onClick={handleRemoveScreenshot}
+                    sx={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      bgcolor: '#6D214F',
+                      color: '#FFF8F0',
+                      '&:hover': { bgcolor: '#4e1739' },
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
                 </Box>
-
-                {/* Receipt Image upload */}
-                <Box>
-                  <Typography variant="body2" sx={{ color: '#475569', mb: 1.5, fontWeight: 700 }}>
-                    Upload Payment Screenshot
-                  </Typography>
-
-                  {screenshotPreview ? (
-                    <Box
-                      sx={{
-                        position: 'relative',
-                        width: '100%',
-                        height: 200,
-                        borderRadius: '14px',
-                        overflow: 'hidden',
-                        border: '1px solid #E2E8F0',
-                        bgcolor: '#F8FAFC',
-                      }}
-                    >
-                      <Box
-                        component="img"
-                        src={screenshotPreview}
-                        alt="Screenshot Preview"
-                        sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                      />
-                      <IconButton
-                        onClick={handleRemoveScreenshot}
-                        sx={{
-                          position: 'absolute',
-                          top: 10,
-                          right: 10,
-                          bgcolor: 'rgba(239, 68, 68, 0.95)',
-                          color: '#0F172A',
-                          '&:hover': { bgcolor: 'rgba(239, 68, 68, 1)' },
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  ) : (
-                    <Button
-                      component="label"
-                      variant="outlined"
-                      startIcon={<CloudUploadIcon />}
-                      sx={{
-                        width: '100%',
-                        py: 4,
-                        borderRadius: '14px',
-                        border: '2px dashed rgba(255, 255, 255, 0.12)',
-                        color: '#475569',
-                        textTransform: 'none',
-                        fontSize: '0.95rem',
-                        '&:hover': {
-                          bordercolor: '#0284C7',
-                          color: '#0284C7',
-                          bgcolor: 'rgba(2, 132, 199, 0.02)',
-                        },
-                      }}
-                    >
-                      Drag & Drop or Click to Upload Payment Screenshot
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={handleFileChange}
-                      />
-                    </Button>
-                  )}
-                </Box>
-
+              ) : (
                 <Button
-                  type="submit"
-                  disabled={isSubmitting}
+                  component="label"
+                  variant="outlined"
+                  startIcon={<CloudUploadIcon sx={{ color: '#6D214F' }} />}
                   sx={{
-                    bgcolor: '#0284C7',
-                    color: '#FFFFFF',
+                    width: '100%',
+                    py: 3,
+                    borderRadius: '16px',
+                    border: '2px dashed #E5989B',
+                    color: '#6D214F',
                     textTransform: 'none',
-                    fontWeight: 900,
-                    fontSize: '1rem',
-                    py: 1.75,
-                    borderRadius: '14px',
-                    boxShadow: '0 6px 20px rgba(2, 132, 199, 0.35)',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    bgcolor: '#FFF8F0',
                     '&:hover': {
-                      bgcolor: '#0369A1',
-                      boxShadow: '0 8px 26px rgba(2, 132, 199, 0.5)',
-                    },
-                    '&.Mui-disabled': {
-                      bgcolor: '#F1F5F9',
-                      color: '#64748B',
+                      borderColor: '#6D214F',
+                      bgcolor: '#fdf2f4',
                     },
                   }}
                 >
-                  {isSubmitting ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CircularProgress size={20} sx={{ color: '#FFFFFF' }} />
-                      Submitting...
-                    </Box>
-                  ) : (
-                    'Submit'
-                  )}
+                  Upload Payment Screenshot
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
                 </Button>
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
+              )}
+            </Box>
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              sx={{
+                background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                color: '#FFF8F0',
+                textTransform: 'none',
+                fontWeight: 900,
+                fontSize: '1rem',
+                py: 1.5,
+                borderRadius: '16px',
+                boxShadow: '0 8px 24px rgba(109, 33, 79, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                  transform: 'translateY(-1px)'
+                },
+                '&.Mui-disabled': {
+                  bgcolor: '#f0d0d8',
+                  color: '#8c6b7d',
+                },
+                transition: 'all 0.2s'
+              }}
+            >
+              {isSubmitting ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={20} sx={{ color: '#FFF8F0' }} />
+                  Submitting...
+                </Box>
+              ) : (
+                'Submit Load Request'
+              )}
+            </Button>
+          </Box>
+        </Paper>
       )}
 
       {/* Screenshot Viewer Dialog */}
       <Dialog
         open={!!selectedScreenshot}
         onClose={() => setSelectedScreenshot(null)}
-        maxWidth="md"
+        maxWidth="xs"
         fullWidth
         PaperProps={{
           sx: {
             bgcolor: '#FFFFFF',
             borderRadius: '20px',
-            border: '1px solid #E2E8F0',
+            border: '1.5px solid #f0d0d8',
             overflow: 'hidden',
           },
         }}
       >
-        <DialogTitle sx={{ m: 0, p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#0F172A' }}>
+        <DialogTitle sx={{ m: 0, p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#6D214F' }}>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>Payment Screenshot</Typography>
-          <IconButton onClick={() => setSelectedScreenshot(null)} sx={{ color: '#475569', '&:hover': { color: '#0F172A' } }}>
+          <IconButton onClick={() => setSelectedScreenshot(null)} sx={{ color: '#8c6b7d', '&:hover': { color: '#6D214F' } }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', bgcolor: '#F8FAFC', height: '70vh' }}>
+        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', bgcolor: '#FFF8F0', height: '60vh' }}>
           {selectedScreenshot && (
             <Box
               component="img"

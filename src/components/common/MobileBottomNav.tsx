@@ -36,8 +36,8 @@ const MobileBottomNav: React.FC = () => {
           left: 0,
           right: 0,
           zIndex: 1000,
-          borderTop: '1px solid #e0e0e0',
-          boxShadow: '0 -4px 10px rgba(0,0,0,0.05)'
+          borderTop: '1px solid #fce8ec',
+          boxShadow: '0 -4px 16px rgba(109, 33, 79, 0.08)'
         }}
         elevation={3}
       >
@@ -50,24 +50,24 @@ const MobileBottomNav: React.FC = () => {
           }}
           sx={{
             height: 70,
+            backgroundColor: '#ffffff',
             '& .MuiBottomNavigationAction-root': {
-              color: '#9e9e9e',
+              color: '#b08090',
               minWidth: 0,
               padding: '6px 0',
             },
             '& .Mui-selected': {
-              color: '#0a2558 !important',
+              color: '#6D214F !important',
               '& .MuiBottomNavigationAction-label': {
                 fontWeight: 800,
                 fontSize: '0.75rem',
                 mt: 0.5
               },
-              // The blue rounded square highlight for the icon
               '& .MuiBottomNavigationAction-iconOnly': {
                 paddingTop: '16px',
               },
               '& .indicator': {
-                backgroundColor: '#0a2558',
+                backgroundColor: '#6D214F',
                 color: 'white',
                 borderRadius: '12px',
                 padding: '4px',
