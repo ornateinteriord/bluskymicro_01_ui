@@ -18,6 +18,7 @@ import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import { toast } from 'react-toastify';
 import CropFreeIcon from '@mui/icons-material/CropFree';
+import { useNavigate } from 'react-router-dom';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -36,6 +37,7 @@ interface DashboardQRDialogProps {
 }
 
 const DashboardQRDialog: React.FC<DashboardQRDialogProps> = ({ open, onClose, memberId, memberName }) => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeTab, setActiveTab] = useState<'my_qr' | 'scan_pay'>('my_qr');
@@ -308,19 +310,23 @@ const DashboardQRDialog: React.FC<DashboardQRDialogProps> = ({ open, onClose, me
                 </Typography>
                 <Button
                   variant="contained"
+                  onClick={() => {
+                    onClose();
+                    navigate('/user/scanner');
+                  }}
                   sx={{
                     mt: 3,
-                    background: 'linear-gradient(45deg, #0EA5E9 30%, #0284C7 90%)',
-                    color: '#0D2658',
+                    background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+                    color: '#FFFFFF',
                     borderRadius: '999px',
                     px: 4, py: 1.2,
                     textTransform: 'uppercase',
                     fontWeight: 900,
                     letterSpacing: '0.5px',
-                    boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
+                    boxShadow: '0 4px 15px rgba(0, 186, 242, 0.35)',
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #0284C7 30%, #0369A1 90%)',
-                      boxShadow: '0 6px 20px rgba(255, 215, 0, 0.5)',
+                      background: 'linear-gradient(135deg, #0082CD 0%, #0052cc 100%)',
+                      boxShadow: '0 6px 20px rgba(0, 186, 242, 0.5)',
                       transform: 'translateY(-1px)'
                     }
                   }}

@@ -297,7 +297,7 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
             else if (userRole === "AGENT") navigate("/agent/profile");
             setAnchorEl(null);
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(109, 33, 79, 0.1)', color: '#6D214F', mr: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(37, 99, 235, 0.12)', color: '#2563EB', mr: 1.5 }}>
               <User size={18} />
             </Box>
             My Profile
@@ -307,10 +307,10 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
              navigate("/chat");
              setAnchorEl(null);
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(229, 152, 155, 0.15)', color: '#c97579', mr: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(13, 148, 136, 0.12)', color: '#0D9488', mr: 1.5 }}>
               <MessageCircle size={18} />
             </Box>
-            Chat
+            Support Chat
           </MenuItem>
 
           <MenuItem
@@ -320,10 +320,10 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
               setAnchorEl(null);
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(244, 201, 93, 0.15)', color: '#d4a83a', mr: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(234, 88, 12, 0.12)', color: '#EA580C', mr: 1.5 }}>
               <Settings size={18} />
             </Box>
-            Change Password
+            Security & Password
           </MenuItem>
         </Menu>
 

@@ -32,14 +32,14 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
     isExpandable: false,
   },
   {
-    name: "Account Info",
+    name: "Profile & Security",
     icon: <AccountCircleIcon />,
     isExpandable: true,
     subItems: [
-      { name: "Profile", path: "/user/account/profile", icon: <PersonIcon /> },
-      { name: "KYC", path: "/user/account/kyc", icon: <VerifiedUserIcon /> },
+      { name: "My Profile", path: "/user/account/profile", icon: <PersonIcon /> },
+      { name: "KYC Verification", path: "/user/account/kyc", icon: <VerifiedUserIcon /> },
       {
-        name: "Change Password",
+        name: "Security Password",
         path: "/user/account/change-password",
         icon: <LockIcon />,
       },

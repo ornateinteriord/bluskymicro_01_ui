@@ -2,7 +2,7 @@ import React from 'react';
 import { BottomNavigation, BottomNavigationAction, Paper, Box } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
-import ChatIcon from '@mui/icons-material/Chat';
+// import ChatIcon from '@mui/icons-material/Chat';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { useGetMemberDetails } from '../../api/Memeber';
@@ -36,8 +36,8 @@ const MobileBottomNav: React.FC = () => {
           left: 0,
           right: 0,
           zIndex: 1000,
-          borderTop: '1px solid #fce8ec',
-          boxShadow: '0 -4px 16px rgba(109, 33, 79, 0.08)'
+          borderTop: '1px solid #E2E8F0',
+          boxShadow: '0 -4px 16px rgba(0, 186, 242, 0.08)'
         }}
         elevation={3}
       >
@@ -52,31 +52,33 @@ const MobileBottomNav: React.FC = () => {
             height: 70,
             backgroundColor: '#ffffff',
             '& .MuiBottomNavigationAction-root': {
-              color: '#b08090',
+              color: '#94A3B8',
               minWidth: 0,
               padding: '6px 0',
             },
             '& .Mui-selected': {
-              color: '#6D214F !important',
+              color: '#0082CD !important',
               '& .MuiBottomNavigationAction-label': {
                 fontWeight: 800,
                 fontSize: '0.75rem',
-                mt: 0.5
+                mt: 0.5,
+                color: '#0082CD',
               },
               '& .MuiBottomNavigationAction-iconOnly': {
                 paddingTop: '16px',
               },
               '& .indicator': {
-                backgroundColor: '#6D214F',
-                color: 'white',
+                background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+                color: '#FFFFFF',
                 borderRadius: '12px',
                 padding: '4px',
-                width: '40px',
+                width: '42px',
                 height: '32px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                mb: 0.5
+                mb: 0.5,
+                boxShadow: '0 2px 8px rgba(0, 186, 242, 0.35)',
               }
             }
           }}
@@ -86,11 +88,11 @@ const MobileBottomNav: React.FC = () => {
             label="Home"
             icon={<Box className={value === "/user/dashboard" ? "indicator" : ""}>{<HomeIcon />}</Box>}
           />
-          <BottomNavigationAction
+          {/* <BottomNavigationAction
             value="/user/chat"
             label="Chat"
             icon={<Box className={value === "/user/chat" ? "indicator" : ""}>{<ChatIcon />}</Box>}
-          />
+          /> */}
           <BottomNavigationAction
             value="/user/account/profile"
             label="Profile"

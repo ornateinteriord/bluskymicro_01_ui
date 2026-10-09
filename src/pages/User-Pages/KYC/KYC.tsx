@@ -9,11 +9,39 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import BadgeIcon from '@mui/icons-material/Badge';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import QrCodeIcon from '@mui/icons-material/QrCode';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../../../context/user/userContext';
 import { LoadingComponent } from '../../../App';
 import { useSubmitKYC, useUploadKYCDocument } from '../../../api/Memeber';
 import { toast } from 'react-toastify';
+
+const PaytmIconBadge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Box
+    sx={{
+      width: 32,
+      height: 32,
+      borderRadius: '9px',
+      background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#FFFFFF',
+      boxShadow: '0 2px 6px rgba(0, 186, 242, 0.35)',
+      mr: 0.5,
+      flexShrink: 0,
+      '& svg': {
+        color: '#FFFFFF',
+        fontSize: 18,
+      }
+    }}
+  >
+    {children}
+  </Box>
+);
 
 interface DocumentUploadProps {
   label: string;
@@ -48,88 +76,145 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
   };
 
   return (
-    <Card sx={{ 
-      height: '100%', 
-      position: 'relative', 
-      bgcolor: '#FFF8F0', 
-      borderRadius: '20px', 
-      border: '1.5px solid #f0d0d8',
-      boxShadow: 'none'
-    }}>
+    <Card 
+      sx={{ 
+        height: '100%', 
+        position: 'relative', 
+        bgcolor: '#F8FAFC', 
+        borderRadius: '16px', 
+        border: '1.5px solid #E2E8F0',
+        boxShadow: 'none',
+        transition: 'all 0.25s ease',
+        '&:hover': {
+          borderColor: '#00BAF2',
+          boxShadow: '0 4px 14px rgba(0, 186, 242, 0.12)'
+        }
+      }}
+    >
       <CardContent sx={{ p: 2 }}>
-        <Box display="flex" alignItems="center" mb={1.5}>
-          {icon}
-          <Typography variant="subtitle2" fontWeight="800" ml={1} sx={{ color: '#6D214F' }}>
-            {label}
-          </Typography>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={1.5}>
+          <Box display="flex" alignItems="center">
+            {icon}
+            <Typography variant="subtitle2" fontWeight="800" ml={1} sx={{ color: '#0F172A' }}>
+              {label}
+            </Typography>
+          </Box>
+          {value && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, bgcolor: '#E0F2FE', px: 1, py: 0.2, borderRadius: '20px' }}>
+              <CheckCircleIcon sx={{ fontSize: 13, color: '#0082CD' }} />
+              <Typography sx={{ fontSize: '0.68rem', fontWeight: 800, color: '#0369A1' }}>Attached</Typography>
+            </Box>
+          )}
         </Box>
 
-        {value ? (
-          <Box sx={{ position: 'relative', width: '100%', height: 160, borderRadius: '14px', overflow: 'hidden', border: '1px solid #E5989B' }}>
-            <img
-              src={value}
-              alt={label}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-            <IconButton
-              onClick={onDelete}
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                bgcolor: '#6D214F',
-                color: '#FFF8F0',
-                '&:hover': {
-                  bgcolor: '#4e1739',
-                },
-              }}
-              size="small"
+        <AnimatePresence mode="wait">
+          {value ? (
+            <motion.div
+              key="preview"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              border: '2px dashed #E5989B',
-              borderRadius: '16px',
-              p: 2.5,
-              textAlign: 'center',
-              cursor: 'pointer',
-              bgcolor: '#ffffff',
-              '&:hover': {
-                borderColor: '#6D214F',
-                bgcolor: '#fdf2f4',
-              },
-            }}
-            component="label"
-          >
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleFileChange}
-              disabled={uploading}
-            />
-            {uploading ? (
-              <CircularProgress size={28} sx={{ color: '#6D214F' }} />
-            ) : (
-              <>
-                <CloudUploadIcon sx={{ fontSize: 36, color: '#6D214F', mb: 0.5 }} />
-                <Typography variant="body2" sx={{ color: '#6D214F', fontWeight: 800 }}>
-                  Upload Document
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#8c6b7d', display: 'block', mt: 0.3 }}>
-                  PNG, JPG up to 5MB
-                </Typography>
-              </>
-            )}
-          </Box>
-        )}
+              <Box sx={{ position: 'relative', width: '100%', height: 160, borderRadius: '12px', overflow: 'hidden', border: '1.5px solid #00BAF2' }}>
+                <img
+                  src={value}
+                  alt={label}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+                <IconButton
+                  onClick={onDelete}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    bgcolor: '#EF4444',
+                    color: '#FFFFFF',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    '&:hover': {
+                      bgcolor: '#DC2626',
+                    },
+                  }}
+                  size="small"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="upload"
+              whileHover={{ scale: 1.008 }}
+              whileTap={{ scale: 0.992 }}
+            >
+              <Box
+                component="label"
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  border: '2px dashed #CBD5E1',
+                  borderRadius: '14px',
+                  p: { xs: 2.5, sm: 3 },
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  bgcolor: '#FFFFFF',
+                  boxSizing: 'border-box',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: '#00BAF2',
+                    bgcolor: '#F0F9FF',
+                  },
+                }}
+              >
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={uploading}
+                />
+                {uploading ? (
+                  <Box sx={{ py: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <CircularProgress size={30} sx={{ color: '#00BAF2', mb: 1 }} />
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#0082CD' }}>Uploading document...</Typography>
+                  </Box>
+                ) : (
+                  <>
+                    <Box
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 1,
+                        boxShadow: '0 2px 8px rgba(0, 186, 242, 0.35)'
+                      }}
+                    >
+                      <CloudUploadIcon sx={{ fontSize: 24, color: '#FFFFFF' }} />
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#1E293B', fontWeight: 800, mb: 0.3 }}>
+                      Tap to upload {label}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>
+                      Supports PNG, JPG, JPEG (Max 5MB)
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardContent>
     </Card>
   );
@@ -139,7 +224,7 @@ const KYC: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const submitKYC = useSubmitKYC();
-  const uploadDoc = useUploadKYCDocument();
+  const uploadKYCDocument = useUploadKYCDocument();
 
   const [formData, setFormData] = useState({
     accountName: '',
@@ -149,62 +234,37 @@ const KYC: React.FC = () => {
     upi_id: '',
   });
 
-  const [documents, setDocuments] = useState<{
-    panImage: string | null;
-    profileImage: string | null;
-  }>({
-    panImage: null,
-    profileImage: null,
+  const [documents, setDocuments] = useState({
+    panImage: null as string | null,
+    profileImage: null as string | null,
   });
 
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user?.kyc_details) {
       setFormData({
-        accountName: user.accountName || user.Name || '',
-        account_number: user.bankAccount || '',
-        ifsc_code: user.ifsc || '',
-        bank_name: user.bankName || '',
-        upi_id: user.upiId || '',
+        accountName: user.kyc_details.accountName || user.Name || '',
+        account_number: user.kyc_details.account_number || '',
+        ifsc_code: user.kyc_details.ifsc_code || '',
+        bank_name: user.kyc_details.bank_name || '',
+        upi_id: user.kyc_details.upi_id || '',
       });
-
+      setDocuments({
+        panImage: user.kyc_details.panImage || null,
+        profileImage: user.kyc_details.profileImage || null,
+      });
+    } else if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        accountName: user.Name || '',
+      }));
       setDocuments({
         panImage: user.panImage || null,
         profileImage: user.profileImage || null,
       });
     }
   }, [user]);
-
-  const handleDocumentUpload = async (docType: string, file: File) => {
-    try {
-      setUploadingDoc(docType);
-      const res = await uploadDoc.mutateAsync({
-        memberId: user.Member_id,
-        file,
-        documentType: docType,
-      });
-
-      setDocuments((prev) => ({
-        ...prev,
-        [docType]: res.url || res.documentUrl,
-      }));
-
-      toast.success(`Document uploaded successfully!`);
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      toast.error(error?.message || 'Failed to upload document');
-    } finally {
-      setUploadingDoc(null);
-    }
-  };
-
-  const handleDocumentDelete = (docType: string) => {
-    setDocuments((prev) => ({
-      ...prev,
-      [docType]: null,
-    }));
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -214,249 +274,366 @@ const KYC: React.FC = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    const missingDocs = [];
-    if (!documents.panImage) missingDocs.push('PAN / Aadhaar Image');
-    if (!documents.profileImage) missingDocs.push('Profile Image');
+  const handleDocumentUpload = (docType: string, file: File) => {
+    setUploadingDoc(docType);
+    uploadKYCDocument.mutate(
+      { documentType: docType, file },
+      {
+        onSuccess: (data) => {
+          setDocuments((prev) => ({
+            ...prev,
+            [docType]: data.url,
+          }));
+          toast.success(`${docType === 'panImage' ? 'ID Document' : 'Photo'} uploaded successfully`);
+          setUploadingDoc(null);
+        },
+        onError: () => {
+          setUploadingDoc(null);
+        },
+      }
+    );
+  };
 
-    if (missingDocs.length > 0) {
-      toast.error(`Please upload: ${missingDocs.join(', ')}`);
+  const handleDocumentDelete = (docType: string) => {
+    setDocuments((prev) => ({
+      ...prev,
+      [docType]: null,
+    }));
+    toast.info('Document removed');
+  };
+
+  const handleSubmit = () => {
+    if (!formData.accountName || !formData.account_number || !formData.ifsc_code || !formData.bank_name) {
+      toast.error('Please fill in all required bank details');
       return;
     }
 
-    if (!formData.account_number || !formData.ifsc_code || !formData.bank_name || !formData.upi_id) {
-      toast.error('Please fill all bank account and UPI details');
+    const missingDocs: string[] = [];
+    if (!documents.panImage) missingDocs.push('Identity / PAN Document');
+    if (!documents.profileImage) missingDocs.push('Profile Photo');
+
+    if (missingDocs.length > 0) {
+      toast.error(`Please upload required documents: ${missingDocs.join(', ')}`);
       return;
     }
 
     submitKYC.mutate({
-      ref_no: user.Member_id,
-      bankAccount: formData.account_number,
-      ifsc: formData.ifsc_code,
-      bankName: formData.bank_name,
-      upiId: formData.upi_id,
+      accountName: formData.accountName,
+      account_number: formData.account_number,
+      ifsc_code: formData.ifsc_code,
+      bank_name: formData.bank_name,
+      upi_id: formData.upi_id,
       panImage: documents.panImage,
       profileImage: documents.profileImage,
     });
   };
 
   const documentConfigs = [
-    { key: 'panImage', label: 'PAN / Aadhaar Card', icon: <BadgeIcon sx={{ color: '#6D214F' }} /> },
-    { key: 'profileImage', label: 'Profile Photo', icon: <ImageIcon sx={{ color: '#6D214F' }} /> },
+    { key: 'panImage', label: 'PAN / Aadhaar / National ID', icon: <PaytmIconBadge><BadgeIcon /></PaytmIconBadge> },
+    { key: 'profileImage', label: 'Passport Photo', icon: <PaytmIconBadge><ImageIcon /></PaytmIconBadge> },
   ];
 
-  const inputStyles = {
-    bgcolor: '#FFF8F0',
-    borderRadius: '16px',
+  const modernInputStyles = {
+    bgcolor: '#F8FAFC',
+    borderRadius: '14px',
     '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#f0d0d8',
+      borderColor: '#E2E8F0',
+      borderWidth: '1.5px',
     },
     '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#E5989B',
+      borderColor: '#00BAF2',
     },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#6D214F',
+      borderColor: '#00BAF2',
       borderWidth: '2px',
+      boxShadow: '0 0 0 4px rgba(0, 186, 242, 0.12)',
     },
     '& .MuiInputBase-input': {
-      color: '#2d0f1e',
+      color: '#0F172A',
+      padding: '13px 14px',
+      fontSize: '0.95rem',
       fontWeight: 600,
     },
-    '& .MuiInputLabel-root': {
-      color: '#8c6b7d',
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: '#6D214F',
-    }
   };
 
   return (
     <Box sx={{ 
       p: { xs: 2, sm: 3 }, 
-      bgcolor: '#FFF8F0', 
+      bgcolor: '#F1F5F9', 
       minHeight: '100vh',
-      maxWidth: '480px',
+      maxWidth: '520px',
       margin: '0 auto',
       pb: 10
     }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-        <IconButton 
-          onClick={() => navigate(-1)}
-          sx={{ 
-            bgcolor: '#ffffff', 
-            border: '1.5px solid #f0d0d8',
-            color: '#6D214F',
-            p: 1,
-            '&:hover': { bgcolor: '#fdf2f4' }
-          }}
-        >
-          <ArrowBackIcon fontSize="small" />
-        </IconButton>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
-            KYC Verification
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
-            Bank account details & identification
-          </Typography>
+      {/* Animated Header Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+          <IconButton 
+            onClick={() => navigate(-1)}
+            sx={{ 
+              bgcolor: '#FFFFFF', 
+              border: '1.5px solid #E2E8F0',
+              color: '#0F172A',
+              p: 1,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              '&:hover': { bgcolor: '#F8FAFC', transform: 'translateX(-2px)' },
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 900, color: '#0F172A', letterSpacing: '-0.5px' }}>
+              KYC Verification
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
+              Submit bank details & identity verification documents
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      </motion.div>
 
-      <Card sx={{ 
-        width: '100%', 
-        bgcolor: '#ffffff', 
-        border: '1.5px solid #f0d0d8', 
-        boxShadow: "0 8px 24px rgba(109,33,79,0.06)", 
-        borderRadius: '24px', 
-      }}>
-        <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900, mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Bank Account Details
-            </Typography>
-            <form style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <TextField
-                label="Account Holder Name"
-                name="accountName"
-                value={formData.accountName}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-                placeholder="Enter name as in bank"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon sx={{ color: '#8c6b7d' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyles}
-              />
-              <TextField
-                label="Account Number"
-                name="account_number"
-                value={formData.account_number}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-                placeholder="Enter bank account number"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <AccountBalanceWalletIcon sx={{ color: '#8c6b7d' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyles}
-              />
-              <TextField
-                label="IFSC Code"
-                name="ifsc_code"
-                value={formData.ifsc_code}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-                placeholder="e.g. SBIN0001234"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <ConfirmationNumberIcon sx={{ color: '#8c6b7d' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyles}
-              />
-              <TextField
-                label="Bank Name"
-                name="bank_name"
-                value={formData.bank_name}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-                placeholder="e.g. State Bank of India"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <AccountBalanceIcon sx={{ color: '#8c6b7d' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyles}
-              />
-              <TextField
-                label="UPI ID"
-                name="upi_id"
-                value={formData.upi_id}
-                onChange={handleInputChange}
-                fullWidth
-                variant="outlined"
-                placeholder="e.g. yourname@upi"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <AccountBalanceWalletIcon sx={{ color: '#8c6b7d' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyles}
-              />
-            </form>
-          </Box>
-
-          {/* KYC Documents */}
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: '#6D214F', fontWeight: 900, mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Upload KYC Documents
-            </Typography>
-            <Grid container spacing={2}>
-              {documentConfigs.map((config) => (
-                <Grid item xs={12} key={config.key}>
-                  <DocumentUpload
-                    label={config.label}
-                    icon={config.icon}
-                    value={documents[config.key as keyof typeof documents]}
-                    onUpload={(file) => handleDocumentUpload(config.key, file)}
-                    onDelete={() => handleDocumentDelete(config.key)}
-                    uploading={uploadingDoc === config.key}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-
-            <Box mt={3.5}>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={submitKYC.isPending}
-                fullWidth
-                sx={{
-                  background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
-                  color: '#FFF8F0',
-                  padding: '14px',
-                  fontWeight: 900,
-                  fontSize: '1rem',
-                  borderRadius: '16px',
-                  textTransform: 'none',
-                  boxShadow: '0 8px 24px rgba(109, 33, 79, 0.25)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
-                    transform: 'translateY(-1px)'
-                  },
-                  '&:disabled': {
-                    bgcolor: '#f0d0d8',
-                    color: '#8c6b7d'
-                  },
-                  transition: 'all 0.2s'
-                }}
-              >
-                {submitKYC.isPending ? 'Submitting KYC...' : 'Submit KYC Details'}
-              </Button>
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.05 }}
+      >
+        <Card sx={{ 
+          width: '100%', 
+          bgcolor: '#FFFFFF', 
+          border: '1px solid #E2E8F0', 
+          boxShadow: "0 12px 32px rgba(15, 23, 42, 0.06)", 
+          borderRadius: '24px', 
+          overflow: 'hidden'
+        }}>
+          <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
+            
+            {/* Top Verification Status Banner */}
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              p: 2.2,
+              borderRadius: '18px',
+              background: 'linear-gradient(135deg, #002970 0%, #0052cc 60%, #00BAF2 100%)',
+              color: '#FFFFFF',
+              boxShadow: '0 8px 24px rgba(0, 186, 242, 0.22)',
+              mb: 3
+            }}>
+              <Box sx={{
+                width: 48,
+                height: 48,
+                borderRadius: '14px',
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(6px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <VerifiedUserIcon sx={{ fontSize: 28, color: '#FFFFFF' }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontWeight: 900, fontSize: '1rem', color: '#FFFFFF', lineHeight: 1.2 }}>
+                  Identity & Bank Verification
+                </Typography>
+                <Typography sx={{ fontSize: '0.76rem', color: '#E0F2FE', mt: 0.3 }}>
+                  Required for payout settlements and account security
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        </CardContent>
-        {submitKYC.isPending && <LoadingComponent />}
-      </Card>
+
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" sx={{ color: '#0F172A', fontWeight: 900, mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Bank Settlement Account Details
+              </Typography>
+              <form style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                
+                <Box>
+                  <Typography variant="caption" sx={{ mb: 0.8, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Bank Beneficiary Name
+                  </Typography>
+                  <TextField
+                    name="accountName"
+                    value={formData.accountName}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Enter name exactly as printed in bank"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PaytmIconBadge>
+                            <PersonIcon />
+                          </PaytmIconBadge>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={modernInputStyles}
+                  />
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" sx={{ mb: 0.8, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Bank Account Number
+                  </Typography>
+                  <TextField
+                    name="account_number"
+                    value={formData.account_number}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Enter bank account number"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PaytmIconBadge>
+                            <AccountBalanceWalletIcon />
+                          </PaytmIconBadge>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={modernInputStyles}
+                  />
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" sx={{ mb: 0.8, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    IFSC / Branch Code
+                  </Typography>
+                  <TextField
+                    name="ifsc_code"
+                    value={formData.ifsc_code}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    placeholder="e.g. SBIN0001234"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PaytmIconBadge>
+                            <ConfirmationNumberIcon />
+                          </PaytmIconBadge>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={modernInputStyles}
+                  />
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" sx={{ mb: 0.8, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Bank Name & Branch
+                  </Typography>
+                  <TextField
+                    name="bank_name"
+                    value={formData.bank_name}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    placeholder="e.g. State Bank of India"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PaytmIconBadge>
+                            <AccountBalanceIcon />
+                          </PaytmIconBadge>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={modernInputStyles}
+                  />
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" sx={{ mb: 0.8, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    UPI ID (Optional for Instant Payout)
+                  </Typography>
+                  <TextField
+                    name="upi_id"
+                    value={formData.upi_id}
+                    onChange={handleInputChange}
+                    fullWidth
+                    variant="outlined"
+                    placeholder="e.g. yourname@upi"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PaytmIconBadge>
+                            <QrCodeIcon />
+                          </PaytmIconBadge>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={modernInputStyles}
+                  />
+                </Box>
+              </form>
+            </Box>
+
+            {/* KYC Documents */}
+            <Box sx={{ mt: 3.5 }}>
+              <Typography variant="subtitle2" sx={{ color: '#0F172A', fontWeight: 900, mb: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Upload Identity Documents
+              </Typography>
+              <Grid container spacing={2}>
+                {documentConfigs.map((config) => (
+                  <Grid item xs={12} key={config.key}>
+                    <DocumentUpload
+                      label={config.label}
+                      icon={config.icon}
+                      value={documents[config.key as keyof typeof documents]}
+                      onUpload={(file) => handleDocumentUpload(config.key, file)}
+                      onDelete={() => handleDocumentDelete(config.key)}
+                      uploading={uploadingDoc === config.key}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+
+              <Box mt={3.5}>
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    variant="contained"
+                    onClick={handleSubmit}
+                    disabled={submitKYC.isPending}
+                    fullWidth
+                    sx={{
+                      background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+                      color: '#FFFFFF',
+                      padding: '14px',
+                      fontWeight: 900,
+                      fontSize: '1rem',
+                      borderRadius: '14px',
+                      textTransform: 'none',
+                      boxShadow: '0 8px 20px rgba(0, 186, 242, 0.35)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #0082CD 0%, #0052cc 100%)',
+                        boxShadow: '0 10px 24px rgba(0, 186, 242, 0.45)',
+                      },
+                      '&:disabled': {
+                        bgcolor: '#CBD5E1',
+                        color: '#94A3B8'
+                      },
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {submitKYC.isPending ? 'Submitting KYC...' : 'Submit KYC Verification'}
+                  </Button>
+                </motion.div>
+              </Box>
+            </Box>
+          </CardContent>
+          {submitKYC.isPending && <LoadingComponent />}
+        </Card>
+      </motion.div>
     </Box>
   );
 };

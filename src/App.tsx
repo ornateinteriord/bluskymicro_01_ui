@@ -150,9 +150,9 @@ const MISPayMaturity = lazy(() => import("./pages/Admin-Pages/Banking/MIS/MISPay
 const UserDashboard = lazy(
   () => import("./pages/User-Pages/UserDashboard/Dashboard")
 );
-const UserPortfolio = lazy(
-  () => import("./pages/User-Pages/Portfolio/Portfolio")
-);
+// const UserPortfolio = lazy(
+//   () => import("./pages/User-Pages/Portfolio/Portfolio")
+// );
 const LoadFundPage = lazy(() => import("./pages/User-Pages/UserDashboard/LoadFundPage"));
 const NewSubscription = lazy(() => import("./pages/User-Pages/UserDashboard/NewSubscription"));
 const MySubscriptions = lazy(() => import("./pages/User-Pages/UserDashboard/MySubscriptions"));
@@ -217,6 +217,7 @@ const UserSupportChat = lazy(() => import("./pages/User-Pages/SupportChat/Suppor
 const UserChat = lazy(() => import("./pages/User-Pages/Chat/Chat"));
 const UserOverdraft = lazy(() => import("./pages/User-Pages/Overdraft/Overdraft"));
 const UserAccountOpening = lazy(() => import("./pages/User-Pages/AccountOpening/AccountOpening"));
+const UserEcashScanner = lazy(() => import("./pages/User-Pages/Scanner/EcashScanner"));
 
 
 
@@ -253,8 +254,8 @@ const ShouldHideSidebar = () => {
 
 const ShouldHideNavbar = () => {
   const location = useLocation();
-  // Comment out login from nav bar - hide navbar on public/auth pages
-  const noNavbarPaths = ["/", "/about", "/contact", "/services", "/gallery", "/login", "/register", "/recover-password", "/reset-password", "/forgot-password"];
+  // Hide navbar on public/auth pages and user dashboard for plain screen experience
+  const noNavbarPaths = ["/", "/about", "/contact", "/services", "/gallery", "/login", "/register", "/recover-password", "/reset-password", "/forgot-password", "/user/dashboard"];
   return noNavbarPaths.includes(location.pathname);
 };
 
@@ -532,7 +533,7 @@ const RoutesProvider = ({
 
             <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
               <Route path="/user/dashboard" element={<UserDashboard />} />
-              <Route path="/user/portfolio" element={<UserPortfolio />} />
+              {/* <Route path="/user/portfolio" element={<UserPortfolio />} /> */}
               <Route path="/user/load-fund" element={<LoadFundPage />} />
               <Route path="/user/new-subscription" element={<NewSubscription />} />
               <Route path="/user/my-subscriptions" element={<MySubscriptions />} />
@@ -600,6 +601,9 @@ const RoutesProvider = ({
               <Route path="/user/upgrade-wallet" element={<UserUpgradeWallet />} />
               <Route path="/user/transfer" element={<UserWalletTransfer />} />
               <Route path="/user/my-qr" element={<UserMyQR />} />
+              <Route path="/user/scanner" element={<UserEcashScanner />} />
+              <Route path="/user/scan-pay" element={<UserEcashScanner />} />
+              <Route path="/user/ecash-scanner" element={<UserEcashScanner />} />
               <Route path="/user/p2p-transfer" element={<UserP2PTransfer />} />
               <Route path="/user/top-up-wallet" element={<UserTopUpWallet />} />
               <Route path="/user/fixed-deposit-wallet" element={<UserFixedDepositWallet />} />

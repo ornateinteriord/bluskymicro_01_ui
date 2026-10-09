@@ -1,4 +1,4 @@
-import { Typography, Box, Paper, Button, Stack } from '@mui/material';
+import { Typography, Box, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -8,10 +8,6 @@ import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import SyncAltIcon from '@mui/icons-material/SyncAlt';
-import QrCode2Icon from '@mui/icons-material/QrCode2';
-import SendIcon from '@mui/icons-material/Send';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 import TokenService from '../../../api/token/tokenService';
 import { useGetWalletOverview, useGetMemberDetails } from '../../../api/Memeber';
@@ -21,14 +17,6 @@ const Portfolio = () => {
   const memberId = TokenService.getMemberId();
   const { data: walletOverview } = useGetWalletOverview(memberId);
   const { data: memberDetails } = useGetMemberDetails(memberId);
-
-  const quickAccessItems = [
-    { label: "Transfer", icon: <SyncAltIcon />, route: "/user/transfer", color: "#6D214F" },
-    { label: "Scan & Pay", icon: <QrCode2Icon />, route: "/user/my-qr", color: "#6D214F" },
-    { label: "P2P Transfer", icon: <SendIcon />, route: "/user/p2p-transfer", color: "#6D214F" },
-    { label: "Property Listings", icon: <InventoryIcon />, route: "/user/new-subscription", color: "#6D214F" },
-    { label: "My Certificates", icon: <ReceiptLongIcon />, route: "/user/my-subscriptions", color: "#6D214F" },
-  ];
 
   return (
     <Box sx={{
@@ -184,133 +172,412 @@ const Portfolio = () => {
         </Box>
       </Box>
 
-      {/* Quick Access Icons */}
-      <Box sx={{ mb: 4, width: '100%' }}>
-        <Typography variant="h6" sx={{ color: '#6D214F', fontWeight: 900, mb: 2.5, textAlign: 'center', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '1rem' }}>
-          Quick Services
+      {/* Brokerage Performance */}
+      <Box sx={{ mb: 4 }}>
+        <Typography sx={{ color: '#2d0f1e', fontWeight: 900, mb: 1.8, fontSize: { xs: '1.15rem', sm: '1.25rem' }, letterSpacing: '-0.3px' }}>
+          Brokerage Performance
         </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1.5 }}>
-          {quickAccessItems.map((item, i) => (
-            <Box key={i} onClick={() => navigate(item.route)} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, cursor: 'pointer', transition: 'all 0.2s', '&:hover': { transform: 'translateY(-2px)' } }}>
-              <Box sx={{ 
-                width: 56, 
-                height: 56, 
-                borderRadius: '18px', 
-                bgcolor: '#ffffff', 
-                color: '#6D214F',
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(109,33,79,0.06)',
-                border: '1.5px solid #f0d0d8',
-                transition: '0.2s',
-                '&:hover': { bgcolor: '#FFF8F0', borderColor: '#E5989B', boxShadow: '0 6px 18px rgba(109,33,79,0.12)' }
-              }}>
-                {item.icon}
-              </Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.72rem', textAlign: 'center', color: '#2d0f1e' }}>
-                {item.label}
+        
+        {/* Horizontal Scrollable Brokerage Performance Cards */}
+        <Box sx={{
+          display: 'flex',
+          overflowX: 'auto',
+          gap: 2,
+          pb: 1,
+          pt: 0.5,
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          '&::-webkit-scrollbar': { display: 'none' },
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
+          {/* 1. My Agents Card */}
+          <Box 
+            onClick={() => navigate('/user/team')}
+            sx={{
+              flex: { xs: '0 0 calc(50% - 8px)', sm: '0 0 200px' },
+              minWidth: { xs: '155px', sm: '190px' },
+              scrollSnapAlign: 'start',
+              borderRadius: '24px',
+              background: 'linear-gradient(180deg, #EFF6FF 0%, #DBEAFE 100%)',
+              border: '1.5px solid #BFDBFE',
+              p: { xs: 2, sm: 2.5 },
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '200px',
+              boxShadow: '0 8px 20px rgba(59, 130, 246, 0.08)',
+              transition: 'all 0.25s ease',
+              '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 12px 28px rgba(59, 130, 246, 0.16)' }
+            }}
+          >
+            <Box>
+              <Typography sx={{ color: '#1e3a8a', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.1rem' }, lineHeight: 1.25, mb: 0.3 }}>
+                My Agents
+              </Typography>
+              <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
+                Total network team
               </Typography>
             </Box>
-          ))}
+
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255,255,255,0.9)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(30, 58, 138, 0.1)',
+                mb: 1.2
+              }}>
+                <GroupsIcon sx={{ fontSize: 28, color: '#2563eb' }} />
+              </Box>
+              <Box sx={{
+                bgcolor: '#ffffff',
+                border: '1.5px solid #bfdbfe',
+                borderRadius: '12px',
+                py: 0.6,
+                px: 1.5,
+                width: '100%',
+                textAlign: 'center',
+                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)'
+              }}>
+                <Typography sx={{ fontWeight: 900, color: '#1e3a8a', fontSize: '1.3rem', lineHeight: 1 }}>
+                  {Math.max(memberDetails?.registration_stats?.total || 0, memberDetails?.total_team || 0)}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* 2. Direct Clients Card */}
+          <Box 
+            onClick={() => navigate('/user/team/direct')}
+            sx={{
+              flex: { xs: '0 0 calc(50% - 8px)', sm: '0 0 200px' },
+              minWidth: { xs: '155px', sm: '190px' },
+              scrollSnapAlign: 'start',
+              borderRadius: '24px',
+              background: 'linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%)',
+              border: '1.5px solid #FED7AA',
+              p: { xs: 2, sm: 2.5 },
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '200px',
+              boxShadow: '0 8px 20px rgba(234, 88, 12, 0.08)',
+              transition: 'all 0.25s ease',
+              '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 12px 28px rgba(234, 88, 12, 0.16)' }
+            }}
+          >
+            <Box>
+              <Typography sx={{ color: '#7c2d12', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.1rem' }, lineHeight: 1.25, mb: 0.3 }}>
+                Direct Clients
+              </Typography>
+              <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
+                Direct sponsored
+              </Typography>
+            </Box>
+
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255,255,255,0.9)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(124, 45, 18, 0.1)',
+                mb: 1.2
+              }}>
+                <PersonAddAltIcon sx={{ fontSize: 28, color: '#ea580c' }} />
+              </Box>
+              <Box sx={{
+                bgcolor: '#ffffff',
+                border: '1.5px solid #fed7aa',
+                borderRadius: '12px',
+                py: 0.6,
+                px: 1.5,
+                width: '100%',
+                textAlign: 'center',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.1)'
+              }}>
+                <Typography sx={{ fontWeight: 900, color: '#7c2d12', fontSize: '1.3rem', lineHeight: 1 }}>
+                  {Math.max(memberDetails?.registration_stats?.direct || 0, memberDetails?.direct_referrals?.length || 0)}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
         </Box>
       </Box>
 
-      {/* Brokerage Performance */}
+      {/* Earnings Summary - Horizontal Scrollable Cards */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h6" sx={{ color: '#6D214F', fontWeight: 900, mb: 2, fontSize: '1rem', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-          Brokerage Performance
-        </Typography>
-        <Paper elevation={0} sx={{ p: 3, borderRadius: '22px', bgcolor: '#ffffff', border: '1.5px solid #f0d0d8', boxShadow: '0 4px 16px rgba(109,33,79,0.06)' }}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <Box 
-              onClick={() => navigate('/user/team')}
-              sx={{ textAlign: 'center', cursor: 'pointer', '&:hover': { opacity: 0.8 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-            >
-              <GroupsIcon sx={{ fontSize: 32, color: '#6D214F', mb: 0.5 }} />
-              <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '11px' }}>My Agents</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#6D214F', mt: 0.5 }}>{Math.max(memberDetails?.registration_stats?.total || 0, memberDetails?.total_team || 0)}</Typography>
-            </Box>
-            <Box 
-              onClick={() => navigate('/user/team/direct')}
-              sx={{ textAlign: 'center', borderLeft: '1.5px solid #f0d0d8', cursor: 'pointer', '&:hover': { opacity: 0.8 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-            >
-              <PersonAddAltIcon sx={{ fontSize: 32, color: '#E5989B', mb: 0.5 }} />
-              <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '11px' }}>Direct Clients</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#6D214F', mt: 0.5 }}>{Math.max(memberDetails?.registration_stats?.direct || 0, memberDetails?.direct_referrals?.length || 0)}</Typography>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-
-      {/* Earnings Cards */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Typography variant="h6" sx={{ color: '#6D214F', fontWeight: 900, mb: 0.5, fontSize: '1rem', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+        <Typography sx={{ color: '#2d0f1e', fontWeight: 900, mb: 1.8, fontSize: { xs: '1.15rem', sm: '1.25rem' }, letterSpacing: '-0.3px' }}>
           Earnings Summary
         </Typography>
-        <Paper elevation={0} sx={{ p: 2.5, borderRadius: '22px', bgcolor: '#ffffff', border: '1.5px solid #f0d0d8', boxShadow: '0 4px 16px rgba(109,33,79,0.06)', width: '100%' }}>
-          <Stack spacing={2}>
-            <Box onClick={() => navigate('/user/earnings/referral-bonus')} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: '#fdf2f4' } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ p: 1, borderRadius: '12px', bgcolor: 'rgba(109, 33, 79, 0.12)', display: 'flex' }}>
-                  <PaymentsIcon sx={{ fontSize: 24, color: '#6D214F' }} />
-                </Box>
-                <Box>
-                  <Typography sx={{ color: '#2d0f1e', fontWeight: 800, fontSize: '0.92rem' }}>Referral Commission</Typography>
-                  <Typography variant="caption" sx={{ color: '#8c6b7d', fontSize: '11px' }}>Instant bonus earnings</Typography>
-                </Box>
-              </Box>
-              <Typography sx={{ color: '#6D214F', fontWeight: 900, fontSize: '1.1rem' }}>
-                ₹{Number(walletOverview?.directBenefits || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+        {/* Scrollable Container */}
+        <Box sx={{
+          display: 'flex',
+          overflowX: 'auto',
+          gap: 2,
+          pb: 1.5,
+          pt: 0.5,
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          '&::-webkit-scrollbar': { display: 'none' },
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
+          {/* Card 1: Referral Commission (Mint Green) */}
+          <Box
+            onClick={() => navigate('/user/earnings/referral-bonus')}
+            sx={{
+              flex: { xs: '0 0 200px', sm: '0 0 225px' },
+              minWidth: { xs: '200px', sm: '225px' },
+              scrollSnapAlign: 'start',
+              borderRadius: '24px',
+              background: 'linear-gradient(180deg, #E8F8F0 0%, #D5F5E3 100%)',
+              border: '1.5px solid #B7E8D6',
+              p: 2.5,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '235px',
+              boxShadow: '0 8px 20px rgba(16, 185, 129, 0.08)',
+              transition: 'all 0.25s ease',
+              '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 12px 28px rgba(16, 185, 129, 0.16)' }
+            }}
+          >
+            <Box>
+              <Typography sx={{ color: '#064e3b', fontWeight: 900, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.4 }}>
+                Referral Commission
+              </Typography>
+              <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
+                Instant bonus earnings
               </Typography>
             </Box>
 
-            <Box onClick={() => navigate('/user/earnings/level-benefits')} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: '#fdf2f4' } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ p: 1, borderRadius: '12px', bgcolor: 'rgba(229, 152, 155, 0.25)', display: 'flex' }}>
-                  <AccountTreeIcon sx={{ fontSize: 24, color: '#6D214F' }} />
-                </Box>
-                <Box>
-                  <Typography sx={{ color: '#2d0f1e', fontWeight: 800, fontSize: '0.92rem' }}>Brokerage Override</Typography>
-                  <Typography variant="caption" sx={{ color: '#8c6b7d', fontSize: '11px' }}>Level based progression</Typography>
-                </Box>
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255,255,255,0.92)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(6, 78, 59, 0.1)',
+                mb: 1.5
+              }}>
+                <PaymentsIcon sx={{ fontSize: 30, color: '#059669' }} />
               </Box>
-              <Typography sx={{ color: '#6D214F', fontWeight: 900, fontSize: '1.1rem' }}>
-                ₹{Number(walletOverview?.levelBenefits || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <Box sx={{
+                bgcolor: '#ffffff',
+                border: '1.5px solid #a7f3d0',
+                borderRadius: '14px',
+                py: 0.8,
+                px: 1.5,
+                width: '100%',
+                textAlign: 'center',
+                boxShadow: '0 3px 10px rgba(5, 150, 105, 0.1)'
+              }}>
+                <Typography sx={{ color: '#065f46', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.3px' }}>
+                  ₹{Number(walletOverview?.directBenefits || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Card 2: Brokerage Override (Warm Gold / Butter) */}
+          <Box
+            onClick={() => navigate('/user/earnings/level-benefits')}
+            sx={{
+              flex: { xs: '0 0 200px', sm: '0 0 225px' },
+              minWidth: { xs: '200px', sm: '225px' },
+              scrollSnapAlign: 'start',
+              borderRadius: '24px',
+              background: 'linear-gradient(180deg, #FEF9E7 0%, #FEF3C7 100%)',
+              border: '1.5px solid #FDE68A',
+              p: 2.5,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '235px',
+              boxShadow: '0 8px 20px rgba(217, 119, 6, 0.08)',
+              transition: 'all 0.25s ease',
+              '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 12px 28px rgba(217, 119, 6, 0.16)' }
+            }}
+          >
+            <Box>
+              <Typography sx={{ color: '#78350f', fontWeight: 900, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.4 }}>
+                Brokerage Override
+              </Typography>
+              <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
+                Level based progression
               </Typography>
             </Box>
 
-            <Box onClick={() => navigate('/user/earnings/single-level-income-history')} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: '#fdf2f4' } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ p: 1, borderRadius: '12px', bgcolor: 'rgba(244, 201, 93, 0.25)', display: 'flex' }}>
-                  <TrendingUpIcon sx={{ fontSize: 24, color: '#6D214F' }} />
-                </Box>
-                <Box>
-                  <Typography sx={{ color: '#2d0f1e', fontWeight: 800, fontSize: '0.92rem' }}>Direct Commission</Typography>
-                  <Typography variant="caption" sx={{ color: '#8c6b7d', fontSize: '11px' }}>Single-leg structure</Typography>
-                </Box>
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255,255,255,0.92)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(120, 53, 15, 0.1)',
+                mb: 1.5
+              }}>
+                <AccountTreeIcon sx={{ fontSize: 30, color: '#d97706' }} />
               </Box>
-              <Typography sx={{ color: '#6D214F', fontWeight: 900, fontSize: '1.1rem' }}>
-                ₹{Number((parseFloat(walletOverview?.singleLineIncome) || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <Box sx={{
+                bgcolor: '#ffffff',
+                border: '1.5px solid #fde68a',
+                borderRadius: '14px',
+                py: 0.8,
+                px: 1.5,
+                width: '100%',
+                textAlign: 'center',
+                boxShadow: '0 3px 10px rgba(217, 119, 6, 0.1)'
+              }}>
+                <Typography sx={{ color: '#92400e', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.3px' }}>
+                  ₹{Number(walletOverview?.levelBenefits || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Card 3: Direct Commission (Soft Coral / Rose) */}
+          <Box
+            onClick={() => navigate('/user/earnings/single-level-income-history')}
+            sx={{
+              flex: { xs: '0 0 200px', sm: '0 0 225px' },
+              minWidth: { xs: '200px', sm: '225px' },
+              scrollSnapAlign: 'start',
+              borderRadius: '24px',
+              background: 'linear-gradient(180deg, #FDF2F4 0%, #FEE2E2 100%)',
+              border: '1.5px solid #FECACA',
+              p: 2.5,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '235px',
+              boxShadow: '0 8px 20px rgba(225, 29, 72, 0.08)',
+              transition: 'all 0.25s ease',
+              '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 12px 28px rgba(225, 29, 72, 0.16)' }
+            }}
+          >
+            <Box>
+              <Typography sx={{ color: '#881337', fontWeight: 900, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.4 }}>
+                Direct Commission
+              </Typography>
+              <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
+                Single-leg structure
               </Typography>
             </Box>
 
-            <Box onClick={() => navigate('/user/transactions?type=Withdrawal')} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: '#fdf2f4' } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ p: 1, borderRadius: '12px', bgcolor: 'rgba(109, 33, 79, 0.12)', display: 'flex' }}>
-                  <AttachMoneyIcon sx={{ fontSize: 24, color: '#6D214F' }} />
-                </Box>
-                <Box>
-                  <Typography sx={{ color: '#2d0f1e', fontWeight: 800, fontSize: '0.92rem' }}>Total Withdrawal</Typography>
-                  <Typography variant="caption" sx={{ color: '#8c6b7d', fontSize: '11px' }}>Processed payouts</Typography>
-                </Box>
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255,255,255,0.92)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(136, 19, 55, 0.1)',
+                mb: 1.5
+              }}>
+                <TrendingUpIcon sx={{ fontSize: 30, color: '#e11d48' }} />
               </Box>
-              <Typography sx={{ color: '#6D214F', fontWeight: 900, fontSize: '1.1rem' }}>
-                ₹{Number(walletOverview?.totalWithdrawal || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <Box sx={{
+                bgcolor: '#ffffff',
+                border: '1.5px solid #fecaca',
+                borderRadius: '14px',
+                py: 0.8,
+                px: 1.5,
+                width: '100%',
+                textAlign: 'center',
+                boxShadow: '0 3px 10px rgba(225, 29, 72, 0.1)'
+              }}>
+                <Typography sx={{ color: '#9f1239', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.3px' }}>
+                  ₹{Number((parseFloat(walletOverview?.singleLineIncome) || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Card 4: Total Withdrawal (Soft Lavender / Plum) */}
+          <Box
+            onClick={() => navigate('/user/transactions?type=Withdrawal')}
+            sx={{
+              flex: { xs: '0 0 200px', sm: '0 0 225px' },
+              minWidth: { xs: '200px', sm: '225px' },
+              scrollSnapAlign: 'start',
+              borderRadius: '24px',
+              background: 'linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 100%)',
+              border: '1.5px solid #DDD6FE',
+              p: 2.5,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '235px',
+              boxShadow: '0 8px 20px rgba(109, 33, 79, 0.08)',
+              transition: 'all 0.25s ease',
+              '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 12px 28px rgba(109, 33, 79, 0.16)' }
+            }}
+          >
+            <Box>
+              <Typography sx={{ color: '#4c1d95', fontWeight: 900, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.4 }}>
+                Total Withdrawal
+              </Typography>
+              <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
+                Processed payouts
               </Typography>
             </Box>
-          </Stack>
-        </Paper>
+
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255,255,255,0.92)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(76, 29, 149, 0.1)',
+                mb: 1.5
+              }}>
+                <AttachMoneyIcon sx={{ fontSize: 30, color: '#7c3aed' }} />
+              </Box>
+              <Box sx={{
+                bgcolor: '#ffffff',
+                border: '1.5px solid #ddd6fe',
+                borderRadius: '14px',
+                py: 0.8,
+                px: 1.5,
+                width: '100%',
+                textAlign: 'center',
+                boxShadow: '0 3px 10px rgba(124, 58, 237, 0.1)'
+              }}>
+                <Typography sx={{ color: '#5b21b6', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.3px' }}>
+                  ₹{Number(walletOverview?.totalWithdrawal || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

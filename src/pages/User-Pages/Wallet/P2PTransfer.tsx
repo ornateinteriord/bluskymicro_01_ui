@@ -5,6 +5,7 @@ import { useGetWalletOverview, useGetMemberDetails, useLookupMemberForTransfer, 
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { motion } from 'framer-motion';
 import jsQR from 'jsqr';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
@@ -432,8 +433,8 @@ const P2PTransfer: React.FC = () => {
                     mx: 'auto',
                     borderRadius: '24px',
                     overflow: 'hidden',
-                    border: '3px solid #6D214F',
-                    boxShadow: '0 10px 30px rgba(109, 33, 79, 0.2)',
+                    border: '2px solid #00BAF2',
+                    boxShadow: '0 0 25px rgba(0, 186, 242, 0.25)',
                     position: 'relative',
                     bgcolor: '#000',
                     display: 'flex',
@@ -443,9 +444,38 @@ const P2PTransfer: React.FC = () => {
                 >
                   <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+                  {/* Laser Line Scanning Animation */}
+                  <motion.div
+                    animate={{
+                      top: ['5%', '90%', '5%'],
+                    }}
+                    transition={{
+                      duration: 2.2,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                    style={{
+                      position: 'absolute',
+                      left: '6%',
+                      right: '6%',
+                      height: '3px',
+                      background: 'linear-gradient(90deg, transparent 0%, #00BAF2 50%, transparent 100%)',
+                      boxShadow: '0 0 16px 3px #00BAF2',
+                      borderRadius: '50%',
+                      zIndex: 2,
+                    }}
+                  />
+
+                  {/* Corner Brackets */}
+                  <Box sx={{ position: 'absolute', top: 0, left: 0, width: 28, height: 28, borderTop: '4px solid #00BAF2', borderLeft: '4px solid #00BAF2', borderTopLeftRadius: '14px', zIndex: 2 }} />
+                  <Box sx={{ position: 'absolute', top: 0, right: 0, width: 28, height: 28, borderTop: '4px solid #00BAF2', borderRight: '4px solid #00BAF2', borderTopRightRadius: '14px', zIndex: 2 }} />
+                  <Box sx={{ position: 'absolute', bottom: 0, left: 0, width: 28, height: 28, borderBottom: '4px solid #00BAF2', borderLeft: '4px solid #00BAF2', borderBottomLeftRadius: '14px', zIndex: 2 }} />
+                  <Box sx={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderBottom: '4px solid #00BAF2', borderRight: '4px solid #00BAF2', borderBottomRightRadius: '14px', zIndex: 2 }} />
+
                   {lookupMutation.isPending && (
-                    <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CircularProgress sx={{ color: '#F4C95D' }} />
+                    <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
+                      <CircularProgress sx={{ color: '#00BAF2' }} />
                     </Box>
                   )}
                 </Box>

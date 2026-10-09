@@ -121,7 +121,7 @@ const Sidebar = ({ isOpen, onClose, role }: { isOpen: boolean, onClose: () => vo
                   marginTop: '0px',
                 } : { fontWeight: 'bold' }}>
                   {fethedUser?.Name || name}
-                  {isNidhiRole && <><br />ID: {fethedUser?.Member_id || fethedUser?.member_id || fethedUser?.username || fethedUser?.id || ''}</>}
+                  {isNidhiRole && <><br />ID: {fethedUser?.member_code || fethedUser?.Member_id || fethedUser?.member_id || fethedUser?.username || ''}</>}
                 </Typography>
               </div>
             </div>
