@@ -172,10 +172,10 @@ const Portfolio = () => {
         </Box>
       </Box>
 
-      {/* Brokerage Performance */}
+      {/* Team Performance */}
       <Box sx={{ mb: 4 }}>
         <Typography sx={{ color: '#2d0f1e', fontWeight: 900, mb: 1.8, fontSize: { xs: '1.15rem', sm: '1.25rem' }, letterSpacing: '-0.3px' }}>
-          Brokerage Performance
+          Team Performance
         </Typography>
         
         {/* Horizontal Scrollable Brokerage Performance Cards */}
@@ -214,7 +214,7 @@ const Portfolio = () => {
           >
             <Box>
               <Typography sx={{ color: '#1e3a8a', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.1rem' }, lineHeight: 1.25, mb: 0.3 }}>
-                My Agents
+                My Member
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
                 Total network team
@@ -252,7 +252,7 @@ const Portfolio = () => {
             </Box>
           </Box>
 
-          {/* 2. Direct Clients Card */}
+          {/* 2. My Direct Card */}
           <Box 
             onClick={() => navigate('/user/team/direct')}
             sx={{
@@ -275,7 +275,7 @@ const Portfolio = () => {
           >
             <Box>
               <Typography sx={{ color: '#7c2d12', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.1rem' }, lineHeight: 1.25, mb: 0.3 }}>
-                Direct Clients
+                My Direct
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
                 Direct sponsored
@@ -418,7 +418,7 @@ const Portfolio = () => {
           >
             <Box>
               <Typography sx={{ color: '#78350f', fontWeight: 900, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.4 }}>
-                Brokerage Override
+                Level Bonus
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
                 Level based progression
@@ -456,7 +456,7 @@ const Portfolio = () => {
             </Box>
           </Box>
 
-          {/* Card 3: Direct Commission (Soft Coral / Rose) */}
+          {/* Card 3: Daily Incentive */}
           <Box
             onClick={() => navigate('/user/earnings/single-level-income-history')}
             sx={{
@@ -479,7 +479,7 @@ const Portfolio = () => {
           >
             <Box>
               <Typography sx={{ color: '#881337', fontWeight: 900, fontSize: '1.05rem', lineHeight: 1.3, mb: 0.4 }}>
-                Direct Commission
+                Daily Incentive
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '11px', fontWeight: 600 }}>
                 Single-leg structure

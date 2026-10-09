@@ -23,6 +23,8 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { toast } from 'react-toastify';
 
 import TokenService from '../../../api/token/tokenService';
@@ -241,7 +243,7 @@ const UserDashboard = () => {
     {
       title: "PROFILE & SECURITY",
       items: [
-        { label: "My Profile", icon: <AccountCircleIcon />, route: "/user/account/profile", color: '#2563EB' },
+        { label: "Profile", icon: <AccountCircleIcon />, route: "/user/account/profile", color: '#2563EB' },
         { label: "KYC Verify", icon: <VerifiedUserIcon />, route: "/user/account/kyc", color: "#0D9488" },
         { label: "Security", icon: <LockIcon />, route: "/user/account/change-password", color: "#EA580C" },
       ]
@@ -258,8 +260,8 @@ const UserDashboard = () => {
     { label: "Transfer", icon: <SyncAltIcon />, route: "/user/transfer", color: "#6D214F" },
     { label: "Scan & Pay", icon: <QrCode2Icon />, route: "/user/my-qr", color: "#6D214F" },
     { label: "P2P Transfer", icon: <SendIcon />, route: "/user/p2p-transfer", color: "#6D214F" },
-    { label: "Property Listings", icon: <InventoryIcon />, route: "/user/new-subscription", color: "#6D214F" },
-    { label: "My Certificates", icon: <ReceiptLongIcon />, route: "/user/my-subscriptions", color: "#6D214F" },
+    { label: "New Subscription", icon: <InventoryIcon />, route: "/user/new-subscription", color: "#6D214F" },
+    { label: "My Subscription", icon: <ReceiptLongIcon />, route: "/user/my-subscriptions", color: "#6D214F" },
   ];
 
   return (
@@ -418,7 +420,7 @@ const UserDashboard = () => {
           </Box>
         </Box>
 
-        {/* Middle Section: Member ID (Left) & User ID (Right) */}
+        {/* Middle Section: Login ID (Left) & User ID (Right) */}
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -428,7 +430,7 @@ const UserDashboard = () => {
         }}>
           <Box>
             <Typography sx={{ color: '#E5989B', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>
-              Member ID
+              Login ID
             </Typography>
             <Typography sx={{ 
               fontFamily: 'monospace', 
@@ -459,10 +461,10 @@ const UserDashboard = () => {
           </Box>
         </Box>
 
-        {/* Bottom Section: Member Name */}
+        {/* Bottom Section: Name */}
         <Box sx={{ zIndex: 1 }}>
           <Typography sx={{ color: '#E5989B', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
-            Member Name
+            Name
           </Typography>
           <Typography sx={{ 
             fontSize: { xs: '1rem', sm: '1.1rem' }, 
@@ -479,7 +481,7 @@ const UserDashboard = () => {
 
       {/* Profile Settings (Quick Access Grid) immediately after Card */}
       <Box sx={{ mb: 4, width: '100%' }}>
-        <Typography variant="h6" sx={{ color: '#6D214F', fontWeight: 900, mb: 2.5, textAlign: 'center', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '1rem' }}>
+        <Typography sx={{ color: '#6D214F', fontWeight: 900, mb: 2, textAlign: 'left', px: 0.5, letterSpacing: '1px', textTransform: 'uppercase', fontSize: '1rem' }}>
           Profile Settings
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: { xs: 1.5, sm: 2.5 } }}>
@@ -956,10 +958,10 @@ const UserDashboard = () => {
         </Paper>
       </Box>
 
-      {/* Brokerage Performance */}
+      {/* Team Performance */}
       <Box sx={{ mb: 3.5 }}>
         <Typography sx={{ color: '#2d0f1e', fontWeight: 900, mb: 1.4, fontSize: { xs: '1rem', sm: '1.15rem' }, letterSpacing: '-0.3px' }}>
-          Brokerage Performance
+          Team Performance
         </Typography>
         
         {/* Compact Brokerage Performance Cards */}
@@ -975,49 +977,49 @@ const UserDashboard = () => {
           scrollbarWidth: 'none',
           msOverflowStyle: 'none'
         }}>
-          {/* 1. My Agents Card */}
-          <Box 
+          {/* 1. My Member Card */}
+          <Box
             onClick={() => navigate('/user/team')}
             sx={{
-              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 150px' },
-              minWidth: { xs: '105px', sm: '130px' },
+              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 160px' },
+              minWidth: { xs: '115px', sm: '135px' },
               scrollSnapAlign: 'start',
-              borderRadius: { xs: '18px', sm: '20px' },
+              borderRadius: { xs: '20px', sm: '22px' },
               background: 'linear-gradient(180deg, #EFF6FF 0%, #DBEAFE 100%)',
               border: '1px solid #BFDBFE',
-              p: { xs: 1.2, sm: 1.6 },
+              p: { xs: 1.4, sm: 1.8 },
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: { xs: '145px', sm: '165px' },
+              minHeight: { xs: '165px', sm: '185px' },
               boxShadow: '0 4px 14px rgba(59, 130, 246, 0.08)',
               transition: 'all 0.2s ease',
               '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 18px rgba(59, 130, 246, 0.14)' }
             }}
           >
             <Box>
-              <Typography sx={{ color: '#1e3a8a', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.88rem' }, lineHeight: 1.2, mb: 0.2 }}>
-                My Agents
+              <Typography sx={{ color: '#1e3a8a', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2, mb: 0.2 }}>
+                My Member
               </Typography>
               <Typography sx={{ color: '#64748b', fontSize: '9.5px', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
                 Total network
               </Typography>
             </Box>
 
-            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Box sx={{
-                width: { xs: 34, sm: 40 },
-                height: { xs: 34, sm: 40 },
-                borderRadius: '50%',
-                bgcolor: 'rgba(255,255,255,0.92)',
+                width: { xs: 52, sm: 62 },
+                height: { xs: 52, sm: 62 },
+                borderRadius: '18px',
+                bgcolor: 'rgba(255,255,255,0.7)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(30, 58, 138, 0.08)',
-                mb: 0.8
+                mb: 1,
+                boxShadow: '0 4px 12px rgba(30, 58, 138, 0.06)'
               }}>
-                <GroupsIcon sx={{ fontSize: { xs: 18, sm: 22 }, color: '#2563eb' }} />
+                <GroupsIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#2563eb' }} />
               </Box>
               <Box sx={{
                 bgcolor: '#ffffff',
@@ -1036,49 +1038,49 @@ const UserDashboard = () => {
             </Box>
           </Box>
 
-          {/* 2. Direct Clients Card */}
+          {/* 2. My Direct Card */}
           <Box 
             onClick={() => navigate('/user/team/direct')}
             sx={{
-              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 150px' },
-              minWidth: { xs: '105px', sm: '130px' },
+              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 160px' },
+              minWidth: { xs: '115px', sm: '135px' },
               scrollSnapAlign: 'start',
-              borderRadius: { xs: '18px', sm: '20px' },
+              borderRadius: { xs: '20px', sm: '22px' },
               background: 'linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%)',
               border: '1px solid #FED7AA',
-              p: { xs: 1.2, sm: 1.6 },
+              p: { xs: 1.4, sm: 1.8 },
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: { xs: '145px', sm: '165px' },
+              minHeight: { xs: '165px', sm: '185px' },
               boxShadow: '0 4px 14px rgba(234, 88, 12, 0.08)',
               transition: 'all 0.2s ease',
               '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 18px rgba(234, 88, 12, 0.14)' }
             }}
           >
             <Box>
-              <Typography sx={{ color: '#7c2d12', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.88rem' }, lineHeight: 1.2, mb: 0.2 }}>
-                Direct Clients
+              <Typography sx={{ color: '#7c2d12', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2, mb: 0.2 }}>
+                My Direct
               </Typography>
               <Typography sx={{ color: '#64748b', fontSize: '9.5px', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
                 Sponsored
               </Typography>
             </Box>
 
-            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Box sx={{
-                width: { xs: 34, sm: 40 },
-                height: { xs: 34, sm: 40 },
-                borderRadius: '50%',
-                bgcolor: 'rgba(255,255,255,0.92)',
+                width: { xs: 52, sm: 62 },
+                height: { xs: 52, sm: 62 },
+                borderRadius: '18px',
+                bgcolor: 'rgba(255,255,255,0.7)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(124, 45, 18, 0.08)',
-                mb: 0.8
+                mb: 1,
+                boxShadow: '0 4px 12px rgba(124, 45, 18, 0.06)'
               }}>
-                <PersonAddAltIcon sx={{ fontSize: { xs: 18, sm: 22 }, color: '#ea580c' }} />
+                <PersonAddAltIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#ea580c' }} />
               </Box>
               <Box sx={{
                 bgcolor: '#ffffff',
@@ -1122,25 +1124,25 @@ const UserDashboard = () => {
           <Box
             onClick={() => navigate('/user/earnings/referral-bonus')}
             sx={{
-              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 150px' },
-              minWidth: { xs: '105px', sm: '130px' },
+              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 160px' },
+              minWidth: { xs: '115px', sm: '135px' },
               scrollSnapAlign: 'start',
-              borderRadius: { xs: '18px', sm: '20px' },
+              borderRadius: { xs: '20px', sm: '22px' },
               background: 'linear-gradient(180deg, #E8F8F0 0%, #D5F5E3 100%)',
               border: '1px solid #B7E8D6',
-              p: { xs: 1.2, sm: 1.6 },
+              p: { xs: 1.4, sm: 1.8 },
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: { xs: '150px', sm: '170px' },
+              minHeight: { xs: '165px', sm: '185px' },
               boxShadow: '0 4px 14px rgba(16, 185, 129, 0.08)',
               transition: 'all 0.2s ease',
               '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 18px rgba(16, 185, 129, 0.14)' }
             }}
           >
             <Box>
-              <Typography sx={{ color: '#064e3b', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.86rem' }, lineHeight: 1.2, mb: 0.2 }}>
+              <Typography sx={{ color: '#064e3b', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2, mb: 0.2 }}>
                 Referral Bonus
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '9.5px', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
@@ -1148,19 +1150,19 @@ const UserDashboard = () => {
               </Typography>
             </Box>
 
-            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Box sx={{
-                width: { xs: 34, sm: 40 },
-                height: { xs: 34, sm: 40 },
-                borderRadius: '50%',
-                bgcolor: 'rgba(255,255,255,0.92)',
+                width: { xs: 52, sm: 62 },
+                height: { xs: 52, sm: 62 },
+                borderRadius: '18px',
+                bgcolor: 'rgba(255,255,255,0.7)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(6, 78, 59, 0.08)',
-                mb: 0.8
+                mb: 1,
+                boxShadow: '0 4px 12px rgba(6, 78, 59, 0.06)'
               }}>
-                <PaymentsIcon sx={{ fontSize: { xs: 18, sm: 22 }, color: '#059669' }} />
+                <PaymentsIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#059669' }} />
               </Box>
               <Box sx={{
                 bgcolor: '#ffffff',
@@ -1172,7 +1174,7 @@ const UserDashboard = () => {
                 textAlign: 'center',
                 boxShadow: '0 2px 6px rgba(5, 150, 105, 0.08)'
               }}>
-                <Typography sx={{ color: '#065f46', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography sx={{ color: '#065f46', fontWeight: 900, fontSize: { xs: '0.8rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   ₹{Number(walletOverview?.directBenefits || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </Typography>
               </Box>
@@ -1183,45 +1185,45 @@ const UserDashboard = () => {
           <Box
             onClick={() => navigate('/user/earnings/level-benefits')}
             sx={{
-              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 150px' },
-              minWidth: { xs: '105px', sm: '130px' },
+              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 160px' },
+              minWidth: { xs: '115px', sm: '135px' },
               scrollSnapAlign: 'start',
-              borderRadius: { xs: '18px', sm: '20px' },
+              borderRadius: { xs: '20px', sm: '22px' },
               background: 'linear-gradient(180deg, #FEF9E7 0%, #FEF3C7 100%)',
               border: '1px solid #FDE68A',
-              p: { xs: 1.2, sm: 1.6 },
+              p: { xs: 1.4, sm: 1.8 },
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: { xs: '150px', sm: '170px' },
+              minHeight: { xs: '165px', sm: '185px' },
               boxShadow: '0 4px 14px rgba(217, 119, 6, 0.08)',
               transition: 'all 0.2s ease',
               '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 18px rgba(217, 119, 6, 0.14)' }
             }}
           >
             <Box>
-              <Typography sx={{ color: '#78350f', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.86rem' }, lineHeight: 1.2, mb: 0.2 }}>
-                Brokerage Level
+              <Typography sx={{ color: '#78350f', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2, mb: 0.2 }}>
+                Level Bonus
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '9.5px', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
                 Level progression
               </Typography>
             </Box>
 
-            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Box sx={{
-                width: { xs: 34, sm: 40 },
-                height: { xs: 34, sm: 40 },
-                borderRadius: '50%',
-                bgcolor: 'rgba(255,255,255,0.92)',
+                width: { xs: 52, sm: 62 },
+                height: { xs: 52, sm: 62 },
+                borderRadius: '18px',
+                bgcolor: 'rgba(255,255,255,0.7)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(120, 53, 15, 0.08)',
-                mb: 0.8
+                mb: 1,
+                boxShadow: '0 4px 12px rgba(120, 53, 15, 0.06)'
               }}>
-                <AccountTreeIcon sx={{ fontSize: { xs: 18, sm: 22 }, color: '#d97706' }} />
+                <AccountTreeIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#d97706' }} />
               </Box>
               <Box sx={{
                 bgcolor: '#ffffff',
@@ -1233,7 +1235,7 @@ const UserDashboard = () => {
                 textAlign: 'center',
                 boxShadow: '0 2px 6px rgba(217, 119, 6, 0.08)'
               }}>
-                <Typography sx={{ color: '#92400e', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography sx={{ color: '#92400e', fontWeight: 900, fontSize: { xs: '0.8rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   ₹{Number(walletOverview?.levelBenefits || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </Typography>
               </Box>
@@ -1244,45 +1246,45 @@ const UserDashboard = () => {
           <Box
             onClick={() => navigate('/user/earnings/single-level-income-history')}
             sx={{
-              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 150px' },
-              minWidth: { xs: '105px', sm: '130px' },
+              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 160px' },
+              minWidth: { xs: '115px', sm: '135px' },
               scrollSnapAlign: 'start',
-              borderRadius: { xs: '18px', sm: '20px' },
+              borderRadius: { xs: '20px', sm: '22px' },
               background: 'linear-gradient(180deg, #FDF2F4 0%, #FEE2E2 100%)',
               border: '1px solid #FECACA',
-              p: { xs: 1.2, sm: 1.6 },
+              p: { xs: 1.4, sm: 1.8 },
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: { xs: '150px', sm: '170px' },
+              minHeight: { xs: '165px', sm: '185px' },
               boxShadow: '0 4px 14px rgba(225, 29, 72, 0.08)',
               transition: 'all 0.2s ease',
               '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 18px rgba(225, 29, 72, 0.14)' }
             }}
           >
             <Box>
-              <Typography sx={{ color: '#881337', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.86rem' }, lineHeight: 1.2, mb: 0.2 }}>
-                Single Leg
+              <Typography sx={{ color: '#881337', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2, mb: 0.2 }}>
+                Daily Incentive
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '9.5px', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
                 Structure earnings
               </Typography>
             </Box>
 
-            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Box sx={{
-                width: { xs: 34, sm: 40 },
-                height: { xs: 34, sm: 40 },
-                borderRadius: '50%',
-                bgcolor: 'rgba(255,255,255,0.92)',
+                width: { xs: 52, sm: 62 },
+                height: { xs: 52, sm: 62 },
+                borderRadius: '18px',
+                bgcolor: 'rgba(255,255,255,0.7)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(136, 19, 55, 0.08)',
-                mb: 0.8
+                mb: 1,
+                boxShadow: '0 4px 12px rgba(136, 19, 55, 0.06)'
               }}>
-                <TrendingUpIcon sx={{ fontSize: { xs: 18, sm: 22 }, color: '#e11d48' }} />
+                <TrendingUpIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#e11d48' }} />
               </Box>
               <Box sx={{
                 bgcolor: '#ffffff',
@@ -1294,7 +1296,7 @@ const UserDashboard = () => {
                 textAlign: 'center',
                 boxShadow: '0 2px 6px rgba(225, 29, 72, 0.08)'
               }}>
-                <Typography sx={{ color: '#9f1239', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography sx={{ color: '#9f1239', fontWeight: 900, fontSize: { xs: '0.8rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   ₹{Number((parseFloat(walletOverview?.singleLineIncome) || 0)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </Typography>
               </Box>
@@ -1305,25 +1307,25 @@ const UserDashboard = () => {
           <Box
             onClick={() => navigate('/user/transactions?type=Withdrawal')}
             sx={{
-              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 150px' },
-              minWidth: { xs: '105px', sm: '130px' },
+              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 160px' },
+              minWidth: { xs: '115px', sm: '135px' },
               scrollSnapAlign: 'start',
-              borderRadius: { xs: '18px', sm: '20px' },
+              borderRadius: { xs: '20px', sm: '22px' },
               background: 'linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 100%)',
               border: '1px solid #DDD6FE',
-              p: { xs: 1.2, sm: 1.6 },
+              p: { xs: 1.4, sm: 1.8 },
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: { xs: '150px', sm: '170px' },
+              minHeight: { xs: '165px', sm: '185px' },
               boxShadow: '0 4px 14px rgba(109, 33, 79, 0.08)',
               transition: 'all 0.2s ease',
               '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 18px rgba(109, 33, 79, 0.14)' }
             }}
           >
             <Box>
-              <Typography sx={{ color: '#4c1d95', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.86rem' }, lineHeight: 1.2, mb: 0.2 }}>
+              <Typography sx={{ color: '#4c1d95', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2, mb: 0.2 }}>
                 Withdrawals
               </Typography>
               <Typography sx={{ color: '#475569', fontSize: '9.5px', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
@@ -1331,19 +1333,19 @@ const UserDashboard = () => {
               </Typography>
             </Box>
 
-            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Box sx={{
-                width: { xs: 34, sm: 40 },
-                height: { xs: 34, sm: 40 },
-                borderRadius: '50%',
-                bgcolor: 'rgba(255,255,255,0.92)',
+                width: { xs: 52, sm: 62 },
+                height: { xs: 52, sm: 62 },
+                borderRadius: '18px',
+                bgcolor: 'rgba(255,255,255,0.7)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(76, 29, 149, 0.08)',
-                mb: 0.8
+                mb: 1,
+                boxShadow: '0 4px 12px rgba(76, 29, 149, 0.06)'
               }}>
-                <AttachMoneyIcon sx={{ fontSize: { xs: 18, sm: 22 }, color: '#7c3aed' }} />
+                <AttachMoneyIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#7c3aed' }} />
               </Box>
               <Box sx={{
                 bgcolor: '#ffffff',
@@ -1355,12 +1357,93 @@ const UserDashboard = () => {
                 textAlign: 'center',
                 boxShadow: '0 2px 6px rgba(124, 58, 237, 0.08)'
               }}>
-                <Typography sx={{ color: '#5b21b6', fontWeight: 900, fontSize: { xs: '0.78rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography sx={{ color: '#5b21b6', fontWeight: 900, fontSize: { xs: '0.8rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   ₹{Number(walletOverview?.totalWithdrawal || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </Typography>
               </Box>
             </Box>
           </Box>
+        </Box>
+      </Box>
+
+      {/* Re-Invest Section */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.4 }}>
+          <Typography sx={{ color: '#2d0f1e', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.15rem' }, letterSpacing: '-0.3px' }}>
+            Re-Invest
+          </Typography>
+        </Box>
+
+        {/* Single Re-Invest Container with Re-Invest Button Inside */}
+        <Box
+          sx={{
+            borderRadius: { xs: '20px', sm: '22px' },
+            background: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)',
+            border: '1.5px solid #BAE6FD',
+            p: { xs: 2, sm: 2.5 },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            boxShadow: '0 4px 16px rgba(0, 186, 242, 0.08)',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              boxShadow: '0 6px 20px rgba(0, 186, 242, 0.14)'
+            }
+          }}
+        >
+          {/* Left Side: Icon & Info */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
+            <Box sx={{
+              width: { xs: 46, sm: 52 },
+              height: { xs: 46, sm: 52 },
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0, 186, 242, 0.3)',
+              flexShrink: 0
+            }}>
+              <AccountBalanceWalletIcon sx={{ fontSize: { xs: 24, sm: 28 }, color: '#FFFFFF' }} />
+            </Box>
+            <Box>
+              <Typography sx={{ color: '#0369a1', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2 }}>
+                Re-Invest
+              </Typography>
+              <Typography sx={{ color: '#0284c7', fontWeight: 900, fontSize: { xs: '1.25rem', sm: '1.45rem' }, letterSpacing: '-0.3px', mt: 0.3 }}>
+                ₹{Number(walletOverview?.topUpBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Right Side: Re-Invest Button Inside Container */}
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => navigate('/user/new-subscription')}
+            startIcon={<AutorenewIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              fontSize: { xs: '0.8rem', sm: '0.88rem' },
+              borderRadius: '12px',
+              px: { xs: 2, sm: 2.8 },
+              py: { xs: 0.8, sm: 1 },
+              textTransform: 'none',
+              boxShadow: '0 3px 10px rgba(0, 186, 242, 0.35)',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #0082CD 0%, #0052cc 100%)',
+                boxShadow: '0 5px 14px rgba(0, 186, 242, 0.45)'
+              }
+            }}
+          >
+            Re-Invest
+          </Button>
         </Box>
       </Box>
 

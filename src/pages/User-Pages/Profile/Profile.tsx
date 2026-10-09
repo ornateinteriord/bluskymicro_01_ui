@@ -195,7 +195,7 @@ const Profile: React.FC = () => {
                     backdropFilter: 'blur(4px)'
                   }}>
                     <Typography variant="caption" sx={{ color: '#FCD34D', fontWeight: 800, letterSpacing: '1px' }}>
-                      MEMBER ID: {user?.member_code || user?.Member_id || 'N/A'}
+                      LOGIN ID: {user?.member_code || user?.Member_id || 'N/A'}
                     </Typography>
                   </Box>
                 </Box>

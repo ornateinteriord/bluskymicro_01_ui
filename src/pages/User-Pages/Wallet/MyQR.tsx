@@ -7,15 +7,10 @@ import {
   CircularProgress,
   Stack,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  List,
-  ListItemButton,
   Avatar,
-  Divider,
-  Chip,
   IconButton,
   InputAdornment,
 } from '@mui/material';
@@ -26,13 +21,14 @@ import {
   useLookupMemberForTransfer,
   useTransferP2PWallet,
 } from '../../../api/Memeber';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DownloadIcon from '@mui/icons-material/Download';
+import {
+  useRequestAddOnMutation,
+  useGetLoadFundConfig,
+  useUploadPaymentScreenshot,
+} from '../../../api/Packages';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import SendIcon from '@mui/icons-material/Send';
-import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import FlashOffIcon from '@mui/icons-material/FlashOff';
@@ -40,12 +36,16 @@ import FlipCameraIosIcon from '@mui/icons-material/FlipCameraIos';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PersonIcon from '@mui/icons-material/Person';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import { motion, AnimatePresence } from 'framer-motion';
 import jsQR from 'jsqr';
 import { toast } from 'react-toastify';
-import { get, post } from '../../../api/Api';
 import { jwtDecode } from 'jwt-decode';
 import TokenService from '../../../api/token/tokenService';
+import jeeScImage from '../../../assets/jee_sc.png';
 
 const decoder = (jsQR as any).default || jsQR;
 
@@ -62,6 +62,30 @@ const getCurrentUserId = () => {
   return '';
 };
 
+const PaytmIconBadge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Box
+    sx={{
+      width: 32,
+      height: 32,
+      borderRadius: '9px',
+      background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#FFFFFF',
+      boxShadow: '0 2px 6px rgba(0, 186, 242, 0.35)',
+      mr: 0.5,
+      flexShrink: 0,
+      '& svg': {
+        color: '#FFFFFF',
+        fontSize: 18,
+      },
+    }}
+  >
+    {children}
+  </Box>
+);
+
 const MyQR: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -71,8 +95,14 @@ const MyQR: React.FC = () => {
   const lookupMutation = useLookupMemberForTransfer();
   const transferMutation = useTransferP2PWallet();
 
-  // Active Tab: default to 'scanner' if ?tab=scan or on scan & pay route, else 'scanner'
-  const initialTab = searchParams.get('tab') === 'qr' ? 'my_qr' : 'scanner';
+  // Load Fund Mutations & Config
+  const requestAddOn = useRequestAddOnMutation();
+  const uploadScreenshot = useUploadPaymentScreenshot(currentUserId || '');
+  useGetLoadFundConfig();
+
+  // Active Tab: 'scanner' | 'my_qr'
+  const paramTab = searchParams.get('tab');
+  const initialTab: 'scanner' | 'my_qr' = paramTab === 'qr' ? 'my_qr' : 'scanner';
   const [activeTab, setActiveTab] = useState<'scanner' | 'my_qr'>(initialTab);
 
   // Scanner States
@@ -93,14 +123,13 @@ const MyQR: React.FC = () => {
   const [amount, setAmount] = useState<string>('');
   const [sourceWallet, setSourceWallet] = useState<'Top Up Wallet' | 'Earning Wallet'>('Top Up Wallet');
 
-  // Chat Share Modal State
-  const [shareOpen, setShareOpen] = useState(false);
-  const [chatRooms, setChatRooms] = useState<any[]>([]);
-  const [loadingRooms, setLoadingRooms] = useState(false);
-  const [searchMobile, setSearchMobile] = useState('');
-  const [searchingMember, setSearchingMember] = useState(false);
-  const [foundMember, setFoundMember] = useState<any>(null);
-  const [sendingRoomId, setSendingRoomId] = useState<string | null>(null);
+  // Load Fund / Deposit States (Transaction ID / UTR)
+  const [depositAmount, setDepositAmount] = useState<string>('');
+  const [depositTxNo, setDepositTxNo] = useState<string>('');
+  const [depositScreenshotFile, setDepositScreenshotFile] = useState<File | null>(null);
+  const [depositScreenshotPreview, setDepositScreenshotPreview] = useState<string | null>(null);
+  const [isDepositSubmitting, setIsDepositSubmitting] = useState<boolean>(false);
+  const depositFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const stopCamera = useCallback(() => {
     if (animFrameId.current) {
@@ -310,101 +339,55 @@ const MyQR: React.FC = () => {
     }
   };
 
-  // Share handlers
-  const handleOpenShare = async () => {
-    setShareOpen(true);
-    setLoadingRooms(true);
-    try {
-      const res = await get('/chat/rooms');
-      if (res.success) {
-        setChatRooms(res.data || []);
-      }
-    } catch (err) {
-      console.error('Failed to fetch chat rooms', err);
-    } finally {
-      setLoadingRooms(false);
+  // Load Fund / Deposit Submit Handler with Transaction ID
+  const handleDepositScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setDepositScreenshotFile(file);
+      setDepositScreenshotPreview(URL.createObjectURL(file));
     }
   };
 
-  const handleSearchMember = async () => {
-    if (!searchMobile.trim()) {
-      toast.error('Please enter a mobile number');
+  const handleDepositSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!depositAmount || isNaN(Number(depositAmount)) || Number(depositAmount) <= 0) {
+      toast.error('Please enter a valid deposit amount');
       return;
     }
-    setSearchingMember(true);
-    setFoundMember(null);
-    try {
-      const res = await get(`/chat/search-member?mobile=${encodeURIComponent(searchMobile.trim())}`);
-      if (res.success && res.data) {
-        const roomRes = await post('/chat/room', {
-          targetMemberId: res.data.Member_id || res.data.memberId || res.data.id,
-          targetRole: res.data.role || 'Member',
-        });
-        if (roomRes.success && roomRes.data) {
-          setFoundMember({
-            ...res.data,
-            chatRoom: roomRes.data,
-          });
-        }
-      } else {
-        toast.error('No member found with this mobile number');
-      }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Member not found');
-    } finally {
-      setSearchingMember(false);
+
+    if (!depositTxNo.trim()) {
+      toast.error('Please enter the UTR / Transaction Reference ID');
+      return;
     }
-  };
 
-  const handleSendQRToRoom = async (roomId: string, targetName: string) => {
-    const memberId = TokenService.getMemberId() || memberDetails?.Member_id || memberDetails?.member_id || 'UNKNOWN';
-    const memberName = memberDetails?.Name || memberDetails?.name || memberDetails?.username || 'Member';
-    const qrData = `Ecash-P2P:${memberId}`;
-    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&margin=10`;
+    if (!depositScreenshotFile) {
+      toast.error('Please upload your payment screenshot/receipt');
+      return;
+    }
 
-    setSendingRoomId(roomId);
     try {
-      const res = await post('/chat/message', {
-        roomId,
-        content: `Here is my Ecash P2P QR Code for transfers.\nMember: ${memberName}\nID: ${memberId}`,
-        attachments: [qrImageUrl],
+      setIsDepositSubmitting(true);
+      const uploadRes = await uploadScreenshot.mutateAsync(depositScreenshotFile);
+      const screenshotUrl = uploadRes?.url || '';
+
+      await requestAddOn.mutateAsync({
+        member_id: currentUserId || '',
+        requested_amount: Number(depositAmount),
+        tx_no: depositTxNo.trim(),
+        screenshot_url: screenshotUrl,
+        payment_method: 'UPI/QR',
       });
-      if (res.success) {
-        toast.success(`QR Code sent directly to ${targetName}!`);
-        setShareOpen(false);
-      }
-    } catch (err) {
-      toast.error('Failed to send QR code to chat');
+
+      toast.success('Deposit request submitted successfully for approval!');
+      setDepositAmount('');
+      setDepositTxNo('');
+      setDepositScreenshotFile(null);
+      setDepositScreenshotPreview(null);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to submit deposit request');
     } finally {
-      setSendingRoomId(null);
-    }
-  };
-
-  const memberId = TokenService.getMemberId() || memberDetails?.Member_id || memberDetails?.member_id || 'UNKNOWN';
-  const memberName = memberDetails?.Name || memberDetails?.name || memberDetails?.username || 'Member';
-  const qrData = `Ecash-P2P:${memberId}`;
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}&margin=10`;
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(qrData);
-    toast.success('QR Code data copied to clipboard!');
-  };
-
-  const handleDownload = async () => {
-    try {
-      const response = await fetch(qrImageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Ecash-QR-${memberId}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      toast.success('QR Code downloaded!');
-    } catch (err) {
-      toast.error('Failed to download QR code image.');
+      setIsDepositSubmitting(false);
     }
   };
 
@@ -415,6 +398,29 @@ const MyQR: React.FC = () => {
       </Box>
     );
   }
+
+  const modernInputStyles = {
+    bgcolor: '#F8FAFC',
+    borderRadius: '14px',
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#E2E8F0',
+      borderWidth: '1.5px',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#00BAF2',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#00BAF2',
+      borderWidth: '2px',
+      boxShadow: '0 0 0 4px rgba(0, 186, 242, 0.12)',
+    },
+    '& .MuiInputBase-input': {
+      color: '#0F172A',
+      padding: '13px 14px',
+      fontSize: '0.95rem',
+      fontWeight: 600,
+    },
+  };
 
   return (
     <Box
@@ -457,31 +463,34 @@ const MyQR: React.FC = () => {
             E-cash Scanner & QR
           </Typography>
           <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
-            Scan to pay other members or receive payments
+            Scan & Pay, Receive Money, or Deposit via UTR
           </Typography>
         </Box>
       </Box>
 
-      {/* Paytm Style Tab Switcher */}
+      {/* 2-Tab Switcher: Scan & Pay | My QR */}
       <Box
         sx={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
           bgcolor: '#E2E8F0',
           borderRadius: '16px',
           p: 0.6,
           mb: 3,
+          gap: 0.5,
         }}
       >
         <Button
           fullWidth
           onClick={() => setActiveTab('scanner')}
-          startIcon={<QrCodeScannerIcon />}
+          startIcon={<QrCodeScannerIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
           sx={{
             py: 1.2,
+            px: { xs: 0.5, sm: 1.5 },
             borderRadius: '12px',
             textTransform: 'none',
-            fontWeight: 900,
-            fontSize: '0.9rem',
+            fontWeight: 800,
+            fontSize: '0.88rem',
             bgcolor: activeTab === 'scanner' ? '#00BAF2' : 'transparent',
             color: activeTab === 'scanner' ? '#FFFFFF' : '#475569',
             boxShadow: activeTab === 'scanner' ? '0 4px 12px rgba(0, 186, 242, 0.35)' : 'none',
@@ -497,13 +506,14 @@ const MyQR: React.FC = () => {
         <Button
           fullWidth
           onClick={() => setActiveTab('my_qr')}
-          startIcon={<QrCode2Icon />}
+          startIcon={<QrCode2Icon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
           sx={{
             py: 1.2,
+            px: { xs: 0.5, sm: 1.5 },
             borderRadius: '12px',
             textTransform: 'none',
-            fontWeight: 900,
-            fontSize: '0.9rem',
+            fontWeight: 800,
+            fontSize: '0.88rem',
             bgcolor: activeTab === 'my_qr' ? '#00BAF2' : 'transparent',
             color: activeTab === 'my_qr' ? '#FFFFFF' : '#475569',
             boxShadow: activeTab === 'my_qr' ? '0 4px 12px rgba(0, 186, 242, 0.35)' : 'none',
@@ -513,13 +523,14 @@ const MyQR: React.FC = () => {
             transition: 'all 0.2s',
           }}
         >
-          My QR Code
+          My QR
         </Button>
       </Box>
 
       {/* TAB 1: SCANNER VIEWPORT */}
       {activeTab === 'scanner' && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+          {/* Live Scanner Card */}
           <Paper
             elevation={0}
             sx={{
@@ -629,7 +640,7 @@ const MyQR: React.FC = () => {
               </Typography>
             )}
 
-            {/* Gallery Upload & Manual Search */}
+            {/* Gallery Upload & Direct Member ID Search */}
             <Stack spacing={2}>
               <Button
                 variant="outlined"
@@ -669,7 +680,7 @@ const MyQR: React.FC = () => {
               >
                 <TextField
                   fullWidth
-                  placeholder="Or enter Member ID directly"
+                  placeholder="Or enter Member ID to transfer"
                   value={manualInput}
                   onChange={(e) => setManualInput(e.target.value)}
                   variant="standard"
@@ -709,141 +720,253 @@ const MyQR: React.FC = () => {
         </motion.div>
       )}
 
-      {/* TAB 2: MY QR CODE */}
+      {/* TAB 2: ENTER TRANSACTION ID / UTR (MY QR TAB) */}
       {activeTab === 'my_qr' && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+          {/* ENTER TRANSACTION ID / UTR CARD */}
           <Paper
             elevation={0}
             sx={{
-              p: { xs: 3, sm: 4 },
+              p: { xs: 2.5, sm: 3 },
               borderRadius: '24px',
               bgcolor: '#ffffff',
               border: '1px solid #E2E8F0',
               boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
-              textAlign: 'center',
             }}
           >
-            <Box
-              sx={{
-                display: 'inline-flex',
-                p: 1.2,
-                borderRadius: '14px',
-                bgcolor: '#E0F2FE',
-                color: '#00BAF2',
-                mb: 1.5,
-              }}
-            >
-              <QrCode2Icon sx={{ fontSize: 36 }} />
-            </Box>
-
-            <Typography variant="h5" sx={{ color: '#0F172A', fontWeight: 900, mb: 0.5 }}>
-              Scan to Pay Me
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#64748B', mb: 2.5, display: 'block', maxWidth: '320px', mx: 'auto', lineHeight: 1.4 }}>
-              Share your QR code with members to receive instant wallet transfers.
-            </Typography>
-
-            <Box
-              sx={{
-                p: 2.5,
-                bgcolor: '#F8FAFC',
-                borderRadius: '20px',
-                display: 'inline-block',
-                border: '2px dashed #00BAF2',
-                boxShadow: '0 4px 16px rgba(0, 186, 242, 0.1)',
-                mb: 2.5,
-              }}
-            >
-              <img
-                src={qrImageUrl}
-                alt="My P2P QR Code"
-                style={{ width: '200px', height: '200px', display: 'block', borderRadius: '12px' }}
-              />
-            </Box>
-
-            <Box sx={{ mb: 3, p: 2, borderRadius: '16px', bgcolor: '#F0F9FF', border: '1px solid #BAE6FD' }}>
-              <Typography variant="caption" sx={{ color: '#0369A1', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700, display: 'block' }}>
-                Account Holder
-              </Typography>
-              <Typography variant="subtitle1" sx={{ color: '#002970', fontWeight: 900 }}>
-                {memberName}
-              </Typography>
-              <Box sx={{ bgcolor: '#00BAF2', color: '#FFFFFF', px: 1.5, py: 0.3, borderRadius: '8px', display: 'inline-block', mt: 0.5 }}>
-                <Typography variant="caption" sx={{ fontWeight: 800 }}>
-                  MEMBER ID: {memberId}
+            {/* Header with Paytm Icon Badge */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <PaytmIconBadge>
+                <ConfirmationNumberIcon />
+              </PaytmIconBadge>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 900, color: '#0F172A', lineHeight: 1.2 }}>
+                  Enter Transaction ID / UTR
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
+                  Enter your unique payment reference number below
                 </Typography>
               </Box>
             </Box>
 
-            <Stack spacing={1.5}>
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<ContentCopyIcon />}
-                onClick={handleCopy}
-                sx={{
-                  background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
-                  color: '#FFFFFF',
-                  borderRadius: '14px',
-                  py: 1.4,
-                  fontWeight: 900,
-                  textTransform: 'none',
-                  fontSize: '0.92rem',
-                  boxShadow: '0 8px 24px rgba(0, 186, 242, 0.3)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #0082CD 0%, #0052cc 100%)',
-                    transform: 'translateY(-1px)',
-                  },
-                  transition: 'all 0.2s',
-                }}
-              >
-                Copy QR Data
-              </Button>
+            {/* Top Balance Banner */}
+            <Box
+              sx={{
+                p: 1.8,
+                borderRadius: '16px',
+                bgcolor: '#F0F9FF',
+                border: '1px solid #BAE6FD',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2.5,
+              }}
+            >
+              <Box>
+                <Typography variant="caption" sx={{ color: '#0369A1', fontWeight: 800, textTransform: 'uppercase', fontSize: '0.72rem' }}>
+                  Current Top Up Balance
+                </Typography>
+                <Typography variant="h6" sx={{ color: '#002970', fontWeight: 900, fontSize: '1.1rem' }}>
+                  ₹{Number(walletOverview?.topUpBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              </Box>
+              <PaytmIconBadge>
+                <AccountBalanceWalletIcon />
+              </PaytmIconBadge>
+            </Box>
 
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={<ChatBubbleOutlineIcon sx={{ color: '#00BAF2' }} />}
-                onClick={handleOpenShare}
+            {/* Company UPI QR Preview Box */}
+            <Box
+              sx={{
+                p: 1.8,
+                border: '1.5px dashed #00BAF2',
+                borderRadius: '16px',
+                bgcolor: '#F8FAFC',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 1,
+                mb: 2.5,
+              }}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 800, color: '#002970', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Scan Company QR & Pay via UPI
+              </Typography>
+              <Box
                 sx={{
-                  borderColor: '#00BAF2',
-                  color: '#0082CD',
-                  borderRadius: '14px',
-                  py: 1.3,
-                  fontWeight: 800,
-                  textTransform: 'none',
-                  fontSize: '0.92rem',
-                  '&:hover': {
-                    borderColor: '#0082CD',
-                    bgcolor: '#F0F9FF',
-                  },
+                  width: '100%',
+                  maxWidth: 160,
+                  bgcolor: '#FFFFFF',
+                  borderRadius: '12px',
+                  p: 1,
+                  boxShadow: '0 2px 10px rgba(0, 186, 242, 0.12)',
+                  border: '1px solid #E2E8F0',
                 }}
               >
-                Share to Chat
-              </Button>
+                <Box component="img" src={jeeScImage} alt="Payment QR Code" sx={{ width: '100%', height: 'auto', objectFit: 'contain', borderRadius: '8px' }} />
+              </Box>
+              <Box sx={{ bgcolor: '#E0F2FE', px: 1.8, py: 0.4, borderRadius: '8px', border: '1px solid #BAE6FD' }}>
+                <Typography variant="caption" sx={{ color: '#002970', fontWeight: 800, letterSpacing: '0.4px', fontSize: '0.75rem' }}>
+                  UPI ID: <span style={{ textDecoration: 'underline' }}>ecash01qr@fbl</span>
+                </Typography>
+              </Box>
+            </Box>
 
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={<DownloadIcon sx={{ color: '#64748B' }} />}
-                onClick={handleDownload}
-                sx={{
-                  borderColor: '#CBD5E1',
-                  color: '#64748B',
-                  borderRadius: '14px',
-                  py: 1.3,
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  fontSize: '0.92rem',
-                  '&:hover': {
-                    borderColor: '#94A3B8',
-                    bgcolor: '#F8FAFC',
-                  },
-                }}
-              >
-                Download QR Code
-              </Button>
-            </Stack>
+            {/* Deposit Form */}
+            <form onSubmit={handleDepositSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {/* Field 1: Amount */}
+              <Box>
+                <Typography variant="caption" sx={{ mb: 0.6, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase' }}>
+                  Deposit Amount (₹)
+                </Typography>
+                <TextField
+                  fullWidth
+                  name="depositAmount"
+                  type="number"
+                  placeholder="e.g. 5000"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PaytmIconBadge>
+                          <Typography sx={{ fontSize: '1.1rem', fontWeight: 900, color: '#FFFFFF' }}>₹</Typography>
+                        </PaytmIconBadge>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={modernInputStyles}
+                />
+              </Box>
+
+              {/* Field 2: Transaction ID / UTR Unique Number */}
+              <Box>
+                <Typography variant="caption" sx={{ mb: 0.6, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase' }}>
+                  UTR / Unique Transaction ID
+                </Typography>
+                <TextField
+                  fullWidth
+                  name="depositTxNo"
+                  placeholder="Enter 12-digit UTR or Txn Unique Ref No."
+                  value={depositTxNo}
+                  onChange={(e) => setDepositTxNo(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PaytmIconBadge>
+                          <ConfirmationNumberIcon />
+                        </PaytmIconBadge>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={modernInputStyles}
+                />
+              </Box>
+
+              {/* Field 3: Payment Screenshot Upload */}
+              <Box>
+                <Typography variant="caption" sx={{ mb: 0.6, color: '#334155', fontWeight: 800, ml: 0.5, display: 'block', textTransform: 'uppercase' }}>
+                  Payment Screenshot / Receipt (Optional)
+                </Typography>
+                <input
+                  ref={depositFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleDepositScreenshotChange}
+                />
+
+                {depositScreenshotPreview ? (
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      width: '100%',
+                      height: 150,
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                      border: '1.5px solid #00BAF2',
+                      bgcolor: '#F8FAFC',
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={depositScreenshotPreview}
+                      alt="Screenshot Preview"
+                      sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                    <IconButton
+                      onClick={() => {
+                        setDepositScreenshotFile(null);
+                        setDepositScreenshotPreview(null);
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        bgcolor: '#EF4444',
+                        color: '#FFFFFF',
+                        '&:hover': { bgcolor: '#DC2626' },
+                      }}
+                      size="small"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => depositFileInputRef.current?.click()}
+                    startIcon={<CloudUploadIcon sx={{ color: '#00BAF2' }} />}
+                    sx={{
+                      border: '1.5px dashed #CBD5E1',
+                      borderRadius: '14px',
+                      py: 1.5,
+                      color: '#002970',
+                      bgcolor: '#F8FAFC',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      textTransform: 'none',
+                      '&:hover': { borderColor: '#00BAF2', bgcolor: '#F0F9FF' },
+                    }}
+                  >
+                    Upload Payment Screenshot
+                  </Button>
+                )}
+              </Box>
+
+              {/* Submit Deposit Request Button */}
+              <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={isDepositSubmitting}
+                  sx={{
+                    mt: 0.5,
+                    background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+                    color: '#FFFFFF',
+                    py: 1.4,
+                    borderRadius: '14px',
+                    fontWeight: 900,
+                    fontSize: '0.95rem',
+                    textTransform: 'none',
+                    boxShadow: '0 8px 20px rgba(0, 186, 242, 0.35)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #0082CD 0%, #0052cc 100%)',
+                      boxShadow: '0 10px 24px rgba(0, 186, 242, 0.45)',
+                    },
+                    '&:disabled': {
+                      bgcolor: '#CBD5E1',
+                      color: '#94A3B8',
+                    },
+                  }}
+                >
+                  {isDepositSubmitting ? 'Submitting Deposit...' : 'Submit Transaction ID Request'}
+                </Button>
+              </motion.div>
+            </form>
           </Paper>
         </motion.div>
       )}
@@ -1049,154 +1172,6 @@ const MyQR: React.FC = () => {
           </Dialog>
         )}
       </AnimatePresence>
-
-      {/* Share to Chat Dialog */}
-      <Dialog open={shareOpen} onClose={() => setShareOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}>
-        <DialogTitle sx={{ fontWeight: 900, color: '#0F172A', pb: 1 }}>
-          Share QR to Chat
-        </DialogTitle>
-        <DialogContent sx={{ p: 2.5 }}>
-          <Typography variant="body2" sx={{ color: '#64748B', mb: 2 }}>
-            Send your P2P QR directly to a contact in your chat rooms.
-          </Typography>
-
-          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-            <TextField
-              size="small"
-              fullWidth
-              placeholder="Search by Mobile No..."
-              value={searchMobile}
-              onChange={(e) => setSearchMobile(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" sx={{ color: '#64748B' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                bgcolor: '#F8FAFC',
-                borderRadius: '12px',
-                '& fieldset': { borderColor: '#E2E8F0' },
-              }}
-            />
-            <Button
-              variant="contained"
-              onClick={handleSearchMember}
-              disabled={searchingMember}
-              sx={{
-                bgcolor: '#00BAF2',
-                color: '#FFFFFF',
-                borderRadius: '12px',
-                fontWeight: 800,
-                textTransform: 'none',
-                px: 2.5,
-                '&:hover': { bgcolor: '#0082CD' },
-              }}
-            >
-              {searchingMember ? <CircularProgress size={16} sx={{ color: '#FFFFFF' }} /> : 'Find'}
-            </Button>
-          </Box>
-
-          {foundMember && (
-            <Paper
-              elevation={0}
-              sx={{
-                p: 1.5,
-                mb: 2,
-                borderRadius: '14px',
-                bgcolor: '#F0F9FF',
-                border: '1.5px solid #BAE6FD',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Avatar sx={{ width: 36, height: 36, bgcolor: '#00BAF2', fontSize: '0.9rem', fontWeight: 800 }}>
-                  {(foundMember.Name || 'M').charAt(0).toUpperCase()}
-                </Avatar>
-                <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#0F172A', lineHeight: 1.2 }}>
-                    {foundMember.Name}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748B' }}>
-                    {foundMember.mobile}
-                  </Typography>
-                </Box>
-              </Box>
-              <Button
-                size="small"
-                variant="contained"
-                disabled={sendingRoomId === foundMember.chatRoom?._id}
-                onClick={() => handleSendQRToRoom(foundMember.chatRoom?._id, foundMember.Name)}
-                startIcon={<SendIcon sx={{ fontSize: '14px !important' }} />}
-                sx={{
-                  bgcolor: '#00BAF2',
-                  color: '#FFFFFF',
-                  borderRadius: '10px',
-                  fontWeight: 800,
-                  fontSize: '0.75rem',
-                  textTransform: 'none',
-                  '&:hover': { bgcolor: '#0082CD' },
-                }}
-              >
-                Send
-              </Button>
-            </Paper>
-          )}
-
-          <Divider sx={{ my: 2 }}>
-            <Chip label="Or Select Recent Chat" size="small" sx={{ fontSize: '0.7rem', fontWeight: 700 }} />
-          </Divider>
-
-          {loadingRooms ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-              <CircularProgress size={24} sx={{ color: '#00BAF2' }} />
-            </Box>
-          ) : chatRooms.length === 0 ? (
-            <Typography variant="caption" sx={{ color: '#94A3B8', textAlign: 'center', display: 'block', py: 2 }}>
-              No recent chat conversations found.
-            </Typography>
-          ) : (
-            <List sx={{ maxHeight: 200, overflowY: 'auto', p: 0 }}>
-              {chatRooms.map((room) => {
-                const other = room.participants?.find((p: any) => p._id !== currentUserId) || {};
-                const name = other.Name || other.name || other.username || 'Member';
-                return (
-                  <ListItemButton
-                    key={room._id}
-                    onClick={() => handleSendQRToRoom(room._id, name)}
-                    disabled={sendingRoomId === room._id}
-                    sx={{
-                      borderRadius: '12px',
-                      mb: 0.8,
-                      bgcolor: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      '&:hover': { bgcolor: '#F0F9FF', borderColor: '#00BAF2' },
-                    }}
-                  >
-                    <Avatar sx={{ width: 34, height: 34, mr: 1.5, bgcolor: '#00BAF2', fontSize: '0.85rem', fontWeight: 800 }}>
-                      {name.charAt(0).toUpperCase()}
-                    </Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
-                        {name}
-                      </Typography>
-                    </Box>
-                    <SendIcon sx={{ color: '#00BAF2', fontSize: 18 }} />
-                  </ListItemButton>
-                );
-              })}
-            </List>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setShareOpen(false)} sx={{ color: '#64748B', fontWeight: 700, textTransform: 'none' }}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

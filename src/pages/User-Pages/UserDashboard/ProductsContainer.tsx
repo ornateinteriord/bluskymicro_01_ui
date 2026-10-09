@@ -85,7 +85,7 @@ const ProductsContainer: React.FC = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <AccountBalanceWalletIcon sx={{ fontSize: 26, color: '#6D214F' }} />
               <Typography variant="body2" sx={{ color: '#2d0f1e', fontWeight: 800, fontSize: '0.95rem' }}>
-                Package Deposit (Min ₹100)
+                Invest
               </Typography>
             </Box>
           </Box>
@@ -142,10 +142,10 @@ const ProductsContainer: React.FC = () => {
               }}
             />
 
-            {/* Balance displayed below amount text box on left corner */}
+            {/* Credit Balance displayed below amount text box on left corner */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 0.75, mb: 1, pl: 0.5 }}>
               <Typography variant="caption" sx={{ color: '#7a5060', fontWeight: 600 }}>
-                Available Balance: <span style={{ color: '#6D214F', fontWeight: 800 }}>₹{Number(topUpBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                Credit Balance: <span style={{ color: '#6D214F', fontWeight: 800 }}>₹{Number(topUpBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </Typography>
             </Box>
 
@@ -175,7 +175,7 @@ const ProductsContainer: React.FC = () => {
                 }
               }}
             >
-              {isPending ? <CircularProgress size={22} sx={{ color: '#FFF8F0' }} /> : "Submit Deposit Request"}
+              {isPending ? <CircularProgress size={22} sx={{ color: '#FFF8F0' }} /> : "Invest Amount"}
             </Button>
           </Box>
         </CardContent>
@@ -197,15 +197,15 @@ const ProductsContainer: React.FC = () => {
         fullWidth
       >
         <DialogTitle sx={{ textAlign: 'center', pt: 3.5, color: '#6D214F', fontWeight: 800 }}>
-          Deposit Successful! 🎉
+          Investment Successful! 🎉
         </DialogTitle>
         <DialogContent sx={{ pb: 1, textAlign: 'center' }}>
           <Typography variant="body2" sx={{ color: '#7a5060', mb: 2 }}>
-            Your deposit request has been processed successfully.
+            Your investment request has been processed successfully.
           </Typography>
           <Box sx={{ bgcolor: '#ffffff', p: 2, borderRadius: '16px', border: '1px solid #f0d0d8' }}>
             <Typography variant="caption" sx={{ color: '#7a5060', display: 'block' }}>
-              Amount Processed
+              Amount Invested
             </Typography>
             <Typography variant="h5" sx={{ color: '#6D214F', fontWeight: 900, mt: 0.5 }}>
               ₹{Number(purchasedAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

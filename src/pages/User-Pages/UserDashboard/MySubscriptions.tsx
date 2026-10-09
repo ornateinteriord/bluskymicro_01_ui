@@ -1,16 +1,14 @@
 import React, { useContext } from 'react';
 import moment from 'moment';
-import { Box, Card, CardContent, Typography, Grid, CircularProgress, Divider, Chip, LinearProgress, Button, IconButton } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, CircularProgress, Divider, Chip, LinearProgress, IconButton } from '@mui/material';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DownloadIcon from '@mui/icons-material/Download';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../../../context/user/userContext';
 import { useGetMemberAddOns } from '../../../api/Packages';
 import { useGetWalletOverview } from '../../../api/Memeber';
-import { openBondCertificate } from '../../../utils/BondCertificateGenerator';
 
 const MySubscriptions: React.FC = () => {
   const navigate = useNavigate();
@@ -54,7 +52,7 @@ const MySubscriptions: React.FC = () => {
             My Subscriptions
           </Typography>
           <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
-            Active packages, deposits & certificates
+            Active packages, deposits & daily incentives
           </Typography>
         </Box>
       </Box>
@@ -94,7 +92,7 @@ const MySubscriptions: React.FC = () => {
                 : 120;
               const pkgProgress = pkg.roi_payout_count ? Math.min((pkg.roi_payout_count / totalDays) * 100, 100) : 0;
 
-              // Calculate Single Leg Income buyers (Max 100)
+              // Calculate Daily Incentive buyers (Max 100)
               const sliAmount = walletOverview?.singleLevelIncomeByPackage?.[pkgAmount] || 0;
               const perBuyerIncome = pkgAmount * 0.015;
               const buyersCount = perBuyerIncome > 0 ? Math.round(sliAmount / perBuyerIncome) : 0;
@@ -142,7 +140,7 @@ const MySubscriptions: React.FC = () => {
                       <Divider sx={{ my: 1.5, borderColor: '#f0d0d8' }} />
                       <Box sx={{ mb: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#8c6b7d', fontWeight: 700 }}>
-                          {pkg.isFD ? 'Interest Rate' : 'Single Leg Income'}
+                          {pkg.isFD ? 'Interest Rate' : 'Daily Incentive'}
                         </Typography>
                         <Typography variant="subtitle2" sx={{ fontWeight: 900, color: '#6D214F' }}>
                           {pkg.isFD ? `${pkg.interest_rate || 0}% p.a.` : `₹${sliAmount.toFixed(2)}`}
@@ -171,47 +169,6 @@ const MySubscriptions: React.FC = () => {
                           }
                         }}
                       />
-
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<DownloadIcon />}
-                        onClick={() => openBondCertificate({
-                          memberNumber: user.Member_id || user.member_id || '',
-                          memberName: user.Name || user.name || '',
-                          dob: user.dob || '',
-                          fatherName: user.Father_name || user.father_name || '',
-                          address: user.address || '',
-                          accountNo: user.account_number || pkg.package_id || `FD${pkgId.toString().slice(-5)}`,
-                          commencementDate: pkg.roi_start_date || user.Date_of_joining || new Date().toISOString(),
-                          planTerm: 'FD / 3 Years',
-                          planAmount: pkgAmount,
-                          interestRate: pkg.interest_rate || 9.0,
-                          maturityDate: moment(pkg.roi_start_date || user.Date_of_joining || new Date().toISOString()).add(3, 'years').toISOString(),
-                          aadhaarNo: user.aadharcard_no || '',
-                          panNo: user.Pan_no || user.pan_no || '',
-                          nomineeName: user.Nominee_name || user.nominee || '',
-                          nomineeRelation: user.Nominee_Relation || user.relation || '',
-                          branchCode: user.branch_id || '004',
-                          branch: 'UDUPI',
-                          profilePhotoUrl: user.profile_image || user.member_image,
-                        })}
-                        sx={{
-                          mt: 2,
-                          width: '100%',
-                          borderColor: '#f0d0d8',
-                          color: '#6D214F',
-                          fontWeight: 800,
-                          textTransform: 'none',
-                          fontSize: '0.82rem',
-                          py: 0.8,
-                          borderRadius: '12px',
-                          bgcolor: '#FFF8F0',
-                          '&:hover': { bgcolor: '#fdf2f4', borderColor: '#6D214F' }
-                        }}
-                      >
-                        Download Bond Certificate
-                      </Button>
 
                       <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

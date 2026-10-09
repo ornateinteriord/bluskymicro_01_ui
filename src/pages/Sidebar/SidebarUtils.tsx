@@ -20,13 +20,13 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
     isExpandable: false,
   }, */
   {
-    name: "Property Listings",
+    name: "New Subscription",
     icon: <PaymentsIcon />,
     path: "/user/new-subscription",
     isExpandable: false,
   },
   {
-    name: "My Certificates",
+    name: "My Subscription",
     icon: <ReceiptLongIcon />,
     path: "/user/my-subscriptions",
     isExpandable: false,
@@ -36,7 +36,7 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
     icon: <AccountCircleIcon />,
     isExpandable: true,
     subItems: [
-      { name: "My Profile", path: "/user/account/profile", icon: <PersonIcon /> },
+      { name: "Profile", path: "/user/account/profile", icon: <PersonIcon /> },
       { name: "KYC Verification", path: "/user/account/kyc", icon: <VerifiedUserIcon /> },
       {
         name: "Security Password",
@@ -50,11 +50,11 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
     icon: <GroupIcon />,
     isExpandable: true,
     subItems: [
-      { name: "Direct Clients", path: "/user/team/direct", icon: <PeopleIcon /> },
-      { name: "Agents", path: "/user/team", icon: <GroupIcon /> },
+      { name: "My Direct", path: "/user/team/direct", icon: <PeopleIcon /> },
+      { name: "My Member", path: "/user/team", icon: <GroupIcon /> },
       { name: "Network Tree", path: "/user/team/tree", icon: <AccountTreeIcon /> },
       {
-        name: "Register Agent",
+        name: "Register Member",
         path: "/user/team/new-register",
         icon: <PersonAddIcon />,
       },
@@ -71,7 +71,7 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
         icon: <PaymentsIcon />,
       },
       {
-        name: "Brokerage Override",
+        name: "Level Bonus",
         path: "/user/earnings/level-benefits",
         icon: <TrendingUpIcon />,
       },

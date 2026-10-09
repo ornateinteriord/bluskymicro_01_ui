@@ -300,7 +300,7 @@ const Navbar = ({ shouldHide, onToggleSidebar }: NavbarProps) => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(37, 99, 235, 0.12)', color: '#2563EB', mr: 1.5 }}>
               <User size={18} />
             </Box>
-            My Profile
+            Profile
           </MenuItem>
 
           <MenuItem onClick={() => {
