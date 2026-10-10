@@ -40,7 +40,7 @@ const Wallet = () => {
   // --- Referral requirement logic ---
   const currentDirects = memberDetails?.data?.registration_stats?.direct || 0;
   const totalPackages = parseFloat(walletData?.data?.totalPackages || 0);
-  const maxWithdrawal = totalPackages * 0.25;
+  const maxWithdrawal = totalPackages * 2;
 
   const currentDay = new Date().getDay();
   const isWeekend = currentDay === 0 || currentDay === 6;
@@ -77,10 +77,10 @@ const Wallet = () => {
 
     if (value && value !== "0") {
       const withdrawalAmount = parseFloat(value);
-      const tdsAmount = withdrawalAmount * 0.05; // 5% TDS
-      const calculatedNetAmount = withdrawalAmount - tdsAmount;
+      const deductionAmount = withdrawalAmount * 0.10; // 10% deduction
+      const calculatedNetAmount = withdrawalAmount - deductionAmount;
 
-      setTds(tdsAmount);
+      setTds(deductionAmount);
       setNetAmount(calculatedNetAmount);
     } else {
       setTds(0);
@@ -103,7 +103,7 @@ const Wallet = () => {
     }
 
     if (!isReferralConditionMet) {
-      toast.error(`You need ${requiredReferrals} direct referrals to withdraw at your current package level.`);
+      toast.error(`You need ${requiredReferrals} direct referrals to withdraw at your current investment level.`);
       return;
     }
 
@@ -114,13 +114,8 @@ const Wallet = () => {
       return;
     }
 
-    if (withdrawalAmount < 500) {
-      toast.error('Minimum withdrawal amount is 500');
-      return;
-    }
-
     if (withdrawalAmount > maxWithdrawal) {
-      toast.error(`Maximum withdrawal limit is ${maxWithdrawal.toFixed(2)} (25% of your total package amount)`);
+      toast.error(`Maximum withdrawal limit is ₹${maxWithdrawal.toFixed(2)} (2x of your total invest amount)`);
       return;
     }
 
@@ -262,10 +257,16 @@ const Wallet = () => {
                 onChange={handleAmountChange}
                 fullWidth
                 size="medium"
-                placeholder="Enter amount (Min 500)"
+                placeholder="Enter amount"
                 disabled={withdrawMutation.isPending || !isWithdrawalAllowed || isWeekend}
-                error={parseFloat(amount) > displayBalance || (Boolean(amount) && parseFloat(amount) < 500)}
-                helperText={parseFloat(amount) > displayBalance ? "Insufficient Balance" : (amount && parseFloat(amount) < 500) ? "Minimum withdrawal amount is ₹500" : ""}
+                error={parseFloat(amount) > displayBalance || (Boolean(amount) && parseFloat(amount) > maxWithdrawal)}
+                helperText={
+                  parseFloat(amount) > displayBalance 
+                    ? "Insufficient Balance" 
+                    : (Boolean(amount) && parseFloat(amount) > maxWithdrawal) 
+                      ? `Maximum withdrawal limit is ₹${maxWithdrawal.toFixed(2)} (2x of invest amount)` 
+                      : ""
+                }
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "14px",
@@ -296,16 +297,21 @@ const Wallet = () => {
               */}
 
               <TextField
-                label="Admin (5%)"
+                label="Deduction (10%)"
                 value={`${tds.toFixed(2)}`}
                 fullWidth
                 size="medium"
                 InputProps={{ readOnly: true }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "&:hover fieldset": { borderColor: isWithdrawalAllowed ? "#0a2558" : "#ff9800" },
-                    "&.Mui-focused fieldset": { borderColor: isWithdrawalAllowed ? "#0a2558" : "#ff9800" },
+                    borderRadius: "14px",
+                    bgcolor: "#FFF8F0",
+                    "& fieldset": { borderColor: "#f0d0d8", borderWidth: "1.5px" },
+                    "&:hover fieldset": { borderColor: "#E5989B" },
+                    "&.Mui-focused fieldset": { borderColor: "#6D214F", borderWidth: "2px" },
                   },
+                  "& .MuiInputLabel-root": { color: "#7a5060", fontWeight: 600 },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#6D214F" },
                 }}
               />
 
@@ -329,7 +335,7 @@ const Wallet = () => {
                 </Alert>
               ) : (
                 <Alert severity="info" sx={{ mb: 1, borderRadius: '8px' }}>
-                  Minimum withdrawal amount is ₹500. Requests are processed within 2-3 business days.
+                  Requests are processed within 2-3 business days.
                 </Alert>
               )}
 
@@ -348,9 +354,8 @@ const Wallet = () => {
                   </Typography>
                   <Box sx={{ display: "flex", gap: 4, flexDirection: isMobile ? "column" : "row" }}>
                     <Box>
-                      <Typography variant="body2">• 5% Admin applied</Typography>
-                      <Typography variant="body2">  Minimum withdrawal: 500</Typography>
-                      <Typography variant="body2">• Maximum withdrawal: 25% of total package ({maxWithdrawal.toFixed(2)})</Typography>
+                      <Typography variant="body2">• 10% Deduction applied</Typography>
+                      <Typography variant="body2">• Maximum withdrawal: 2x of total invest amount ({maxWithdrawal.toFixed(2)})</Typography>
                       <Typography variant="body2">• One withdrawal per day allowed</Typography>
                     </Box>
                   </Box>
@@ -375,7 +380,7 @@ const Wallet = () => {
                         mt: 1
                       }}
                     >
-                      • Withdrawal locked: Your package level requires {requiredReferrals} direct referrals, but you currently have {currentDirects}.
+                      • Withdrawal locked: Your investment level requires {requiredReferrals} direct referrals, but you currently have {currentDirects}.
                     </Typography>
                   )}
                 </Box>
@@ -387,10 +392,11 @@ const Wallet = () => {
                     isSendingOTP ||
                     withdrawMutation.isPending ||
                     !amount ||
+                    parseFloat(amount) <= 0 ||
+                    parseFloat(amount) > maxWithdrawal ||
                     !isWithdrawalAllowed ||
                     !isReferralConditionMet ||
-                    isWeekend || 
-                    parseFloat(amount) < 500
+                    isWeekend
                   }
                   onClick={handleSendOTP}
                   sx={{

@@ -48,8 +48,8 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
             toast.error('Please select an account');
             return;
         }
-        if (!amount || parseFloat(amount) < 500) {
-            toast.error('Minimum withdrawal amount is ₹500');
+        if (!amount || parseFloat(amount) <= 0) {
+            toast.error('Please enter a valid amount');
             return;
         }
         /* if (!isCommission) {
@@ -249,11 +249,11 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
                                 }
                             }}
                             placeholder="Enter amount"
-                            error={isCommission ? parseFloat(amount || '0') > availableBalance : (selectedAccountData && parseFloat(amount || '0') > selectedAccountData.account_amount) || (Boolean(amount) && parseFloat(amount) < 500)}
+                            error={isCommission ? parseFloat(amount || '0') > availableBalance : (selectedAccountData && parseFloat(amount || '0') > selectedAccountData.account_amount)}
                             helperText={
                                 selectedAccountData && parseFloat(amount || '0') > selectedAccountData.account_amount
                                     ? `Insufficient balance. Available: ${selectedAccountData.account_amount.toFixed(2)}`
-                                    : (amount && parseFloat(amount) < 500) ? 'Minimum withdrawal amount is ₹500' : ''
+                                    : ''
                             }
                             InputProps={{
                                 startAdornment: <InputAdornment position="start"></InputAdornment>,
@@ -323,7 +323,7 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
                         </Alert>
                     ) : (
                         <Alert severity="info" sx={{ borderRadius: '12px' }}>
-                            Minimum withdrawal amount is ₹500. Requests are processed within 2-3 business days.
+                            Requests are processed within 2-3 business days.
                         </Alert>
                     )}
                 </Box>
@@ -351,7 +351,7 @@ const WithdrawMoneyDialog: React.FC<WithdrawMoneyDialogProps> = ({ open, onClose
                 <Button
                     onClick={handleWithdraw}
                     variant="contained"
-                    disabled={withdrawing || (!isCommission && !selectedAccount) || !amount || parseFloat(amount) < 500 || isWeekend}
+                    disabled={withdrawing || (!isCommission && !selectedAccount) || !amount || parseFloat(amount) <= 0 || isWeekend}
                     sx={{
                         borderRadius: '12px',
                         textTransform: 'none',

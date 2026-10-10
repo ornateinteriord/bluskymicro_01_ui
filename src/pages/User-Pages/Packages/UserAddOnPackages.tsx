@@ -31,7 +31,7 @@ export const UserAddOnPackages = () => {
     if (!packageAmount || !user?.Member_id) return;
 
     if (Number(packageAmount) < 100) {
-      toast.error("Minimum package amount is ₹100");
+      toast.error("Minimum invest amount is ₹100");
       return;
     }
 
@@ -62,7 +62,7 @@ export const UserAddOnPackages = () => {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: view === 'addon' ? 0 : 6 }}>
           <Typography variant="h6" sx={{ mb: 2, color: '#0a2558', fontWeight: 900, display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <AddCircleOutlineIcon sx={{ fontSize: 28, color: '#ed6c02' }} />
-            Request Add-On Package
+            Invest Amount
           </Typography>
           <Card sx={{
             boxShadow: '0 8px 32px rgba(10,37,88,0.08)',
@@ -76,26 +76,17 @@ export const UserAddOnPackages = () => {
               <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2.5 }}>
                 <AccountBalanceWalletIcon sx={{ fontSize: 32, color: '#ed6c02', mr: 2, mt: 0.5 }} />
                 <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.85rem', lineHeight: 1.5 }}>
-                  Purchase an independent add-on package with its own 300-day ROI cycle.
+                  Add an investment with daily return cycle.
                 </Typography>
               </Box>
 
               <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                {/* 
-                <Autocomplete
-                  freeSolo
-                  options={["500", "1000", "2000", "3000", "5000", "10000", "25000", "50000", "100000", "250000", "500000", "1000000", "2500000"]}
-                  value={packageAmount}
-                  onChange={(_, newValue) => setPackageAmount(newValue || '')}
-                  onInputChange={(_, newInputValue) => setPackageAmount(newInputValue)}
-                />
-                */}
                 <TextField
                   fullWidth
                   required
                   type="text"
                   inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                  label="Amount (₹)"
+                  label="Invest Amount (₹)"
                   variant="outlined"
                   size="medium"
                   value={packageAmount}
@@ -131,7 +122,7 @@ export const UserAddOnPackages = () => {
                 {/* Balance displayed below amount text box on left corner */}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 0.75, mb: 1, pl: 0.5 }}>
                   <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
-                    Balance: <span style={{ color: '#059669', fontWeight: 700 }}>₹{Number(walletOverview?.topUpBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    Credit Balance: <span style={{ color: '#059669', fontWeight: 700 }}>₹{Number(walletOverview?.balance ?? walletOverview?.availableForWithdrawal ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </Typography>
                 </Box>
 
@@ -144,7 +135,7 @@ export const UserAddOnPackages = () => {
                     mt: 2,
                     py: 1.5,
                     backgroundColor: '#0a2558',
-                    color: '#0F172A',
+                    color: '#FFFFFF',
                     fontWeight: 700,
                     fontSize: '1rem',
                     textTransform: 'none',
@@ -152,7 +143,7 @@ export const UserAddOnPackages = () => {
                     '&:hover': { backgroundColor: '#153b93' }
                   }}
                 >
-                  {isSubmitting ? 'Submitting Request...' : 'Submit Deposit Request'}
+                  {isSubmitting ? 'Submitting Request...' : 'Invest Amount'}
                 </Button>
               </Box>
             </CardContent>
@@ -212,16 +203,11 @@ export const UserAddOnPackages = () => {
               const pkgId = pkg.package_id || pkg.request_id || 'N/A';
               const totalDays = pkg.isFD 
                 ? (moment(pkg.date_of_maturity).diff(moment(pkg.roi_start_date), 'days') || 1)
-                : 120;
-              const pkgProgress = pkg.roi_payout_count ? Math.min((pkg.roi_payout_count / totalDays) * 100, 100) : 0;
-
-
-
-              // Calculate Single Leg Income buyers (Max 100)
-              const sliAmount = walletOverview?.singleLevelIncomeByPackage?.[pkgAmount] || 0;
-              const perBuyerIncome = pkgAmount * 0.015;
-              const buyersCount = perBuyerIncome > 0 ? Math.round(sliAmount / perBuyerIncome) : 0;
-              const sliProgress = Math.min((buyersCount / 100) * 100, 100);
+                : (pkg.roi_payout_target || 200);
+              const payoutCount = pkg.roi_payout_count || 0;
+              const pkgProgress = Math.min((payoutCount / totalDays) * 100, 100);
+              const dailyIncentiveAmount = pkgAmount * 0.01;
+              const earnedSoFar = (payoutCount * dailyIncentiveAmount).toFixed(2);
 
               return (
                 <Grid item xs={12} sm={6} md={4} key={pkgId}>
@@ -240,11 +226,11 @@ export const UserAddOnPackages = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                             {pkg.isFD ? <AccountBalanceIcon sx={{ fontSize: 14, color: '#ed6c02' }} /> : <PaymentsIcon sx={{ fontSize: 14, color: 'text.secondary' }} />}
                             <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 800, color: pkg.isFD ? '#ed6c02' : 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                              {pkg.isFD ? 'Fixed Deposit' : `My Deposit #${index + 1}`}
+                              {pkg.isFD ? 'Fixed Deposit' : `Investment #${index + 1}`}
                             </Typography>
                           </Box>
                           <Typography variant="h5" sx={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a2558', lineHeight: 1.2 }}>
-                            ${pkgAmount.toLocaleString('en-US')}
+                            ₹{pkgAmount.toLocaleString('en-US')}
                           </Typography>
                         </Box>
                         <Chip
@@ -256,26 +242,38 @@ export const UserAddOnPackages = () => {
                       </Box>
 
                       <Divider sx={{ mb: 2 }} />
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'text.secondary', display: 'block', fontWeight: 600 }}>
-                          {pkg.isFD ? 'Interest Rate' : 'Single Leg Income'}
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#1565c0', fontSize: '1.1rem' }}>
-                          {pkg.isFD ? `${pkg.interest_rate || 0}% p.a.` : `${sliAmount.toFixed(2)}`}
-                        </Typography>
+                      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box>
+                          <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'text.secondary', display: 'block', fontWeight: 600 }}>
+                            {pkg.isFD ? 'Interest Rate' : 'Daily Incentive'}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 800, color: '#1565c0', fontSize: '1.1rem' }}>
+                            {pkg.isFD ? `${pkg.interest_rate || 0}% p.a.` : `1% (₹${dailyIncentiveAmount.toFixed(2)}/day)`}
+                          </Typography>
+                        </Box>
+                        {!pkg.isFD && (
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'text.secondary', display: 'block', fontWeight: 600 }}>
+                              Earned So Far
+                            </Typography>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#059669', fontSize: '1rem' }}>
+                              ₹{earnedSoFar}
+                            </Typography>
+                          </Box>
+                        )}
                       </Box>
 
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 700 }}>
-                          {pkg.isFD ? 'Maturity Progress' : `${buyersCount} of 100 Buyers`}
+                          {pkg.isFD ? 'Maturity Progress' : `Daily Incentive: ${payoutCount} of ${totalDays} Days`}
                         </Typography>
                         <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 700 }}>
-                          {pkg.isFD ? `${pkgProgress.toFixed(0)}%` : `${sliProgress.toFixed(0)}%`}
+                          {pkgProgress.toFixed(0)}%
                         </Typography>
                       </Box>
                       <LinearProgress
                         variant="determinate"
-                        value={pkg.isFD ? pkgProgress : sliProgress}
+                        value={pkgProgress}
                         sx={{
                           height: 8,
                           borderRadius: 4,

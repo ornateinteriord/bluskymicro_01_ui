@@ -8,13 +8,11 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../../../context/user/userContext';
 import { useGetMemberAddOns } from '../../../api/Packages';
-import { useGetWalletOverview } from '../../../api/Memeber';
 
 const MySubscriptions: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const { data: addOns = [], isLoading: addOnsLoading } = useGetMemberAddOns(user?.Member_id || '');
-  const { data: walletOverview } = useGetWalletOverview(user?.Member_id || '');
 
   if (!user) {
     return (
@@ -49,10 +47,10 @@ const MySubscriptions: React.FC = () => {
         </IconButton>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', letterSpacing: '-0.5px' }}>
-            My Subscriptions
+            My Investments
           </Typography>
           <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
-            Active packages, deposits & daily incentives
+            Active investments & daily incentives
           </Typography>
         </Box>
       </Box>
@@ -89,14 +87,11 @@ const MySubscriptions: React.FC = () => {
               const pkgId = pkg.package_id || pkg.request_id || 'N/A';
               const totalDays = pkg.isFD 
                 ? (moment(pkg.date_of_maturity).diff(moment(pkg.roi_start_date), 'days') || 1)
-                : 120;
-              const pkgProgress = pkg.roi_payout_count ? Math.min((pkg.roi_payout_count / totalDays) * 100, 100) : 0;
-
-              // Calculate Daily Incentive buyers (Max 100)
-              const sliAmount = walletOverview?.singleLevelIncomeByPackage?.[pkgAmount] || 0;
-              const perBuyerIncome = pkgAmount * 0.015;
-              const buyersCount = perBuyerIncome > 0 ? Math.round(sliAmount / perBuyerIncome) : 0;
-              const sliProgress = Math.min((buyersCount / 100) * 100, 100);
+                : (pkg.roi_payout_target || 200);
+              const payoutCount = pkg.roi_payout_count || 0;
+              const pkgProgress = Math.min((payoutCount / totalDays) * 100, 100);
+              const dailyIncentiveAmount = pkgAmount * 0.01;
+              const earnedSoFar = (payoutCount * dailyIncentiveAmount).toFixed(2);
 
               return (
                 <Grid item xs={12} key={pkgId}>
@@ -115,7 +110,7 @@ const MySubscriptions: React.FC = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                             {pkg.isFD ? <AccountBalanceIcon sx={{ fontSize: 16, color: '#6D214F' }} /> : <PaymentsIcon sx={{ fontSize: 16, color: '#6D214F' }} />}
                             <Typography variant="caption" sx={{ fontSize: '0.72rem', fontWeight: 800, color: '#8c6b7d', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                              {pkg.isFD ? 'Fixed Deposit' : `Subscription #${index + 1}`}
+                              {pkg.isFD ? 'Fixed Deposit' : `Investment #${index + 1}`}
                             </Typography>
                           </Box>
                           <Typography variant="h5" sx={{ fontWeight: 900, color: '#6D214F', lineHeight: 1.2 }}>
@@ -139,25 +134,37 @@ const MySubscriptions: React.FC = () => {
 
                       <Divider sx={{ my: 1.5, borderColor: '#f0d0d8' }} />
                       <Box sx={{ mb: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#8c6b7d', fontWeight: 700 }}>
-                          {pkg.isFD ? 'Interest Rate' : 'Daily Incentive'}
-                        </Typography>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 900, color: '#6D214F' }}>
-                          {pkg.isFD ? `${pkg.interest_rate || 0}% p.a.` : `₹${sliAmount.toFixed(2)}`}
-                        </Typography>
+                        <Box>
+                          <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#8c6b7d', fontWeight: 700 }}>
+                            {pkg.isFD ? 'Interest Rate' : 'Daily Incentive'}
+                          </Typography>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 900, color: '#6D214F' }}>
+                            {pkg.isFD ? `${pkg.interest_rate || 0}% p.a.` : `1% (₹${dailyIncentiveAmount.toFixed(2)}/day)`}
+                          </Typography>
+                        </Box>
+                        {!pkg.isFD && (
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#8c6b7d', fontWeight: 700 }}>
+                              Earned So Far
+                            </Typography>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 900, color: '#059669' }}>
+                              ₹{earnedSoFar}
+                            </Typography>
+                          </Box>
+                        )}
                       </Box>
 
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8 }}>
                         <Typography variant="caption" sx={{ fontSize: '0.72rem', color: '#8c6b7d', fontWeight: 700 }}>
-                          {pkg.isFD ? 'Maturity Progress' : `${buyersCount} of 100 Buyers`}
+                          {pkg.isFD ? 'Maturity Progress' : `Daily Incentive: ${payoutCount} of ${totalDays} Days`}
                         </Typography>
                         <Typography variant="caption" sx={{ fontSize: '0.72rem', color: '#6D214F', fontWeight: 800 }}>
-                          {pkg.isFD ? `${pkgProgress.toFixed(0)}%` : `${sliProgress.toFixed(0)}%`}
+                          {pkgProgress.toFixed(0)}%
                         </Typography>
                       </Box>
                       <LinearProgress
                         variant="determinate"
-                        value={pkg.isFD ? pkgProgress : sliProgress}
+                        value={pkgProgress}
                         sx={{
                           height: 8,
                           borderRadius: 4,

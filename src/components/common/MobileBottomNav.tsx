@@ -6,25 +6,37 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { useGetMemberDetails } from '../../api/Memeber';
+import { useGetMemberDetails, useGetWalletOverview } from '../../api/Memeber';
 import TokenService from '../../api/token/tokenService';
+import { ReTopupDialog } from '../../pages/User-Pages/UserDashboard/ReTopupDialog';
 
 const MobileBottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [value, setValue] = React.useState('');
+  const [reTopupOpen, setReTopupOpen] = React.useState(false);
 
   const memberId = TokenService.getMemberId();
-  useGetMemberDetails(memberId);
+  const { data: memberDetails } = useGetMemberDetails(memberId);
+  const { data: walletOverview } = useGetWalletOverview(memberId || '');
+
+  // Backend provides whether user has an initial investment (canReTopup / hasInvestment)
+  const hasInvestment = Boolean(
+    walletOverview?.hasInvestment ??
+    walletOverview?.data?.hasInvestment ??
+    memberDetails?.hasInvestment ??
+    memberDetails?.data?.hasInvestment ??
+    ((Number(walletOverview?.totalPackages ?? walletOverview?.data?.totalPackages ?? memberDetails?.totalPackages ?? memberDetails?.package_value ?? 0)) > 0)
+  );
 
   // Sync state with current path
   React.useEffect(() => {
     if (location.pathname.includes('/user/dashboard')) setValue('/user/dashboard');
-    else if (location.pathname.includes('/user/load-fund')) setValue('/user/load-fund');
-    else if (location.pathname.includes('/user/new-subscription')) setValue('/user/new-subscription');
+    else if (location.search.includes('type=credits') || location.search.includes('type=Credits')) setValue('/user/transactions?type=credits');
+    else if (location.pathname.includes('/user/new-subscription')) setValue(hasInvestment ? 're-topup' : '');
     else if (location.pathname.includes('/user/account/profile')) setValue('/user/account/profile');
     else setValue('');
-  }, [location.pathname]);
+  }, [location.pathname, location.search, hasInvestment]);
 
   if (location.pathname.includes('/user/chat')) return null;
 
@@ -44,8 +56,12 @@ const MobileBottomNav: React.FC = () => {
       >
         <BottomNavigation
           showLabels
-          value={value}
+          value={reTopupOpen ? 're-topup' : value}
           onChange={(_event, newValue) => {
+            if (newValue === 're-topup') {
+              setReTopupOpen(true);
+              return;
+            }
             setValue(newValue);
             navigate(newValue);
           }}
@@ -87,25 +103,33 @@ const MobileBottomNav: React.FC = () => {
           <BottomNavigationAction
             value="/user/dashboard"
             label="Home"
-            icon={<Box className={value === "/user/dashboard" ? "indicator" : ""}>{<HomeIcon sx={{ fontSize: 22 }} />}</Box>}
+            icon={<Box className={!reTopupOpen && value === "/user/dashboard" ? "indicator" : ""}>{<HomeIcon sx={{ fontSize: 22 }} />}</Box>}
           />
           <BottomNavigationAction
-            value="/user/load-fund"
-            label="Add Credit"
-            icon={<Box className={value === "/user/load-fund" ? "indicator" : ""}>{<AccountBalanceWalletIcon sx={{ fontSize: 22 }} />}</Box>}
+            value="/user/transactions?type=credits"
+            label="Credits"
+            icon={<Box className={!reTopupOpen && value === "/user/transactions?type=credits" ? "indicator" : ""}>{<AccountBalanceWalletIcon sx={{ fontSize: 22 }} />}</Box>}
           />
-          <BottomNavigationAction
-            value="/user/new-subscription"
-            label="Re-Topup"
-            icon={<Box className={value === "/user/new-subscription" ? "indicator" : ""}>{<AutorenewIcon sx={{ fontSize: 22 }} />}</Box>}
-          />
+          {hasInvestment && (
+            <BottomNavigationAction
+              value="re-topup"
+              label="Re-Topup"
+              icon={<Box className={reTopupOpen || value === "re-topup" ? "indicator" : ""}>{<AutorenewIcon sx={{ fontSize: 22 }} />}</Box>}
+            />
+          )}
           <BottomNavigationAction
             value="/user/account/profile"
             label="Profile"
-            icon={<Box className={value === "/user/account/profile" ? "indicator" : ""}>{<PersonIcon sx={{ fontSize: 22 }} />}</Box>}
+            icon={<Box className={!reTopupOpen && value === "/user/account/profile" ? "indicator" : ""}>{<PersonIcon sx={{ fontSize: 22 }} />}</Box>}
           />
         </BottomNavigation>
       </Paper>
+
+      {/* Re-Topup Dialog accessible from mobile bottom nav only if user has investment */}
+      {hasInvestment && (
+        <ReTopupDialog open={reTopupOpen} onClose={() => setReTopupOpen(false)} />
+      )}
+
       {/* Spacer to prevent content from being hidden behind nav — Skip on Chat page */}
       {!location.pathname.includes('/user/chat') && <Box sx={{ height: 68 }} />}
     </Box>

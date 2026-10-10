@@ -23,14 +23,14 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { toast } from 'react-toastify';
 
 import TokenService from '../../../api/token/tokenService';
 import { useVerifyPayment, parsePaymentRedirectParams, useGetTransactionDetails, useGetWalletOverview, useGetMemberDetails, useGetDailyPayout } from '../../../api/Memeber';
 
 import ProductsContainer from './ProductsContainer';
+import ReTopupDialog from './ReTopupDialog';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 const carouselSlides = [
   {
@@ -182,12 +182,22 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const [paymentProcessed, setPaymentProcessed] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [reTopupDialogOpen, setReTopupDialogOpen] = useState(false);
   const memberId = TokenService.getMemberId();
   const { data: walletOverview } = useGetWalletOverview(memberId);
   const { data: memberDetails, refetch: refetchMemberDetails } = useGetMemberDetails(memberId);
   const { mutate: verifyPayment, isPending: isVerifyingPayment } = useVerifyPayment();
   const { refetch: refetchTransactions } = useGetTransactionDetails("all");
   useGetDailyPayout(memberId);
+
+  // Backend provides whether user has an initial investment (canReTopup / hasInvestment)
+  const hasInvestment = Boolean(
+    walletOverview?.hasInvestment ??
+    walletOverview?.data?.hasInvestment ??
+    memberDetails?.hasInvestment ??
+    memberDetails?.data?.hasInvestment ??
+    ((Number(walletOverview?.totalPackages ?? walletOverview?.data?.totalPackages ?? memberDetails?.totalPackages ?? memberDetails?.package_value ?? 0)) > 0)
+  );
 
   const handleCopyReferralLink = () => {
     const code = memberDetails?.Member_id || memberDetails?.member_id || memberId;
@@ -260,8 +270,8 @@ const UserDashboard = () => {
     { label: "Transfer", icon: <SyncAltIcon />, route: "/user/transfer", color: "#6D214F" },
     { label: "Scan & Pay", icon: <QrCode2Icon />, route: "/user/my-qr", color: "#6D214F" },
     { label: "P2P Transfer", icon: <SendIcon />, route: "/user/p2p-transfer", color: "#6D214F" },
-    { label: "New Subscription", icon: <InventoryIcon />, route: "/user/new-subscription", color: "#6D214F" },
-    { label: "My Subscription", icon: <ReceiptLongIcon />, route: "/user/my-subscriptions", color: "#6D214F" },
+    { label: "Invest Amount", icon: <InventoryIcon />, route: "/user/new-subscription", color: "#6D214F" },
+    { label: "My Investments", icon: <ReceiptLongIcon />, route: "/user/my-subscriptions", color: "#6D214F" },
   ];
 
   return (
@@ -657,7 +667,7 @@ const UserDashboard = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Package Deposit */}
+      {/* Invest Amount */}
       <ProductsContainer />
 
       {/* Credits Card */}
@@ -679,23 +689,32 @@ const UserDashboard = () => {
           width: '100%'
         }}>
           {/* Left Side: Wallet Balance & Credits info (Parallel Left) */}
-          <Box sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            minWidth: 0,
-            gap: { xs: 1.2, sm: 1.6, md: 2 },
-            bgcolor: '#ffffff',
-            border: '1.5px solid #f0d0d8',
-            borderRadius: { xs: '20px', sm: '24px' },
-            p: { xs: 2.2, sm: 3.2, md: 3.8 },
-            minHeight: { xs: '170px', sm: '200px', md: '220px' },
-            boxShadow: '0 6px 20px rgba(109, 33, 79, 0.05)',
-            transition: 'all 0.2s ease',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
+          <Box 
+            onClick={() => navigate('/user/transactions?type=credits')}
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minWidth: 0,
+              gap: { xs: 1.2, sm: 1.6, md: 2 },
+              bgcolor: '#ffffff',
+              border: '1.5px solid #f0d0d8',
+              borderRadius: { xs: '20px', sm: '24px' },
+              p: { xs: 2.2, sm: 3.2, md: 3.8 },
+              minHeight: { xs: '170px', sm: '200px', md: '220px' },
+              boxShadow: '0 6px 20px rgba(109, 33, 79, 0.05)',
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 10px 26px rgba(109, 33, 79, 0.12)',
+                borderColor: '#e5a5b5'
+              }
+            }}
+          >
             {/* Icon + Title */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.2, sm: 1.6 } }}>
               <Box sx={{
@@ -747,7 +766,7 @@ const UserDashboard = () => {
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden'
             }}>
-              Fund your wallet to unlock packages, deposits, and start growing your returns.
+              Fund your wallet to invest, unlock returns, and start growing your earnings.
             </Typography>
           </Box>
 
@@ -1366,87 +1385,93 @@ const UserDashboard = () => {
         </Box>
       </Box>
 
-      {/* Re-Invest Section */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.4 }}>
-          <Typography sx={{ color: '#2d0f1e', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.15rem' }, letterSpacing: '-0.3px' }}>
-            Re-Invest
-          </Typography>
-        </Box>
-
-        {/* Single Re-Invest Container with Re-Invest Button Inside */}
-        <Box
-          sx={{
-            borderRadius: { xs: '20px', sm: '22px' },
-            background: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)',
-            border: '1.5px solid #BAE6FD',
-            p: { xs: 2, sm: 2.5 },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 2,
-            boxShadow: '0 4px 16px rgba(0, 186, 242, 0.08)',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              boxShadow: '0 6px 20px rgba(0, 186, 242, 0.14)'
-            }
-          }}
-        >
-          {/* Left Side: Icon & Info */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
-            <Box sx={{
-              width: { xs: 46, sm: 52 },
-              height: { xs: 46, sm: 52 },
-              borderRadius: '16px',
-              background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0, 186, 242, 0.3)',
-              flexShrink: 0
-            }}>
-              <AccountBalanceWalletIcon sx={{ fontSize: { xs: 24, sm: 28 }, color: '#FFFFFF' }} />
+      {/* Re-Topup Section (Only displayed once user has made an initial investment) */}
+      {hasInvestment && (
+        <>
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.4 }}>
+              <Typography sx={{ color: '#2d0f1e', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.15rem' }, letterSpacing: '-0.3px' }}>
+                Re-Topup
+              </Typography>
             </Box>
-            <Box>
-              <Typography sx={{ color: '#0369a1', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2 }}>
-                Re-Invest
-              </Typography>
-              <Typography sx={{ color: '#0284c7', fontWeight: 900, fontSize: { xs: '1.25rem', sm: '1.45rem' }, letterSpacing: '-0.3px', mt: 0.3 }}>
-                ₹{Number(walletOverview?.topUpBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </Typography>
+
+            {/* Single Re-Topup Container with Re-Topup Button Inside */}
+            <Box
+              sx={{
+                borderRadius: { xs: '20px', sm: '22px' },
+                background: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)',
+                border: '1.5px solid #BAE6FD',
+                p: { xs: 2, sm: 2.5 },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2,
+                boxShadow: '0 4px 16px rgba(0, 186, 242, 0.08)',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  boxShadow: '0 6px 20px rgba(0, 186, 242, 0.14)'
+                }
+              }}
+            >
+              {/* Left Side: Icon & Info */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
+                <Box sx={{
+                  width: { xs: 46, sm: 52 },
+                  height: { xs: 46, sm: 52 },
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0, 186, 242, 0.3)',
+                  flexShrink: 0
+                }}>
+                  <AutorenewIcon sx={{ fontSize: { xs: 24, sm: 28 }, color: '#FFFFFF' }} />
+                </Box>
+                <Box>
+                  <Typography sx={{ color: '#0369a1', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2 }}>
+                    Re-Topup
+                  </Typography>
+                  <Typography sx={{ color: '#64748B', fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.82rem' }, mt: 0.3 }}>
+                    Credit Balance: <strong style={{ color: '#0284c7' }}>₹{Number(walletOverview?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Right Side: Re-Topup Button Inside Container */}
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => setReTopupDialogOpen(true)}
+                startIcon={<AutorenewIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  fontSize: { xs: '0.8rem', sm: '0.88rem' },
+                  borderRadius: '12px',
+                  px: { xs: 2, sm: 2.8 },
+                  py: { xs: 0.8, sm: 1 },
+                  textTransform: 'none',
+                  boxShadow: '0 3px 10px rgba(0, 186, 242, 0.35)',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #0082CD 0%, #0052cc 100%)',
+                    boxShadow: '0 5px 14px rgba(0, 186, 242, 0.45)'
+                  }
+                }}
+              >
+                Re-Topup
+              </Button>
             </Box>
           </Box>
 
-          {/* Right Side: Re-Invest Button Inside Container */}
-          <Button
-            size="small"
-            variant="contained"
-            onClick={() => navigate('/user/new-subscription')}
-            startIcon={<AutorenewIcon sx={{ fontSize: 18 }} />}
-            sx={{
-              background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
-              color: '#FFFFFF',
-              fontWeight: 800,
-              fontSize: { xs: '0.8rem', sm: '0.88rem' },
-              borderRadius: '12px',
-              px: { xs: 2, sm: 2.8 },
-              py: { xs: 0.8, sm: 1 },
-              textTransform: 'none',
-              boxShadow: '0 3px 10px rgba(0, 186, 242, 0.35)',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              '&:hover': {
-                background: 'linear-gradient(135deg, #0082CD 0%, #0052cc 100%)',
-                boxShadow: '0 5px 14px rgba(0, 186, 242, 0.45)'
-              }
-            }}
-          >
-            Re-Invest
-          </Button>
-        </Box>
-      </Box>
-
+          {/* Re-Topup Dialog */}
+          <ReTopupDialog open={reTopupDialogOpen} onClose={() => setReTopupDialogOpen(false)} />
+        </>
+      )}
     </Box>
   );
 };

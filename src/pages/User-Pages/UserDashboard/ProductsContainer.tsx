@@ -1,68 +1,100 @@
-import React, { useState, useContext } from "react";
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Card, 
-  CardContent, 
-  TextField, 
-  InputAdornment, 
-  CircularProgress, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions 
+import React, { useState, useContext } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  InputAdornment,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert
 } from '@mui/material';
-import PaymentsIcon from '@mui/icons-material/Payments';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import UserContext from "../../../context/user/userContext";
+import PaymentsIcon from '@mui/icons-material/Payments';
+import UserContext from '../../../context/user/userContext';
 import { useGetWalletOverview } from '../../../api/Memeber';
 import { useBuyPackageDirectlyMutation } from '../../../api/Packages';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
 
 const ProductsContainer: React.FC = () => {
+  const queryClient = useQueryClient();
   const { user } = useContext(UserContext);
-  const { data: walletOverview } = useGetWalletOverview(user?.Member_id || '');
+  const memberId = user?.Member_id || '';
+
+  const { data: walletOverview } = useGetWalletOverview(memberId);
   const { mutate: buyPackage, isPending } = useBuyPackageDirectlyMutation();
 
   const [packageAmount, setPackageAmount] = useState<string>('');
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState<boolean>(false);
   const [purchasedAmount, setPurchasedAmount] = useState<number | null>(null);
 
-  const topUpBalance = walletOverview?.topUpBalance || 0;
+  // Single wallet: credits balance
+  const creditBalance = Number(walletOverview?.balance ?? walletOverview?.availableForWithdrawal ?? 0);
+
+  const amountNum = Number(packageAmount);
+  const isEntered = packageAmount.trim() !== '' && !isNaN(amountNum);
+  const isMultipleOf100 = isEntered && amountNum >= 100 && amountNum % 100 === 0;
+  const isBalanceSufficient = isEntered && amountNum <= creditBalance;
+  const isValid = isEntered && isMultipleOf100 && isBalanceSufficient;
+
+  let validationError: string | null = null;
+  if (isEntered) {
+    if (amountNum < 100) {
+      validationError = 'Minimum invest amount is ₹100.';
+    } else if (amountNum % 100 !== 0) {
+      validationError = 'Amount must be in multiples of ₹100 only.';
+    } else if (amountNum > creditBalance) {
+      validationError = `Insufficient Credit Balance! You have ₹${creditBalance.toLocaleString()} but need ₹${amountNum.toLocaleString()}.`;
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!packageAmount || isNaN(Number(packageAmount))) {
-      toast.error("Please enter a valid amount");
+    if (!packageAmount || isNaN(amountNum)) {
+      toast.error('Please enter a valid amount');
       return;
     }
-
-    const amountNum = Number(packageAmount);
 
     if (amountNum < 100) {
-      toast.error("Minimum package amount is ₹100");
+      toast.error('Minimum invest amount is ₹100');
       return;
     }
 
-    if (amountNum > topUpBalance) {
-      toast.error(`Insufficient Balance! You need ₹${amountNum.toLocaleString()} but have ₹${topUpBalance.toLocaleString()}`);
+    if (amountNum % 100 !== 0) {
+      toast.error('Invest amount must be in multiples of ₹100 only');
       return;
     }
 
-    if (!user?.Member_id) {
-      toast.error("User information not found");
+    if (amountNum > creditBalance) {
+      toast.error(`Insufficient Credit Balance! You have ₹${creditBalance.toLocaleString()} but need ₹${amountNum.toLocaleString()}`);
+      return;
+    }
+
+    if (!memberId) {
+      toast.error('User information not found');
       return;
     }
 
     buyPackage(
-      { member_id: user.Member_id, requested_amount: amountNum },
+      { member_id: memberId, requested_amount: amountNum },
       {
         onSuccess: () => {
           setPurchasedAmount(amountNum);
           setSuccessDialogOpen(true);
           setPackageAmount('');
+          queryClient.invalidateQueries({ queryKey: ['walletOverview'] });
+          queryClient.invalidateQueries({ queryKey: ['memberDetails'] });
+          queryClient.invalidateQueries({ queryKey: ['addOns'] });
+        },
+        onError: (err: any) => {
+          toast.error(err?.response?.data?.message || err?.message || 'Investment failed');
         }
       }
     );
@@ -98,11 +130,11 @@ const ProductsContainer: React.FC = () => {
               variant="outlined"
               size="medium"
               type="text"
-              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
               value={packageAmount}
               onChange={(e) => {
                 const val = e.target.value;
-                if (val === "" || /^\d+$/.test(val)) {
+                if (val === '' || /^\d+$/.test(val)) {
                   setPackageAmount(val);
                 }
               }}
@@ -115,37 +147,57 @@ const ProductsContainer: React.FC = () => {
                 ),
               }}
               sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "14px",
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '14px',
                   bgcolor: '#FFF8F0',
-                  "& fieldset": { borderColor: "#f0d0d8", borderWidth: "1.5px" },
-                  "&:hover fieldset": { borderColor: "#E5989B" },
-                  "&.Mui-focused fieldset": { borderColor: "#6D214F", borderWidth: "2px" },
+                  '& fieldset': { borderColor: validationError ? '#ef4444' : '#f0d0d8', borderWidth: '1.5px' },
+                  '&:hover fieldset': { borderColor: validationError ? '#dc2626' : '#E5989B' },
+                  '&.Mui-focused fieldset': { borderColor: validationError ? '#dc2626' : '#6D214F', borderWidth: '2px' },
                 },
-                "& .MuiInputLabel-root": {
-                  color: '#7a5060',
+                '& .MuiInputLabel-root': {
+                  color: validationError ? '#ef4444' : '#7a5060',
                   fontWeight: 600,
                 },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: '#6D214F',
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: validationError ? '#dc2626' : '#6D214F',
                 },
-                "& input": {
-                  MozAppearance: "textfield",
-                  color: "#2d0f1e",
+                '& input': {
+                  MozAppearance: 'textfield',
+                  color: '#2d0f1e',
                   fontWeight: 600,
                 },
-                "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
-                  WebkitAppearance: "none",
-                  display: "none",
+                '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  display: 'none',
                   margin: 0,
                 },
               }}
             />
 
+            {/* Validation Error */}
+            {validationError && (
+              <Alert
+                severity="error"
+                sx={{
+                  mt: 1.2,
+                  borderRadius: '12px',
+                  py: 0.2,
+                  px: 1.2,
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  bgcolor: '#fee2e2',
+                  color: '#991b1b',
+                  '& .MuiAlert-icon': { fontSize: '18px', color: '#dc2626' }
+                }}
+              >
+                {validationError}
+              </Alert>
+            )}
+
             {/* Credit Balance displayed below amount text box on left corner */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 0.75, mb: 1, pl: 0.5 }}>
               <Typography variant="caption" sx={{ color: '#7a5060', fontWeight: 600 }}>
-                Credit Balance: <span style={{ color: '#6D214F', fontWeight: 800 }}>₹{Number(topUpBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                Credit Balance: <span style={{ color: '#6D214F', fontWeight: 800 }}>₹{Number(creditBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </Typography>
             </Box>
 
@@ -153,19 +205,19 @@ const ProductsContainer: React.FC = () => {
               type="submit"
               variant="contained"
               fullWidth
-              disabled={!packageAmount || isPending}
+              disabled={!isValid || isPending}
               sx={{
-                mt: 2.5,
-                py: 1.5,
-                background: !packageAmount ? '#f0d0d8' : 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
-                color: !packageAmount ? '#a88098' : '#FFF8F0',
+                mt: 2,
+                py: 1.4,
+                background: !isValid ? '#f0d0d8' : 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                color: !isValid ? '#a88098' : '#FFF8F0',
                 fontWeight: 800,
                 fontSize: '0.95rem',
                 textTransform: 'none',
                 borderRadius: '14px',
-                boxShadow: !packageAmount ? 'none' : '0 4px 16px rgba(109,33,79,0.25)',
+                boxShadow: !isValid ? 'none' : '0 4px 16px rgba(109,33,79,0.25)',
                 '&:hover': {
-                  background: !packageAmount ? '#f0d0d8' : 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
+                  background: !isValid ? '#f0d0d8' : 'linear-gradient(135deg, #4e1739 0%, #6D214F 100%)',
                   boxShadow: '0 6px 20px rgba(109,33,79,0.35)',
                   transform: 'translateY(-1px)'
                 },
@@ -175,7 +227,7 @@ const ProductsContainer: React.FC = () => {
                 }
               }}
             >
-              {isPending ? <CircularProgress size={22} sx={{ color: '#FFF8F0' }} /> : "Invest Amount"}
+              {isPending ? <CircularProgress size={22} sx={{ color: '#FFF8F0' }} /> : 'Invest Amount'}
             </Button>
           </Box>
         </CardContent>

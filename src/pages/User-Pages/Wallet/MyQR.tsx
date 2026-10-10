@@ -45,7 +45,7 @@ import jsQR from 'jsqr';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
 import TokenService from '../../../api/token/tokenService';
-import jeeScImage from '../../../assets/jee_sc.png';
+import jeeScImage from '../../../assets/E-cashScanner.jpeg';
 
 const decoder = (jsQR as any).default || jsQR;
 
@@ -379,13 +379,12 @@ const MyQR: React.FC = () => {
         payment_method: 'UPI/QR',
       });
 
-      toast.success('Deposit request submitted successfully for approval!');
       setDepositAmount('');
       setDepositTxNo('');
       setDepositScreenshotFile(null);
       setDepositScreenshotPreview(null);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to submit deposit request');
+      console.error('Deposit error:', err);
     } finally {
       setIsDepositSubmitting(false);
     }
@@ -775,41 +774,48 @@ const MyQR: React.FC = () => {
               </PaytmIconBadge>
             </Box>
 
-            {/* Company UPI QR Preview Box */}
+            {/* Company UPI QR Preview Box (E-cash Scanner) */}
             <Box
               sx={{
-                p: 1.8,
-                border: '1.5px dashed #00BAF2',
-                borderRadius: '16px',
-                bgcolor: '#F8FAFC',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 textAlign: 'center',
-                gap: 1,
+                gap: 1.2,
                 mb: 2.5,
               }}
             >
               <Typography variant="caption" sx={{ fontWeight: 800, color: '#002970', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Scan Company QR & Pay via UPI
+                Scan & Pay via PhonePe / UPI
               </Typography>
               <Box
                 sx={{
                   width: '100%',
-                  maxWidth: 160,
-                  bgcolor: '#FFFFFF',
-                  borderRadius: '12px',
+                  maxWidth: 220,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  bgcolor: '#ffffff',
                   p: 1,
-                  boxShadow: '0 2px 10px rgba(0, 186, 242, 0.12)',
-                  border: '1px solid #E2E8F0',
+                  boxShadow: '0 4px 16px rgba(0, 186, 242, 0.12)',
+                  border: '1.5px solid #BAE6FD',
                 }}
               >
-                <Box component="img" src={jeeScImage} alt="Payment QR Code" sx={{ width: '100%', height: 'auto', objectFit: 'contain', borderRadius: '8px' }} />
-              </Box>
-              <Box sx={{ bgcolor: '#E0F2FE', px: 1.8, py: 0.4, borderRadius: '8px', border: '1px solid #BAE6FD' }}>
-                <Typography variant="caption" sx={{ color: '#002970', fontWeight: 800, letterSpacing: '0.4px', fontSize: '0.75rem' }}>
-                  UPI ID: <span style={{ textDecoration: 'underline' }}>ecash01qr@fbl</span>
-                </Typography>
+                <Box
+                  component="img"
+                  src={jeeScImage}
+                  alt="E-Cash Scanner QR"
+                  sx={{
+                    width: '100%',
+                    height: 'auto',
+                    maxHeight: '320px',
+                    objectFit: 'contain',
+                    display: 'block',
+                    borderRadius: '8px',
+                  }}
+                />
               </Box>
             </Box>
 
@@ -851,6 +857,10 @@ const MyQR: React.FC = () => {
                   placeholder="Enter 12-digit UTR or Txn Unique Ref No."
                   value={depositTxNo}
                   onChange={(e) => setDepositTxNo(e.target.value)}
+                  helperText="Must be a unique transaction reference number (UTR / Txn ID)"
+                  FormHelperTextProps={{
+                    sx: { color: '#64748B', fontWeight: 600, fontSize: '0.72rem', mt: 0.5, ml: 0.5 }
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">

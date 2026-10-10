@@ -20,13 +20,13 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
     isExpandable: false,
   }, */
   {
-    name: "New Subscription",
+    name: "Invest Amount",
     icon: <PaymentsIcon />,
     path: "/user/new-subscription",
     isExpandable: false,
   },
   {
-    name: "My Subscription",
+    name: "My Investments",
     icon: <ReceiptLongIcon />,
     path: "/user/my-subscriptions",
     isExpandable: false,

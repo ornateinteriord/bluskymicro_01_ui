@@ -299,7 +299,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
                   display: 'inline-block'
                 }}
               >
-                Select RD Package
+                Select Invest Amount
               </Typography>
             ) : renewalDays !== undefined && renewalDays > 0 ? (
               <Typography
@@ -369,7 +369,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
               transition: 'all 0.3s ease'
             }}
           >
-            {isNewUser ? 'Select RD Package' : 'Deposit Amount'}
+            {isNewUser ? 'Select Invest Amount' : 'Deposit Amount'}
           </Button>
         </CardContent>
       </Card >

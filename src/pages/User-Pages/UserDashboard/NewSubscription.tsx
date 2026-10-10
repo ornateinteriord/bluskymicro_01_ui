@@ -77,19 +77,19 @@ const NewSubscription: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.Member_id || !formData.package) {
-      toast.error("Please enter or select a package amount");
+      toast.error("Please enter invest amount");
       return;
     }
 
     const packageAmt = Number(formData.package);
     if (isNaN(packageAmt) || packageAmt < 100) {
-      toast.error("Minimum package amount is ₹100");
+      toast.error("Minimum invest amount is ₹100");
       return;
     }
 
-    const availableBalance = Number(walletOverview?.topUpBalance || 0);
+    const availableBalance = Number(walletOverview?.balance ?? walletOverview?.availableForWithdrawal ?? 0);
     if (packageAmt > availableBalance) {
-      toast.error(`Insufficient Purchase Balance! You have ₹${availableBalance.toLocaleString()} but need ₹${packageAmt.toLocaleString()}`);
+      toast.error(`Insufficient Credit Balance! You have ₹${availableBalance.toLocaleString()} but need ₹${packageAmt.toLocaleString()}`);
       return;
     }
 
@@ -104,7 +104,7 @@ const NewSubscription: React.FC = () => {
       requested_amount: packageAmt,
     }, {
       onSuccess: () => {
-        let packageName = `₹${packageAmt.toLocaleString()} Deposit`;
+        let packageName = `₹${packageAmt.toLocaleString()} Investment`;
         
         setPurchasedPkgDetails({
           targetMemberId: formData.targetMemberId || user.Member_id,
@@ -150,7 +150,7 @@ const NewSubscription: React.FC = () => {
     <Box sx={{ p: { xs: 2, md: 4 }, display: 'flex', justifyContent: 'center', bgcolor: '#F8FAFC', minHeight: '100vh' }}>
       <Card sx={{ maxWidth: 600, width: '100%', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0', boxShadow: "0 15px 35px rgba(0,0,0,0.2)", borderRadius: '28px', color: '#0F172A', alignSelf: 'flex-start' }}>
         <CardHeader 
-          title="NEW SUBSCRIPTION" 
+          title="INVEST AMOUNT" 
           sx={{ bgcolor: '#F8FAFC', color: '#0F172A', py: 2.5, textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
           titleTypographyProps={{ variant: 'subtitle1', fontWeight: 900, letterSpacing: '1px' }}
         />
@@ -193,9 +193,9 @@ const NewSubscription: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>
-              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Your Purchase Balance</Typography>
+              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Credit Balance</Typography>
               <TextField
-                value={`${Number(walletOverview?.topUpBalance || 0).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`}
+                value={`₹${Number(walletOverview?.balance ?? walletOverview?.availableForWithdrawal ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`}
                 fullWidth
                 size="small"
                 disabled
@@ -204,7 +204,7 @@ const NewSubscription: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>
-              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Amount (₹) <span style={{color: '#ef4444'}}>*</span></Typography>
+              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Invest Amount (₹) <span style={{color: '#ef4444'}}>*</span></Typography>
               <TextField
                 name="package"
                 type="text"
@@ -241,7 +241,7 @@ const NewSubscription: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>
-              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Topup Date</Typography>
+              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Date</Typography>
               <TextField
                 value={new Date().toLocaleDateString('en-GB')}
                 fullWidth
@@ -276,7 +276,7 @@ const NewSubscription: React.FC = () => {
                   }
                 }}
               >
-                {isSubmitting ? "Processing..." : "Buy Package"}
+                {isSubmitting ? "Processing..." : "Invest Amount"}
               </Button>
             </Box>
           </form>
@@ -300,11 +300,11 @@ const NewSubscription: React.FC = () => {
         fullWidth
       >
         <DialogTitle sx={{ textAlign: 'center', pt: 4, color: '#10b981', fontWeight: 800, fontSize: '1.5rem' }}>
-          Subscription Successful!
+          Investment Successful!
         </DialogTitle>
         <DialogContent sx={{ pb: 1 }}>
           <Typography variant="body1" sx={{ textAlign: 'center', mb: 4, color: '#475569' }}>
-            Package has been successfully activated for the target member.
+            Investment has been successfully activated for the target member.
           </Typography>
           <Box sx={{ bgcolor: 'rgba(0,0,0,0.2)', p: 3, borderRadius: '16px', border: '1px solid #E2E8F0' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
@@ -313,15 +313,15 @@ const NewSubscription: React.FC = () => {
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
               <Typography variant="body2" sx={{ color: '#475569' }}>Target Name</Typography>
-              <Typography variant="h6" sx={{ color: '#0000', fontWeight: 700 }}>{purchasedPkgDetails?.targetName}</Typography>
+              <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 700 }}>{purchasedPkgDetails?.targetName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#475569' }}>Package</Typography>
+              <Typography variant="body2" sx={{ color: '#475569' }}>Investment</Typography>
               <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 700 }}>{purchasedPkgDetails?.packageName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="body2" sx={{ color: '#475569' }}>Amount Paid</Typography>
-              <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700 }}>{Number(purchasedPkgDetails?.amount).toFixed(2)}</Typography>
+              <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700 }}>₹{Number(purchasedPkgDetails?.amount).toFixed(2)}</Typography>
             </Box>
           </Box>
         </DialogContent>

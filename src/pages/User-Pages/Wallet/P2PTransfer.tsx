@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Paper, TextField, MenuItem, CircularProgress, Stack, Avatar, Divider, IconButton } from '@mui/material';
+import { Box, Typography, Button, Paper, TextField, CircularProgress, Stack, Avatar, Divider, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useGetWalletOverview, useGetMemberDetails, useLookupMemberForTransfer, useTransferP2PWallet } from '../../../api/Memeber';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
@@ -33,7 +33,6 @@ const P2PTransfer: React.FC = () => {
   const transferMutation = useTransferP2PWallet();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [sourceWallet, setSourceWallet] = useState<'Top Up Wallet' | 'Withdrawal Wallet'>('Top Up Wallet');
   const [amount, setAmount] = useState<string>('');
   const [scanMode, setScanMode] = useState<'camera' | 'manual'>('camera');
   const [manualId, setManualId] = useState<string>('');
@@ -45,9 +44,7 @@ const P2PTransfer: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isScanning, setIsScanning] = useState<boolean>(false);
 
-  const maxBalance = sourceWallet === 'Top Up Wallet' 
-    ? Number(walletOverview?.topUpBalance || 0) 
-    : Number(walletOverview?.balance || 0);
+  const maxBalance = Number(walletOverview?.balance || 0);
 
   const handleStep1Submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +54,7 @@ const P2PTransfer: React.FC = () => {
       return;
     }
     if (numAmount > maxBalance) {
-      toast.error(`Insufficient balance in your ${sourceWallet === 'Top Up Wallet' ? 'Top Up Wallet' : 'Payouts'}`);
+      toast.error('Insufficient balance in your Credits Wallet');
       return;
     }
     setStep(2);
@@ -196,7 +193,7 @@ const P2PTransfer: React.FC = () => {
       await transferMutation.mutateAsync({
         senderId: memberDetails?.Member_id || memberDetails?.member_id || '',
         recipientId: recipient.Member_id || recipient.member_id || '',
-        sourceWallet: sourceWallet === 'Withdrawal Wallet' ? 'Earning Wallet' : sourceWallet,
+        sourceWallet: 'Credits',
         amount: parseFloat(amount),
         idToken,
       });
@@ -275,43 +272,31 @@ const P2PTransfer: React.FC = () => {
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="caption" sx={{ color: '#6D214F', mb: 0.8, fontWeight: 800, display: 'block', textTransform: 'uppercase' }}>
-                  Select Source Wallet
+                  Source Wallet
                 </Typography>
-                <TextField
-                  select
-                  fullWidth
-                  value={sourceWallet}
-                  onChange={(e) => setSourceWallet(e.target.value as any)}
+                <Box
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: '#2d0f1e',
-                      bgcolor: '#FFF8F0',
-                      borderRadius: '16px',
-                      fontWeight: 700,
-                      '& fieldset': { borderColor: '#f0d0d8' },
-                      '&:hover fieldset': { borderColor: '#E5989B' },
-                      '&.Mui-focused fieldset': { borderColor: '#6D214F', borderWidth: '2px' },
-                    },
-                    '& .MuiSelect-icon': { color: '#6D214F' },
+                    p: 1.8,
+                    borderRadius: '16px',
+                    border: '1.5px solid #f0d0d8',
+                    bgcolor: '#FFF8F0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  <MenuItem value="Top Up Wallet" sx={{ bgcolor: '#FFF8F0', color: '#2d0f1e' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                      <span>Top Up Wallet</span>
-                      <span style={{ color: '#6D214F', fontWeight: 'bold', marginLeft: '10px' }}>
-                        ₹{Number(walletOverview?.topUpBalance || 0).toFixed(2)}
-                      </span>
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="Withdrawal Wallet" sx={{ bgcolor: '#FFF8F0', color: '#2d0f1e' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                      <span>Payouts</span>
-                      <span style={{ color: '#6D214F', fontWeight: 'bold', marginLeft: '10px' }}>
-                        ₹{Number(walletOverview?.balance || 0).toFixed(2)}
-                      </span>
-                    </Box>
-                  </MenuItem>
-                </TextField>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, color: '#6D214F', fontSize: '0.9rem' }}>
+                      Credits Wallet
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#8c6b7d' }}>
+                      Available for Transfer & Withdrawal
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontWeight: 900, color: '#6D214F', fontSize: '1.1rem' }}>
+                    ₹{Number(walletOverview?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Typography>
+                </Box>
               </Box>
 
               <Box sx={{ p: 2, borderRadius: '16px', bgcolor: '#FFF8F0', border: '1px solid #f0d0d8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -611,7 +596,7 @@ const P2PTransfer: React.FC = () => {
                     From Wallet:
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#2d0f1e', fontWeight: 800 }}>
-                    {sourceWallet === 'Top Up Wallet' ? 'Top Up Wallet' : 'Payouts'}
+                    Credits Wallet
                   </Typography>
                 </Stack>
 
@@ -624,7 +609,7 @@ const P2PTransfer: React.FC = () => {
                       ₹{parseFloat(amount).toFixed(2)}
                     </Typography>
                     <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 700, display: 'block', fontSize: '11px' }}>
-                      (Top Up Wallet)
+                      (Credits Wallet)
                     </Typography>
                   </Box>
                 </Stack>

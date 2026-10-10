@@ -9,7 +9,7 @@ import TokenService from '../../../api/token/tokenService';
 import { useGetWalletOverview } from '../../../api/Memeber';
 import { useRequestAddOnMutation, useGetLoadFundConfig, useUploadPaymentScreenshot } from '../../../api/Packages';
 import { toast } from 'react-toastify';
-import jeeScImage from '../../../assets/jee_sc.png';
+import ecashScannerImage from '../../../assets/E-cashScanner.jpeg';
 
 const LoadFundPage: React.FC = () => {
   const navigate = useNavigate();
@@ -73,13 +73,12 @@ const LoadFundPage: React.FC = () => {
         payment_method: 'UPI/QR',
       });
 
-      toast.success('Deposit request submitted successfully for approval!');
       setAmount('');
       setTxNo('');
       setScreenshotFile(null);
       setScreenshotPreview(null);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to submit load fund request');
+      console.error('Load fund error:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -145,18 +144,59 @@ const LoadFundPage: React.FC = () => {
               </Typography>
             </Box>
 
-            {/* Scan to Pay QR Code */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', p: 2.5, border: '1.5px dashed #E5989B', borderRadius: '20px', bgcolor: '#FFF8F0', gap: 1.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#6D214F', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Scan to Pay via UPI
+            {/* E-Cash Scanner QR Card */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                p: { xs: 2, sm: 2.5 },
+                bgcolor: '#FFF8F0',
+                borderRadius: '20px',
+                border: '1.5px dashed #E5989B',
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 800,
+                  color: '#6D214F',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  mb: 1.5,
+                }}
+              >
+                Scan & Pay via UPI / PhonePe
               </Typography>
-              <Box sx={{ width: '100%', maxWidth: 220, bgcolor: '#FFFFFF', borderRadius: '16px', p: 1.5, boxShadow: '0 4px 14px rgba(109,33,79,0.08)', border: '1px solid #f0d0d8' }}>
-                <Box component="img" src={jeeScImage} alt="Payment QR Code" sx={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
-              </Box>
-              <Box sx={{ bgcolor: 'rgba(244, 201, 93, 0.25)', px: 2, py: 0.75, borderRadius: '10px', border: '1px solid rgba(244, 201, 93, 0.6)' }}>
-                <Typography variant="body2" sx={{ color: '#6D214F', fontWeight: 800, letterSpacing: '0.5px' }}>
-                  UPI ID: <span style={{ textDecoration: 'underline' }}>ecash01qr@fbl</span>
-                </Typography>
+              <Box
+                sx={{
+                  width: '100%',
+                  maxWidth: 240,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  bgcolor: '#ffffff',
+                  p: 1.2,
+                  boxShadow: '0 4px 16px rgba(109,33,79,0.1)',
+                  border: '1px solid #f0d0d8',
+                }}
+              >
+                <Box
+                  component="img"
+                  src={ecashScannerImage}
+                  alt="E-Cash Scanner QR Code"
+                  sx={{
+                    width: '100%',
+                    height: 'auto',
+                    maxHeight: '360px',
+                    objectFit: 'contain',
+                    display: 'block',
+                    borderRadius: '10px',
+                  }}
+                />
               </Box>
             </Box>
 
@@ -193,9 +233,13 @@ const LoadFundPage: React.FC = () => {
               value={txNo}
               onChange={(e) => setTxNo(e.target.value)}
               placeholder="Enter 12-digit UTR or Txn Ref"
+              helperText="Must be a unique transaction reference number (UTR / Txn ID)"
               slotProps={{
                 inputLabel: {
                   sx: { color: '#8c6b7d', '&.Mui-focused': { color: '#6D214F' } }
+                },
+                formHelperText: {
+                  sx: { color: '#8c6b7d', fontWeight: 600, fontSize: '0.72rem', mt: 0.5 }
                 }
               }}
               sx={{

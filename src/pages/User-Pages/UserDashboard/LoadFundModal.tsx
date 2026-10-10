@@ -70,7 +70,7 @@ const LoadFundModal: React.FC<LoadFundModalProps> = ({ open, onClose }) => {
       await requestAddOn.mutateAsync({
         member_id: memberId || '',
         requested_amount: Number(amount),
-        tx_no: txNo,
+        tx_no: txNo.trim(),
         screenshot_url: url || undefined,
         payment_method: paymentMethod,
       });
@@ -83,7 +83,6 @@ const LoadFundModal: React.FC<LoadFundModalProps> = ({ open, onClose }) => {
       onClose();
     } catch (err: any) {
       console.error('Submit error:', err);
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to submit load fund request');
     } finally {
       setIsSubmitting(false);
     }
@@ -327,9 +326,13 @@ const LoadFundModal: React.FC<LoadFundModalProps> = ({ open, onClose }) => {
                     value={txNo}
                     onChange={(e) => setTxNo(e.target.value)}
                     placeholder="Enter Transaction ID"
+                    helperText="Must be a unique transaction reference number / TX hash"
                     slotProps={{
                       inputLabel: {
                         sx: { color: '#475569', '&.Mui-focused': { color: '#0284C7' } }
+                      },
+                      formHelperText: {
+                        sx: { color: '#64748B', fontWeight: 600, fontSize: '0.72rem', mt: 0.5 }
                       }
                     }}
                     sx={{

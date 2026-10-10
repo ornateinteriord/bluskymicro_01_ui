@@ -21,6 +21,8 @@ import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SendIcon from '@mui/icons-material/Send';
 import PersonIcon from '@mui/icons-material/Person';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
+import ecashScannerImg from '../../../assets/E-cashScanner.jpeg';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import jsQR from 'jsqr';
@@ -58,9 +60,9 @@ const EcashScanner: React.FC = () => {
   // Manual & Payment Dialog States
   const [manualInput, setManualInput] = useState<string>('');
   const [recipient, setRecipient] = useState<any>(null);
+  const [qrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<string>('');
-  const [sourceWallet, setSourceWallet] = useState<'Top Up Wallet' | 'Earning Wallet'>('Top Up Wallet');
 
   const stopCamera = useCallback(() => {
     if (animFrameId.current) {
@@ -244,13 +246,10 @@ const EcashScanner: React.FC = () => {
       return;
     }
 
-    const availableBalance =
-      sourceWallet === 'Top Up Wallet'
-        ? Number(walletOverview?.topUpBalance || 0)
-        : Number(walletOverview?.balance || 0);
+    const availableBalance = Number(walletOverview?.balance || 0);
 
     if (numAmount > availableBalance) {
-      toast.error(`Insufficient balance in ${sourceWallet}`);
+      toast.error('Insufficient Credits balance');
       return;
     }
 
@@ -258,7 +257,7 @@ const EcashScanner: React.FC = () => {
       await transferMutation.mutateAsync({
         senderId: memberDetails?.Member_id || memberDetails?.member_id || currentMemberId || '',
         recipientId: recipient?.Member_id || recipient?.member_id || '',
-        sourceWallet: sourceWallet,
+        sourceWallet: 'Credits',
         amount: numAmount,
         idToken: 'BYPASS_TOKEN',
       });
@@ -343,6 +342,19 @@ const EcashScanner: React.FC = () => {
               {torchOn ? <FlashOnIcon /> : <FlashOffIcon />}
             </IconButton>
           )}
+
+          <IconButton
+            onClick={() => setQrModalOpen(true)}
+            sx={{
+              bgcolor: 'rgba(255, 255, 255, 0.15)',
+              color: '#FFFFFF',
+              backdropFilter: 'blur(8px)',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' },
+            }}
+            title="View E-cash QR"
+          >
+            <QrCode2Icon />
+          </IconButton>
 
           <IconButton
             onClick={toggleCameraFacing}
@@ -647,44 +659,29 @@ const EcashScanner: React.FC = () => {
                 <Typography variant="caption" sx={{ color: '#475569', fontWeight: 800, mb: 0.8, display: 'block', textTransform: 'uppercase' }}>
                   Pay From Wallet
                 </Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-                  <Box
-                    onClick={() => setSourceWallet('Top Up Wallet')}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: '14px',
-                      border: `2px solid ${sourceWallet === 'Top Up Wallet' ? '#00BAF2' : '#E2E8F0'}`,
-                      bgcolor: sourceWallet === 'Top Up Wallet' ? '#F0F9FF' : '#F8FAFC',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#002970' }}>
-                      Top Up Wallet
+                <Box
+                  sx={{
+                    p: 1.8,
+                    borderRadius: '16px',
+                    border: '2px solid #00BAF2',
+                    bgcolor: '#F0F9FF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 4px 12px rgba(0, 186, 242, 0.1)',
+                  }}
+                >
+                  <Box>
+                    <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: '#002970', textTransform: 'uppercase' }}>
+                      Credits Wallet
                     </Typography>
-                    <Typography sx={{ fontSize: '0.95rem', fontWeight: 900, color: '#0F172A' }}>
-                      ₹{Number(walletOverview?.topUpBalance || 0).toLocaleString()}
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    onClick={() => setSourceWallet('Earning Wallet')}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: '14px',
-                      border: `2px solid ${sourceWallet === 'Earning Wallet' ? '#00BAF2' : '#E2E8F0'}`,
-                      bgcolor: sourceWallet === 'Earning Wallet' ? '#F0F9FF' : '#F8FAFC',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#002970' }}>
-                      Payout Balance
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.95rem', fontWeight: 900, color: '#0F172A' }}>
-                      ₹{Number(walletOverview?.balance || 0).toLocaleString()}
+                    <Typography sx={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
+                      Available for Transfer
                     </Typography>
                   </Box>
+                  <Typography sx={{ fontSize: '1.2rem', fontWeight: 900, color: '#00BAF2' }}>
+                    ₹{Number(walletOverview?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Typography>
                 </Box>
               </Box>
 
@@ -782,6 +779,54 @@ const EcashScanner: React.FC = () => {
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* E-Cash Scanner QR Card Modal */}
+      <Dialog
+        open={qrModalOpen}
+        onClose={() => setQrModalOpen(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: '#FFF8F0',
+            borderRadius: '24px',
+            p: 2.5,
+            maxWidth: '360px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 20px 48px rgba(0,0,0,0.3)',
+          }
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            component="img"
+            src={ecashScannerImg}
+            alt="E-Cash Scanner QR Card"
+            sx={{
+              width: '100%',
+              maxWidth: 300,
+              height: 'auto',
+              borderRadius: '20px',
+              boxShadow: '0 8px 24px rgba(109,33,79,0.12)',
+              bgcolor: '#ffffff',
+            }}
+          />
+          <Button
+            onClick={() => setQrModalOpen(false)}
+            variant="contained"
+            fullWidth
+            sx={{
+              mt: 1,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+              color: '#FFF8F0',
+              fontWeight: 800,
+              textTransform: 'none'
+            }}
+          >
+            Close
+          </Button>
+        </Box>
+      </Dialog>
     </Box>
   );
 };

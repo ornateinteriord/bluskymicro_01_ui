@@ -51,7 +51,7 @@ const PurchaseWallet = () => {
             Purchase Wallet
           </Typography>
           <Typography variant="caption" sx={{ color: '#8c6b7d', fontWeight: 600 }}>
-            Active package balance & history
+            Active invest amount balance & history
           </Typography>
         </Box>
       </Box>

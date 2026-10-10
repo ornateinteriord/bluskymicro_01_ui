@@ -236,8 +236,19 @@ export const getTransactionColumns = () => [
     width: "120px"
   },
   {
+    name: "Type",
+    selector: (row: any) => row.transaction_type || row.benefit_type || "Transaction",
+    sortable: true,
+    width: "150px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 700, color: '#002970', fontSize: '12px' }}>
+        {row.transaction_type || row.benefit_type || "Transaction"}
+      </span>
+    )
+  },
+  {
     name: "Description",
-    selector: (row: any) => (row.description || "-").replace(/\/300/g, '/120'),
+    selector: (row: any) => row.description || "-",
     sortable: true,
     wrap: true,
   },
@@ -245,9 +256,10 @@ export const getTransactionColumns = () => [
     name: "Credit",
     selector: (row: any) => {
       const ew = parseFloat(row.ew_credit || 0);
+      const tw = parseFloat(row.tw_credit || 0);
       const uw = parseFloat(row.uw_credit || 0);
       const regular = parseFloat(row.credit || 0);
-      const amt = ew > 0 ? ew : (uw > 0 ? uw : regular);
+      const amt = ew > 0 ? ew : (tw > 0 ? tw : (uw > 0 ? uw : regular));
       return amt > 0 ? `${parseFloat(amt.toString()).toLocaleString('en-US')}` : "-";
     },
     sortable: true,
@@ -257,9 +269,10 @@ export const getTransactionColumns = () => [
     name: "Debit",
     selector: (row: any) => {
       const ew = parseFloat(row.ew_debit || 0);
+      const tw = parseFloat(row.tw_debit || 0);
       const uw = parseFloat(row.uw_debit || 0);
       const regular = parseFloat(row.debit || 0);
-      const amt = ew > 0 ? ew : (uw > 0 ? uw : regular);
+      const amt = ew > 0 ? ew : (tw > 0 ? tw : (uw > 0 ? uw : regular));
       return amt > 0 ? `${parseFloat(amt.toString()).toLocaleString('en-US')}` : "-";
     },
     sortable: true,

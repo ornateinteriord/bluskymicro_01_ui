@@ -973,14 +973,19 @@ export const useTransferP2PWallet = () => {
     mutationFn: async (transferData: {
       senderId: string;
       recipientId: string;
-      sourceWallet: 'Earning Wallet' | 'Top Up Wallet';
+      sourceWallet: 'Earning Wallet' | 'Top Up Wallet' | 'Credits' | 'Credits Wallet';
       amount: number;
       idToken: string;
     }) => {
       const payload = {
         memberId: transferData.senderId,
         receiverId: transferData.recipientId,
-        fromWallet: transferData.sourceWallet === 'Earning Wallet' ? 'Earnings Wallet' : 'Top Up Wallet',
+        fromWallet:
+          transferData.sourceWallet === 'Credits' || transferData.sourceWallet === 'Credits Wallet'
+            ? 'Credits'
+            : transferData.sourceWallet === 'Earning Wallet'
+            ? 'Earnings Wallet'
+            : 'Top Up Wallet',
         amount: transferData.amount,
         otp: transferData.idToken,
       };
