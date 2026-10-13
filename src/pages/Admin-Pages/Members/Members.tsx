@@ -1,5 +1,5 @@
 import DataTable from 'react-data-table-component';
-import { Card, CardContent, TextField, Typography, Button, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Box, Divider, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Select, MenuItem, InputLabel,  } from '@mui/material';
+import { Card, CardContent, TextField, Typography, Button, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Box, Divider, InputAdornment } from '@mui/material';
 import { CheckCircle, WarningAmber } from '@mui/icons-material';
 import { DASHBOARD_CUTSOM_STYLE, getMembersColumns, getPendingMembersColumns, getPermissionsColumns } from '../../../utils/DataTableColumnsProvider';
 import './Members.scss'
@@ -242,7 +242,7 @@ export const Members = () => {
   const { memberdata, isLoading } = useMembers("All");
   return (
     <MemberTable
-      title="Members"
+      title="All Members"
       summaryTitle="List of All Members"
       showEdit
       showView
@@ -287,43 +287,20 @@ export const PendingMembers = () => {
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [packageAmount, setPackageAmount] = useState<string>('');
-  const [customAmount, setCustomAmount] = useState<string>('');
-  const [activationType, setActivationType] = useState<'with' | 'without'>('with');
+  const [investmentAmount, setInvestmentAmount] = useState<string>('');
 
   const handleActivateClick = (member: any) => {
     setSelectedMember(member);
-    // Don't pre-fill package amount to ensure "Select Package" is shown
-    setPackageAmount('');
-    setCustomAmount('');
-    setActivationType('with');
+    setInvestmentAmount(member?.package_value ? String(member.package_value) : '');
     setDialogOpen(true);
   };
 
   const handleConfirm = () => {
     if (!selectedMember) return;
 
-    if (activationType === 'without') {
-      activatePackage(
-        { memberId: selectedMember.Member_id, packageType: 'NONE' },
-        {
-          onSuccess: () => {
-            setDialogOpen(false);
-            setSelectedMember(null);
-            setPackageAmount('');
-            toast.success(`${selectedMember.Name} activated successfully without a package.`);
-          },
-          onError: () => {
-            setDialogOpen(false);
-          },
-        }
-      );
-      return;
-    }
-
-    const amt = packageAmount === 'custom' ? Number(customAmount) : Number(packageAmount);
+    const amt = Number(investmentAmount);
     if (!amt || amt <= 0) {
-      toast.error('Please enter a valid package amount or select None.');
+      toast.error('Please enter a valid investment amount.');
       return;
     }
 
@@ -333,12 +310,9 @@ export const PendingMembers = () => {
       { memberId: selectedMember.Member_id, packageType },
       {
         onSuccess: () => {
-          // if (response.success) {
-          //   toast.success(`${selectedMember.Name} activated successfully!`);
-          // }
           setDialogOpen(false);
           setSelectedMember(null);
-          setPackageAmount('');
+          setInvestmentAmount('');
         },
         onError: () => {
           setDialogOpen(false);
@@ -406,71 +380,28 @@ export const PendingMembers = () => {
             </Grid>
           </Box>
 
-          {/* Activation Type Selection */}
-          <FormControl component="fieldset" sx={{ mb: 3 }}>
-            <FormLabel component="legend" sx={{ fontWeight: 600, color: primaryColor, mb: 1 }}>Activation Type</FormLabel>
-            <RadioGroup
-              row
-              value={activationType}
-              onChange={(e) => setActivationType(e.target.value as 'with' | 'without')}
-            >
-              <FormControlLabel
-                value="with"
-                control={<Radio sx={{ color: primaryColor, '&.Mui-checked': { color: primaryColor } }} />}
-                label={<Typography variant="body2" fontWeight={600}>With Package</Typography>}
-              />
-              <FormControlLabel
-                value="without"
-                control={<Radio sx={{ color: primaryColor, '&.Mui-checked': { color: primaryColor } }} />}
-                label={<Typography variant="body2" fontWeight={600}>Without Package</Typography>}
-              />
-            </RadioGroup>
-          </FormControl>
-
-          {/* Package Selection */}
-          {activationType === 'with' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel id="package-select-label">Select Package</InputLabel>
-                <Select
-                  labelId="package-select-label"
-                  value={packageAmount}
-                  label="Select Package"
-                  onChange={(e) => setPackageAmount(e.target.value)}
-                  sx={{
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: primaryColor },
-                  }}
-                >
-                  <MenuItem value="100">Ecash Plan - 100</MenuItem>
-                  <MenuItem value="250">Ecash Plan - 250</MenuItem>
-                  <MenuItem value="500">Ecash Plan - 500</MenuItem>
-                  <MenuItem value="1000">Ecash Plan - 1,000</MenuItem>
-                  <MenuItem value="2000">Ecash Plan - 2,000</MenuItem>
-                  <MenuItem value="5000">Ecash Plan - 5,000</MenuItem>
-                  <MenuItem value="10000">Ecash Plan - 10,000</MenuItem>
-                  <MenuItem value="custom">Enter Custom Amount...</MenuItem>
-                </Select>
-              </FormControl>
-
-              {packageAmount === 'custom' && (
-                <TextField
-                  label="Custom Package Amount"
-                  fullWidth
-                  type="number"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  placeholder="e.g. 1500"
-                  helperText="Enter the custom package amount"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': { borderColor: primaryColor },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': { color: primaryColor }
-                  }}
-                />
-              )}
-            </Box>
-          )}
+          {/* Investment Amount Input */}
+          <Box sx={{ mt: 1 }}>
+            <TextField
+              label="Investment Amount"
+              fullWidth
+              type="number"
+              value={investmentAmount}
+              onChange={(e) => setInvestmentAmount(e.target.value)}
+              placeholder="e.g. 1000"
+              helperText="Enter the investment amount to activate this member"
+              autoFocus
+              InputProps={{
+                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': { borderColor: primaryColor },
+                },
+                '& .MuiInputLabel-root.Mui-focused': { color: primaryColor }
+              }}
+            />
+          </Box>
 
         </DialogContent>
 

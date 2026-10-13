@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Card, CardContent, CardHeader, TextField, Button, Box, Typography, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment } from '@mui/material';
 import PaymentsIcon from '@mui/icons-material/Payments';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import UserContext from "../../../context/user/userContext";
 import { useGetWalletOverview } from '../../../api/Memeber';
 import { useBuyPackageDirectlyMutation } from '../../../api/Packages';
@@ -289,58 +290,125 @@ const NewSubscription: React.FC = () => {
         onClose={() => setSuccessDialogOpen(false)}
         PaperProps={{
           sx: {
-            bgcolor: '#F1F5F9',
-            color: '#0F172A',
+            bgcolor: '#ffffff',
             borderRadius: '24px',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            border: '1.5px solid #f0d0d8',
+            boxShadow: '0 24px 48px rgba(109, 33, 79, 0.12)',
+            p: { xs: 1, sm: 2 },
+            maxWidth: '460px',
+            width: '100%',
+            mx: 2
           }
         }}
-        maxWidth="sm"
+        maxWidth="xs"
         fullWidth
       >
-        <DialogTitle sx={{ textAlign: 'center', pt: 4, color: '#10b981', fontWeight: 800, fontSize: '1.5rem' }}>
-          Investment Successful!
-        </DialogTitle>
-        <DialogContent sx={{ pb: 1 }}>
-          <Typography variant="body1" sx={{ textAlign: 'center', mb: 4, color: '#475569' }}>
-            Investment has been successfully activated for the target member.
+        <DialogTitle sx={{ textAlign: 'center', pt: 3, pb: 1 }}>
+          <Box sx={{
+            width: 64,
+            height: 64,
+            borderRadius: '50%',
+            bgcolor: '#ECFDF5',
+            border: '2px solid #A7F3D0',
+            color: '#059669',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mx: 'auto',
+            mb: 2,
+            boxShadow: '0 8px 20px rgba(5, 150, 105, 0.15)'
+          }}>
+            <CheckCircleOutlineIcon sx={{ fontSize: 36 }} />
+          </Box>
+          <Typography variant="h6" sx={{ color: '#2D0F1E', fontWeight: 900, fontSize: '1.4rem' }}>
+            Investment Successful!
           </Typography>
-          <Box sx={{ bgcolor: 'rgba(0,0,0,0.2)', p: 3, borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#475569' }}>Target Member ID</Typography>
-              <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 700 }}>{purchasedPkgDetails?.targetMemberId}</Typography>
+          <Typography variant="body2" sx={{ color: '#7A5060', fontWeight: 600, mt: 0.5, fontSize: '0.85rem' }}>
+            Investment has been successfully activated for the member.
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ px: { xs: 2, sm: 3 }, py: 1 }}>
+          <Box sx={{
+            bgcolor: '#FFF8F0',
+            p: 2.5,
+            borderRadius: '18px',
+            border: '1.5px solid #f0d0d8',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1.5
+          }}>
+            {/* Amount Banner */}
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              pb: 1.5,
+              borderBottom: '1px dashed #f0d0d8'
+            }}>
+              <Typography sx={{ color: '#7A5060', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Amount Paid
+              </Typography>
+              <Typography sx={{ color: '#059669', fontWeight: 900, fontSize: '1.35rem' }}>
+                ₹{Number(purchasedPkgDetails?.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#475569' }}>Target Name</Typography>
-              <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 700 }}>{purchasedPkgDetails?.targetName}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#475569' }}>Investment</Typography>
-              <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 700 }}>{purchasedPkgDetails?.packageName}</Typography>
-            </Box>
+
+            {/* Target Member ID */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#475569' }}>Amount Paid</Typography>
-              <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700 }}>₹{Number(purchasedPkgDetails?.amount).toFixed(2)}</Typography>
+              <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Target Member ID</Typography>
+              <Typography sx={{ color: '#6D214F', fontWeight: 800, fontSize: '0.9rem', fontFamily: 'monospace' }}>
+                {purchasedPkgDetails?.targetMemberId || '-'}
+              </Typography>
+            </Box>
+
+            {/* Target Name */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Target Name</Typography>
+              <Typography sx={{ color: '#2D0F1E', fontWeight: 700, fontSize: '0.88rem' }}>
+                {purchasedPkgDetails?.targetName || '-'}
+              </Typography>
+            </Box>
+
+            {/* Status */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Status</Typography>
+              <Box sx={{
+                bgcolor: '#ECFDF5',
+                border: '1px solid #A7F3D0',
+                color: '#059669',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                px: 1,
+                py: 0.25,
+                borderRadius: '6px',
+                textTransform: 'uppercase'
+              }}>
+                Active
+              </Box>
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 4, pt: 2, justifyContent: 'center' }}>
+
+        <DialogActions sx={{ p: { xs: 2, sm: 3 }, pt: 1 }}>
           <Button
             onClick={() => setSuccessDialogOpen(false)}
             variant="contained"
             fullWidth
             sx={{
-              py: 1.5,
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)',
-              color: '#0F172A',
+              py: 1.3,
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+              color: '#FFFFFF',
               textTransform: 'none',
-              fontWeight: 700,
-              fontSize: '1.1rem',
+              fontWeight: 800,
+              fontSize: '1rem',
+              boxShadow: '0 4px 14px rgba(109, 33, 79, 0.25)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
-              }
+                background: 'linear-gradient(135deg, #5a1a41 0%, #6D214F 100%)',
+                transform: 'translateY(-1px)'
+              },
+              transition: 'all 0.2s'
             }}
           >
             Done

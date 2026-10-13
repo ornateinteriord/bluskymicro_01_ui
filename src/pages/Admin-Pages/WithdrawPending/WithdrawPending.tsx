@@ -46,7 +46,7 @@ const WithdrawPending: React.FC = () => {
   return (
     <>
       <Typography variant="h4" sx={{ margin: '2rem', mt: 10 }}>
-        Withdraw Requests (Pending)
+        Pending Withdrawal Requests
       </Typography>
       <Card sx={{ margin: '2rem', mt: 2 }}>
         <CardContent>

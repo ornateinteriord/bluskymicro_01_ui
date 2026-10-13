@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { TextField, FormControl, FormLabel, RadioGroup, Radio, FormControlLabel, Button, Box, Card, CardContent, InputAdornment, FormHelperText, Dialog, DialogTitle, DialogContent, DialogActions, Typography, MenuItem } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import WcIcon from '@mui/icons-material/Wc';
@@ -32,9 +33,11 @@ const NewResgister: React.FC = () => {
   const [genderError, setGenderError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [registrationData, setRegistrationData] = useState<{ memberId: string; password: string }>({
+  const [registrationData, setRegistrationData] = useState<{ memberId: string; password: string; name?: string; mobile?: string }>({
     memberId: '',
-    password: ''
+    password: '',
+    name: '',
+    mobile: ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -75,8 +78,10 @@ const NewResgister: React.FC = () => {
         onSuccess: (response) => {
           if (response.success) {
             setRegistrationData({
-              memberId: response.user.Member_id,
-              password: formData.password
+              memberId: response.user?.Member_id || response.user?.member_id || '',
+              password: formData.password,
+              name: response.user?.Name || formData.name,
+              mobile: response.user?.mobileno || formData.mobileno
             });
             setSuccessDialogOpen(true);
             toast.success("Registration successful");
@@ -335,58 +340,126 @@ const NewResgister: React.FC = () => {
           onClose={handleCloseDialog}
           PaperProps={{
             sx: {
-              bgcolor: '#F1F5F9',
-              color: '#0F172A',
+              bgcolor: '#ffffff',
               borderRadius: '24px',
-              border: '1px solid rgba(255, 215, 0, 0.2)',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              border: '1.5px solid #f0d0d8',
+              boxShadow: '0 24px 48px rgba(109, 33, 79, 0.12)',
+              p: { xs: 1, sm: 2 },
+              maxWidth: '460px',
+              width: '100%',
+              mx: 2
             }
           }}
-          maxWidth="sm"
+          maxWidth="xs"
           fullWidth
         >
-          <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
-            <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
-              <PersonIcon sx={{ fontSize: 32 }} />
+          <DialogTitle sx={{ textAlign: 'center', pt: 3, pb: 1 }}>
+            <Box sx={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              bgcolor: '#ECFDF5',
+              border: '2px solid #A7F3D0',
+              color: '#059669',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 2,
+              boxShadow: '0 8px 20px rgba(5, 150, 105, 0.15)'
+            }}>
+              <CheckCircleOutlineIcon sx={{ fontSize: 36 }} />
             </Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#10b981' }}>Registration Successful!</Typography>
-          </DialogTitle>
-          <DialogContent sx={{ pb: 1 }}>
-            {/* <Typography variant="body1" sx={{ textAlign: 'center', mb: 4, color: '#475569' }}>
+            <Typography variant="h6" sx={{ color: '#2D0F1E', fontWeight: 900, fontSize: '1.4rem' }}>
+              Registration Successful!
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#7A5060', fontWeight: 600, mt: 0.5, fontSize: '0.85rem' }}>
               New member has been successfully added to your network.
-            </Typography> */}
-            <Box sx={{ bgcolor: 'rgba(0,0,0,0.2)', p: 3, borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ color: '#475569' }}>Member ID</Typography>
-                <Typography variant="h6" sx={{ color: '#0284C7', fontWeight: 700 }}>{registrationData.memberId}</Typography>
+            </Typography>
+          </DialogTitle>
+
+          <DialogContent sx={{ px: { xs: 2, sm: 3 }, py: 1 }}>
+            <Box sx={{
+              bgcolor: '#FFF8F0',
+              p: 2.5,
+              borderRadius: '18px',
+              border: '1.5px solid #f0d0d8',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1.5
+            }}>
+              {/* Member ID */}
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                pb: 1.5,
+                borderBottom: '1px dashed #f0d0d8'
+              }}>
+                <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 700 }}>
+                  Member ID
+                </Typography>
+                <Typography sx={{ color: '#6D214F', fontWeight: 900, fontSize: '1.15rem', fontFamily: 'monospace' }}>
+                  {registrationData.memberId}
+                </Typography>
               </Box>
+
+              {/* Password */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ color: '#475569' }}>Password</Typography>
-                <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 700 }}>{registrationData.password}</Typography>
+                <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Password</Typography>
+                <Typography sx={{ color: '#2D0F1E', fontWeight: 800, fontSize: '0.95rem', fontFamily: 'monospace' }}>
+                  {registrationData.password}
+                </Typography>
               </Box>
+
+              {/* Member Name */}
+              {registrationData.name && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Name</Typography>
+                  <Typography sx={{ color: '#2D0F1E', fontWeight: 700, fontSize: '0.9rem' }}>
+                    {registrationData.name}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Mobile */}
+              {registrationData.mobile && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Mobile</Typography>
+                  <Typography sx={{ color: '#2D0F1E', fontWeight: 700, fontSize: '0.9rem' }}>
+                    {registrationData.mobile}
+                  </Typography>
+                </Box>
+              )}
             </Box>
-            <Typography variant="caption" sx={{ display: 'block', mt: 3, color: '#475569', textAlign: 'center' }}>
-              Please securely share these credentials with the new member.
+
+            <Typography variant="caption" sx={{ display: 'block', mt: 2, color: '#7A5060', textAlign: 'center', fontWeight: 600 }}>
+              Please securely share these login credentials with the member.
             </Typography>
           </DialogContent>
-          <DialogActions sx={{ p: 4, pt: 2, justifyContent: 'center' }}>
+
+          <DialogActions sx={{ p: { xs: 2, sm: 3 }, pt: 1 }}>
             <Button
               onClick={handleCloseDialog}
               variant="contained"
               fullWidth
               sx={{
-                py: 1.5,
-                borderRadius: '12px',
-                background: '#E2E8F0',
-                color: '#0F172A',
+                py: 1.3,
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)',
+                color: '#FFFFFF',
                 textTransform: 'none',
-                fontWeight: 600,
+                fontWeight: 800,
+                fontSize: '1rem',
+                boxShadow: '0 4px 14px rgba(109, 33, 79, 0.25)',
                 '&:hover': {
-                  background: '#E2E8F0',
-                }
+                  background: 'linear-gradient(135deg, #5a1a41 0%, #6D214F 100%)',
+                  transform: 'translateY(-1px)'
+                },
+                transition: 'all 0.2s'
               }}
             >
-              Close Window
+              Done
             </Button>
           </DialogActions>
         </Dialog>

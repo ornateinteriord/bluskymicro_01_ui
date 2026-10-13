@@ -109,14 +109,14 @@ const AdminAddOnRequests = () => {
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, mt: { xs: 8, md: 8 } }}>
       <Typography variant="h4" sx={{ mb: { xs: 2, md: 4 }, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-        Requests
+        Deposit Requests
       </Typography>
 
       <Card sx={{ width: '100%', mb: 2 }}>
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
             <Typography variant="h6" sx={{ color: '#0a2558', margin: 0 }}>
-              Manage Member Load Fund Approvals
+              Manage Escrow Deposit Requests
             </Typography>
             <TextField
               size="small"

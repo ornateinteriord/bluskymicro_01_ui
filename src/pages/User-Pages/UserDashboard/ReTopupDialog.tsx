@@ -353,14 +353,14 @@ export const ReTopupDialog: React.FC<ReTopupDialogProps> = ({ open, onClose }) =
               </Typography>
             </Box>
 
-            {/* Big Rupee Balance (same like first) */}
+            {/* Rupee Balance */}
             <Box sx={{ my: 1 }}>
               <Typography sx={{
                 color: '#6D214F',
-                fontWeight: 900,
-                fontSize: { xs: '2rem', sm: '2.5rem' },
-                lineHeight: 1,
-                letterSpacing: '-0.8px'
+                fontWeight: 800,
+                fontSize: { xs: '1.5rem', sm: '1.85rem' },
+                lineHeight: 1.1,
+                letterSpacing: '-0.5px'
               }}>
                 ₹{Number(creditBalance).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </Typography>

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, TextField, Typography, Box, Button, CircularProgress, Fade, IconButton, Alert } from '@mui/material';
+import { Card, CardContent, TextField, Typography, Box, Button, CircularProgress, Fade, IconButton, Alert, Divider } from '@mui/material';
 import DataTable from "react-data-table-component";
 import { useMediaQuery } from '@mui/material';
 import { DASHBOARD_CUTSOM_STYLE, getWalletColumns,  } from '../../../utils/DataTableColumnsProvider';
 import TokenService from "../../../api/token/tokenService";
-import { useGetWalletOverview, useWalletWithdraw, useGetMemberDetails, useSendWithdrawalOTP } from '../../../api/Memeber';
+import { useGetWalletOverview, useWalletWithdraw } from '../../../api/Memeber';
 import { toast } from 'react-toastify';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { MuiOtpInput } from 'mui-one-time-password-input';
@@ -29,35 +29,42 @@ const Wallet = () => {
     refetch,
   } = useGetWalletOverview(memberId);
 
-  const { data: memberDetails } = useGetMemberDetails(memberId);
-
-  const { mutate: sendOTP, isPending: isSendingOTP } = useSendWithdrawalOTP(memberId);
   const withdrawMutation = useWalletWithdraw(memberId);
 
   const [step, setStep] = useState<1 | 2>(1);
   const [otp, setOtp] = useState("");
 
-  // --- Referral requirement logic ---
-  const currentDirects = memberDetails?.data?.registration_stats?.direct || 0;
-  const totalPackages = parseFloat(walletData?.data?.totalPackages || 0);
-  const maxWithdrawal = totalPackages * 2;
+  // --- 2X Withdrawal limit logic ---
+  const totalInvested = parseFloat(
+    walletData?.totalInvested ?? 
+    walletData?.data?.totalInvested ?? 
+    walletData?.totalPackages ?? 
+    walletData?.data?.totalPackages ?? 
+    0
+  );
+  const maxWithdrawalLimit = parseFloat(
+    walletData?.maxWithdrawalLimit ?? 
+    walletData?.data?.maxWithdrawalLimit ?? 
+    (totalInvested * 2)
+  );
+  const totalWithdrawn = parseFloat(
+    walletData?.totalWithdrawn ?? 
+    walletData?.data?.totalWithdrawn ?? 
+    0
+  );
+  const rawRemaining = walletData?.remainingWithdrawalLimit ?? walletData?.data?.remainingWithdrawalLimit;
+  const remainingWithdrawalLimit = (rawRemaining !== undefined && rawRemaining !== null)
+    ? parseFloat(rawRemaining)
+    : Math.max(0, maxWithdrawalLimit - totalWithdrawn);
+  const maxWithdrawal = remainingWithdrawalLimit;
 
-  const currentDay = new Date().getDay();
-  const isWeekend = currentDay === 0 || currentDay === 6;
+  const hasWithdrawnToday = Boolean(walletData?.hasWithdrawnToday ?? walletData?.data?.hasWithdrawnToday);
 
-  let requiredReferrals = 0;
-  if (totalPackages >= 1000) requiredReferrals = 10;
-  else if (totalPackages >= 500) requiredReferrals = 8;
-  else if (totalPackages >= 250) requiredReferrals = 6;
-  else if (totalPackages >= 120) requiredReferrals = 4;
-  else if (totalPackages >= 60) requiredReferrals = 2;
-  else requiredReferrals = 0; // <= 30
-
-  const isReferralConditionMet = currentDirects >= requiredReferrals;
 
   useEffect(() => {
-    if (walletData?.data?.balance) {
-      const balance = parseFloat(walletData.data.balance);
+    const rawBalance = walletData?.balance ?? walletData?.data?.balance;
+    if (rawBalance !== undefined && rawBalance !== null) {
+      const balance = parseFloat(rawBalance);
       setOptimisticBalance(balance);
     }
 
@@ -66,7 +73,7 @@ const Wallet = () => {
       setIsWithdrawalAllowed(walletData.loanStatus.isWithdrawalAllowed);
       // setLoanStatusMessage(walletData.loanStatus.message || "");
     }
-  }, [walletData?.data?.balance, walletData?.loanStatus]);
+  }, [walletData?.balance, walletData?.data?.balance, walletData?.loanStatus]);
 
   const handleAmountChange = (e: any) => {
     const value = e.target.value;
@@ -93,17 +100,8 @@ const Wallet = () => {
       return;
     }
 
-    if (!memberId) {
-      return;
-    }
-
-    if (isWeekend) {
-      toast.error('Withdrawals are only allowed from Monday to Friday');
-      return;
-    }
-
-    if (!isReferralConditionMet) {
-      toast.error(`You need ${requiredReferrals} direct referrals to withdraw at your current investment level.`);
+    if (hasWithdrawnToday) {
+      toast.error('You have already requested a withdrawal today. Only one withdrawal per day is allowed.');
       return;
     }
 
@@ -111,19 +109,38 @@ const Wallet = () => {
     const currentBalance = optimisticBalance !== null ? optimisticBalance : parseFloat(walletData?.balance || 0);
 
     if (withdrawalAmount > currentBalance) {
+      toast.error('Withdrawal amount exceeds available balance');
       return;
     }
 
-    if (withdrawalAmount > maxWithdrawal) {
-      toast.error(`Maximum withdrawal limit is ₹${maxWithdrawal.toFixed(2)} (2x of your total invest amount)`);
+    if (totalInvested <= 0) {
+      toast.error('You need an active investment to request a withdrawal.');
       return;
     }
 
-    sendOTP(
-      { memberId: memberId, amount: amount },
+    if (withdrawalAmount > remainingWithdrawalLimit) {
+      toast.error(`Maximum remaining withdrawal limit is ₹${remainingWithdrawalLimit.toFixed(2)} (Total 2x Limit: ₹${maxWithdrawalLimit.toFixed(2)}, Already Withdrawn: ₹${totalWithdrawn.toFixed(2)})`);
+      return;
+    }
+
+    // Direct withdrawal without OTP verification for now
+    const newBalance = currentBalance - withdrawalAmount;
+    setOptimisticBalance(newBalance);
+
+    withdrawMutation.mutate(
+      { memberId: memberId, amount: amount, otp: "BYPASS" },
       {
         onSuccess: () => {
-          setStep(2);
+          setAmount("");
+          setTds(0);
+          setNetAmount(0);
+          setOtp("");
+          setStep(1);
+          refetch();
+        },
+        onError: () => {
+          // Revert optimistic update on error
+          setOptimisticBalance(parseFloat(walletData?.balance || 0));
         }
       }
     );
@@ -231,6 +248,35 @@ const Wallet = () => {
                 gap: "1.5rem",
               }}
             >
+              {/* 2X Withdrawal Limit Summary Card */}
+              <Box sx={{
+                p: 2,
+                borderRadius: "16px",
+                bgcolor: "#FFF8F0",
+                border: "1.5px solid #f0d0d8",
+                display: "flex",
+                flexDirection: "column",
+                gap: 1
+              }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="caption" sx={{ color: "#7a5060", fontWeight: 700 }}>Total Investment</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: "#6D214F" }}>₹{totalInvested.toFixed(2)}</Typography>
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="caption" sx={{ color: "#7a5060", fontWeight: 700 }}>Max Withdrawal Limit (2x)</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: "#6D214F" }}>₹{maxWithdrawalLimit.toFixed(2)}</Typography>
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="caption" sx={{ color: "#7a5060", fontWeight: 700 }}>Already Withdrawn</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: totalWithdrawn > 0 ? "#d32f2f" : "#7a5060" }}>₹{totalWithdrawn.toFixed(2)}</Typography>
+                </Box>
+                <Divider sx={{ my: 0.5, borderColor: "#f0d0d8" }} />
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="caption" sx={{ color: "#059669", fontWeight: 800 }}>Remaining Withdrawable Limit</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 900, color: "#059669" }}>₹{remainingWithdrawalLimit.toFixed(2)}</Typography>
+                </Box>
+              </Box>
+
               <TextField
                 label="Available Balance"
                 value={`${displayBalance.toFixed(2)}`}
@@ -258,14 +304,16 @@ const Wallet = () => {
                 fullWidth
                 size="medium"
                 placeholder="Enter amount"
-                disabled={withdrawMutation.isPending || !isWithdrawalAllowed || isWeekend}
-                error={parseFloat(amount) > displayBalance || (Boolean(amount) && parseFloat(amount) > maxWithdrawal)}
+                disabled={withdrawMutation.isPending || !isWithdrawalAllowed || hasWithdrawnToday}
+                error={parseFloat(amount) > displayBalance || (Boolean(amount) && parseFloat(amount) > remainingWithdrawalLimit)}
                 helperText={
-                  parseFloat(amount) > displayBalance 
-                    ? "Insufficient Balance" 
-                    : (Boolean(amount) && parseFloat(amount) > maxWithdrawal) 
-                      ? `Maximum withdrawal limit is ₹${maxWithdrawal.toFixed(2)} (2x of invest amount)` 
-                      : ""
+                  hasWithdrawnToday
+                    ? "Only one withdrawal per day is allowed. You have already requested a withdrawal today."
+                    : parseFloat(amount) > displayBalance 
+                      ? "Insufficient Balance" 
+                      : (Boolean(amount) && parseFloat(amount) > remainingWithdrawalLimit) 
+                        ? `Maximum remaining limit is ₹${remainingWithdrawalLimit.toFixed(2)} (Total 2x Limit: ₹${maxWithdrawalLimit.toFixed(2)}, Withdrawn: ₹${totalWithdrawn.toFixed(2)})` 
+                        : `2x Limit: ₹${maxWithdrawalLimit.toFixed(2)} | Remaining: ₹${remainingWithdrawalLimit.toFixed(2)}`
                 }
                 sx={{
                   "& .MuiOutlinedInput-root": {
@@ -329,9 +377,9 @@ const Wallet = () => {
                 }}
               />
 
-              {isWeekend ? (
-                <Alert severity="error" sx={{ mb: 1, borderRadius: '8px' }}>
-                  Withdrawals are only allowed from Monday to Friday.
+              {hasWithdrawnToday ? (
+                <Alert severity="warning" sx={{ mb: 1, borderRadius: '8px' }}>
+                  You have already submitted a withdrawal request today. Only one withdrawal per day is allowed.
                 </Alert>
               ) : (
                 <Alert severity="info" sx={{ mb: 1, borderRadius: '8px' }}>
@@ -355,7 +403,7 @@ const Wallet = () => {
                   <Box sx={{ display: "flex", gap: 4, flexDirection: isMobile ? "column" : "row" }}>
                     <Box>
                       <Typography variant="body2">• 10% Deduction applied</Typography>
-                      <Typography variant="body2">• Maximum withdrawal: 2x of total invest amount ({maxWithdrawal.toFixed(2)})</Typography>
+                      <Typography variant="body2">• Maximum withdrawal: 2x of total invest amount (₹{maxWithdrawalLimit.toFixed(2)})</Typography>
                       <Typography variant="body2">• One withdrawal per day allowed</Typography>
                     </Box>
                   </Box>
@@ -371,39 +419,25 @@ const Wallet = () => {
                       • Withdrawal disabled due to unpaid loan from last Saturday
                     </Typography>
                   )}
-                  {!isReferralConditionMet && (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#f44336",
-                        fontWeight: "bold",
-                        mt: 1
-                      }}
-                    >
-                      • Withdrawal locked: Your investment level requires {requiredReferrals} direct referrals, but you currently have {currentDirects}.
-                    </Typography>
-                  )}
                 </Box>
 
                 <Button
                   variant="contained"
                   fullWidth
                   disabled={
-                    isSendingOTP ||
                     withdrawMutation.isPending ||
                     !amount ||
                     parseFloat(amount) <= 0 ||
                     parseFloat(amount) > maxWithdrawal ||
                     !isWithdrawalAllowed ||
-                    !isReferralConditionMet ||
-                    isWeekend
+                    hasWithdrawnToday
                   }
                   onClick={handleSendOTP}
                   sx={{
-                    background: isWithdrawalAllowed && isReferralConditionMet ? "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)" : "#F4C95D",
-                    color: isWithdrawalAllowed && isReferralConditionMet ? "#FFF8F0" : "#2d0f1e",
+                    background: (isWithdrawalAllowed && !hasWithdrawnToday) ? "linear-gradient(135deg, #6D214F 0%, #8f2f68 100%)" : "#F4C95D",
+                    color: (isWithdrawalAllowed && !hasWithdrawnToday) ? "#FFF8F0" : "#2d0f1e",
                     "&:hover": {
-                      background: isWithdrawalAllowed && isReferralConditionMet ? "linear-gradient(135deg, #4e1739 0%, #6D214F 100%)" : "#e6be4e"
+                      background: (isWithdrawalAllowed && !hasWithdrawnToday) ? "linear-gradient(135deg, #4e1739 0%, #6D214F 100%)" : "#e6be4e"
                     },
                     borderRadius: "14px",
                     height: "50px",
@@ -413,8 +447,9 @@ const Wallet = () => {
                     boxShadow: "0 4px 14px rgba(109,33,79,0.25)"
                   }}
                 >
-                  {isSendingOTP ? <CircularProgress size={24} sx={{ color: '#FFF8F0' }} /> :
-                  (!isWithdrawalAllowed || !isReferralConditionMet) ? "Disabled" : "Proceed to Withdraw"}
+                  {withdrawMutation.isPending ? <CircularProgress size={24} sx={{ color: '#FFF8F0' }} /> :
+                  !isWithdrawalAllowed ? "Disabled" :
+                  hasWithdrawnToday ? "Already Withdrawn Today" : "Submit Withdrawal"}
                 </Button>
               </Box>
             </form>

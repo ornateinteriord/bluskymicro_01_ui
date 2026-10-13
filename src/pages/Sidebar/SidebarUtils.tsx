@@ -1,6 +1,5 @@
 import { SideBarMenuItemType } from '../../store/store';
 import { DashboardIcon, AccountCircleIcon, CheckCircleIcon, GroupIcon, MonetizationOnIcon, ShowChartIcon, CreditCardIcon, MailOutlineIcon, PersonIcon, VerifiedUserIcon, LockIcon, PeopleIcon, AccountTreeIcon, PersonAddIcon, TrendingUpIcon, PaymentsIcon, SupportIcon, AnnouncementIcon, EventIcon, SmsIcon,  } from '../Icons';
-import { Pending } from '@mui/icons-material';
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import QrCode2Icon from "@mui/icons-material/QrCode2";
 import SendIcon from "@mui/icons-material/Send";
@@ -61,7 +60,7 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
     ],
   },
   {
-    name: "Revenue",
+    name: "Commission",
     icon: <MonetizationOnIcon />,
     isExpandable: true,
     subItems: [
@@ -169,12 +168,12 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
     isExpandable: true,
     subItems: [
       {
-        name: "Configuration",
+        name: "Deposit Settings",
         path: "/admin/load-fund",
         icon: <PaymentsIcon />,
       },
       {
-        name: "Requests",
+        name: "Deposit Requests",
         path: "/admin/addon-approvals",
         icon: <ReceiptLongIcon />,
       },
@@ -185,7 +184,7 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
     icon: <GroupIcon />,
     isExpandable: true,
     subItems: [
-      { name: "Members", path: "/admin/members", icon: <PeopleIcon /> },
+      { name: "All Members", path: "/admin/members", icon: <PeopleIcon /> },
       {
         name: "Pending Members",
         path: "/admin/members/pending",
@@ -202,7 +201,7 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
         icon: <PersonIcon />,
       },
       {
-        name: "KYC Approval",
+        name: "KYC Approvals",
         path: "/admin/kyc-approval",
         icon: <VerifiedUserIcon />,
       },
@@ -213,118 +212,39 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
       },
     ],
   },
-
-  //   name: "Package",
-  //   icon: <InventoryIcon />,
-  //   isExpandable: true,
-  //   subItems: [
-  //     {
-  //       name: "Generate Package",
-  //       path: "/admin/package/generate",
-  //       icon: <RequestQuoteIcon />,
-  //     },
-  //     {
-  //       name: "Package Request",
-  //       path: "/admin/package/requests",
-  //       icon: <ReceiptLongIcon />,
-  //     },
-  //     {
-  //       name: "Used Package",
-  //       path: "/admin/package/used",
-  //       icon: <InventoryIcon />,
-  //     },
-  //     {
-  //       name: "Unused Package",
-  //       path: "/admin/package/unused",
-  //       icon: <InventoryIcon />,
-  //     },
-  //     {
-  //       name: "Package History",
-  //       path: "/admin/package/history",
-  //       icon: <HistoryIcon />,
-  //     },
-  //   ],
-
-
   {
-    name: "Revenue",
+    name: "Commission",
     icon: <MonetizationOnIcon />,
     isExpandable: true,
     subItems: [
-      // {
-      //   name: "ROI Benefits",
-      //   path: "/admin/income/roi-benefits",
-      //   icon: <TrendingUpIcon />,
-      // },
       {
         name: "Referral Commission",
         path: "/admin/income/referral-income",
         icon: <PaymentsIcon />,
       },
       {
-        name: "Brokerage Override",
+        name: "Level Bonus",
         path: "/admin/income/level-benefits",
         icon: <TrendingUpIcon />,
       },
       {
-        name: "Direct Commission",
+        name: "Daily Incentive",
         path: "/admin/income/daily-payouts",
         icon: <PaymentsIcon />,
       },
-
     ],
   },
-
-
-
-
-  /* {
-    name: "Loans",
+  {
+    name: "Withdrawals",
     icon: <CreditCardIcon />,
     isExpandable: true,
     subItems: [
       {
-        name: "Loan Pending",
-        path: "/admin/member/pending",
-        icon: <Pending />
-      },
-      {
-        name: " Loan Processed",
-        path: "/admin/member/processed",
-        icon: <CardMembershipRounded />
-      },
-
-    ],
-  },
-  {
-    name: "Repayments",
-    icon: <PaymentsIcon />,
-    isExpandable: true,
-    subItems: [
-      {
-        name: "Repayments List",
-        path: "/admin/repayments/list",
-        icon: <PaymentsIcon />
+        name: "Payout History",
+        path: "/admin/payout",
+        icon: <PaymentsIcon />,
       },
     ],
-  }, */
-
-
-  {
-    name: "Commission Payout",
-    icon: <CreditCardIcon />,
-    path: "/admin/payout",
-    isExpandable: false,
-  },
-  /* Separate ROI menu removed and merged into Incomes */
-
-
-
-  {
-    name: "Withdraw Requests",
-    icon: <Pending />,
-    path: "/admin/withdraw-pending",
-    isExpandable: false,
   },
   {
     name: "Transactions",
@@ -332,7 +252,7 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
     isExpandable: true,
     subItems: [
       {
-        name: "Transactions",
+        name: "All Transactions",
         path: "/admin/transactions",
         icon: <ShowChartIcon />,
       },
@@ -350,7 +270,7 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
     isExpandable: false,
   },
   {
-    name: "News",
+    name: "News & Updates",
     path: "/admin/news",
     icon: <AnnouncementIcon />,
     isExpandable: false,

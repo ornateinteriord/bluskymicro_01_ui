@@ -743,14 +743,14 @@ const UserDashboard = () => {
               </Typography>
             </Box>
 
-            {/* Big Rupee Balance (Main Wallet: for Add Credit, Withdrawal, New Subscription) */}
+            {/* Rupee Balance (Main Wallet: for Add Credit, Withdrawal, New Subscription) */}
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: { xs: 0.5, sm: 0.8 }, my: { xs: 0.5, sm: 0.8 } }}>
               <Typography sx={{
                 color: '#6D214F',
-                fontWeight: 900,
-                fontSize: { xs: '1.9rem', sm: '2.6rem', md: '3.2rem' },
-                lineHeight: 1,
-                letterSpacing: '-0.8px'
+                fontWeight: 800,
+                fontSize: { xs: '1.45rem', sm: '1.85rem', md: '2.2rem' },
+                lineHeight: 1.1,
+                letterSpacing: '-0.5px'
               }}>
                 ₹{Number(walletOverview?.balance ?? walletOverview?.availableForWithdrawal ?? 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </Typography>

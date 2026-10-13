@@ -28,6 +28,22 @@ import { exportToExcel } from '../../../utils/excelExport';
 import { getFormattedDate } from '../../../utils/common';
 import { useGetTransactionDetails } from '../../../api/Memeber';
 
+const getSourceMemberId = (tx: any): string | null => {
+  if (!tx) return null;
+  const rawId = tx.related_member_id || tx.member_id_from || tx.from_member_id || tx.sender_id;
+  if (rawId && String(rawId).trim()) {
+    return String(rawId).trim();
+  }
+  if (tx.description && typeof tx.description === 'string') {
+    const match = tx.description.match(/from\s+member\s+([A-Za-z0-9_-]+)/i) ||
+                  tx.description.match(/from\s+(U\w+|\d{6,})/i);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return null;
+};
+
 const WalletTransaction: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -204,11 +220,26 @@ const WalletTransaction: React.FC = () => {
       selector: (row: any) => row.description || "-",
       sortable: true,
       wrap: true,
-      cell: (row: any) => (
-        <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#2D0F1E', py: 0.5 }}>
-          {row.description || "-"}
-        </Typography>
-      )
+      cell: (row: any) => {
+        const sourceMemberId = getSourceMemberId(row);
+        return (
+          <Box sx={{ py: 0.5 }}>
+            <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#2D0F1E' }}>
+              {row.description || "-"}
+            </Typography>
+            {row.transaction_id && (
+              <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 600, fontFamily: 'monospace' }}>
+                ID: {row.transaction_id}
+              </Typography>
+            )}
+            {sourceMemberId && (
+              <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 600, fontFamily: 'monospace' }}>
+                User ID: {sourceMemberId}
+              </Typography>
+            )}
+          </Box>
+        );
+      }
     },
     {
       name: "Credit",
@@ -650,6 +681,11 @@ const WalletTransaction: React.FC = () => {
                     {tx.transaction_id && (
                       <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 600, fontFamily: 'monospace' }}>
                         ID: {tx.transaction_id}
+                      </Typography>
+                    )}
+                    {getSourceMemberId(tx) && (
+                      <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 600, fontFamily: 'monospace' }}>
+                        User ID: {getSourceMemberId(tx)}
                       </Typography>
                     )}
                   </Box>

@@ -88,7 +88,6 @@ const AdminNews = lazy(() => import("./pages/Admin-Pages/News/News"));
 const AdminHolidays = lazy(
   () => import("./pages/Admin-Pages/Holidays/Holidays")
 );
-const WithdrawPending = lazy(() => import("./pages/Admin-Pages/WithdrawPending/WithdrawPending"));
 // const Activate = lazy(() => import("./pages/Admin-Pages/Activate/Activate"));
 // const ActivatePackage = lazy(() => import("./pages/Admin-Pages/activatePackage/ActivatePackage"));
 
@@ -462,7 +461,7 @@ const RoutesProvider = ({
               <Route path="/admin/holidays" element={<AdminHolidays />} />
               <Route path="/admin/members/:memberId" element={<MembersUpdateForm />} />
               <Route path="/admin/kyc-approval" element={<KYCApproval />} />
-              <Route path="/admin/withdraw-pending" element={<WithdrawPending />} />
+              <Route path="/admin/withdraw-pending" element={<Navigate to="/admin/payout" replace />} />
               <Route path="/admin/chat" element={<AdminChat />} />
 
             </Route>

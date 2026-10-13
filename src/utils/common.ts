@@ -36,3 +36,16 @@ export const getFormattedDate = (date: Date | string) => {
     
     return parsedDate.format("DD MMM , YYYY");
 };
+
+export const getFormattedDateTime = (date: Date | string) => {
+    if (!date) return "-";
+    try {
+        const m = moment(date);
+        if (m.isValid()) {
+            return m.format("DD MMM YYYY, hh:mm A");
+        }
+        return String(date);
+    } catch {
+        return "-";
+    }
+};

@@ -31,7 +31,7 @@ const Payout = () => {
   return (
     <>
       <Typography variant="h4" sx={{ margin: "1rem", mt: 10 }}>
-        Payouts
+        Withdrawal Payouts
       </Typography>
       <Card sx={{ margin: "1rem", mt: 2 }}>
         <CardContent>

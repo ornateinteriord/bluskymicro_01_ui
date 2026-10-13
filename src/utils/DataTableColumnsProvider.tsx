@@ -471,6 +471,27 @@ export const getMembersColumns = (
       sortable: true,
     },
     {
+      name: "Level",
+      selector: (row: any) => row.level ?? 0,
+      sortable: true,
+      width: "90px",
+      center: true,
+      cell: (row: any) => (
+        <span
+          style={{
+            backgroundColor: "#ede9fe",
+            color: "#6d28d9",
+            padding: "3px 8px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: 700,
+          }}
+        >
+          {row.level !== undefined && row.level !== null ? row.level : 0}
+        </span>
+      ),
+    },
+    {
       name: "Approved On",
       selector: (row: any) => getFormattedDate(row.Date_of_joining),
       sortable: true,
@@ -489,7 +510,9 @@ export const getMembersColumns = (
       name: "Package",
       selector: (row: any) => {
         const primary = Number(row.package_value) || 0;
-        const addons = Array.isArray(row.addons) ? row.addons.map((a: any) => Number(a.amount)).filter((amt: number) => amt > 0) : [];
+        const addons = Array.isArray(row.addons) 
+          ? row.addons.filter((a: any) => !a.package_id?.startsWith('PKG-P-')).map((a: any) => Number(a.amount)).filter((amt: number) => amt > 0) 
+          : [];
         
         let display = '';
         if (primary > 0) display += `${primary}`;
@@ -651,6 +674,27 @@ export const getPendingMembersColumns = (
       name: "Member Name (ID)",
       selector: (row: any) => `${row.Name ?? "-"} (${row.Member_id})`,
       sortable: true,
+    },
+    {
+      name: "Level",
+      selector: (row: any) => row.level ?? 0,
+      sortable: true,
+      width: "90px",
+      center: true,
+      cell: (row: any) => (
+        <span
+          style={{
+            backgroundColor: "#ede9fe",
+            color: "#6d28d9",
+            padding: "3px 8px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: 700,
+          }}
+        >
+          {row.level !== undefined && row.level !== null ? row.level : 0}
+        </span>
+      ),
     },
     {
       name: "Package Amount",
@@ -1044,17 +1088,17 @@ export const getRequestColumns = (approveTrasaction: (id: any) => void) => [
   },
   {
     name: "Mobile No.",
-    selector: (row: any) => row.memberDetails.mobileno || "-",
+    selector: (row: any) => row.memberDetails?.mobileno || "-",
     sortable: true,
   },
   {
     name: "Account No.",
-    selector: (row: any) => row.memberDetails.account_number || "-",
+    selector: (row: any) => row.memberDetails?.account_number || "-",
     sortable: true,
   },
   {
     name: "IFSC Code",
-    selector: (row: any) => row.memberDetails.ifsc_code || "-",
+    selector: (row: any) => row.memberDetails?.ifsc_code || "-",
     sortable: true,
   },
   {
@@ -1230,59 +1274,316 @@ export const getMultiLevelColumns = () => [
 ];
 
 
-export const getAdminDailyBenifitsColumns = () => [
+// ==========================================
+// ADMIN COMMISSION / INCOME DETAILED COLUMNS
+// ==========================================
+
+// ==========================================
+// ADMIN COMMISSION / INCOME DETAILED COLUMNS
+// ==========================================
+
+export const getAdminReferralIncomeColumns = () => [
   {
-    name: "Date",
-    selector: (row: any) => getFormattedDate(row.transaction_date || row.date),
+    name: "S No",
+    cell: (_: any, index: number) => index + 1,
+    width: "70px",
+  },
+  {
+    name: "Sponsor Name",
+    selector: (row: any) => row.Name || row.name || "-",
     sortable: true,
+    minWidth: "150px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 700, color: "#1e293b", fontSize: "13px" }}>
+        {row.Name || row.name || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Sponsor ID",
+    selector: (row: any) => row.member_id || "-",
+    sortable: true,
+    minWidth: "130px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 600, color: "#002970", fontSize: "12px", fontFamily: "monospace" }}>
+        {row.member_id || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Member Name",
+    selector: (row: any) => row.related_member_name || "-",
+    sortable: true,
+    minWidth: "150px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 700, color: "#1e293b", fontSize: "13px" }}>
+        {row.related_member_name || "-"}
+      </span>
+    ),
   },
   {
     name: "Member ID",
-    selector: (row: any) => row.member_id || "N/A",
+    selector: (row: any) => row.related_member_id || "-",
     sortable: true,
+    minWidth: "130px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 600, color: "#475569", fontSize: "12px", fontFamily: "monospace" }}>
+        {row.related_member_id || "-"}
+      </span>
+    ),
   },
   {
-    name: "ROI Amount",
-    selector: (row: any) => row.ew_credit || row.amount || "0.00",
+    name: "Commission (₹)",
+    selector: (row: any) => parseFloat(row.ew_credit || row.amount || 0),
     sortable: true,
-    format: (row: any) => `${parseFloat(row.ew_credit || row.amount || 0).toFixed(2)}`,
+    width: "140px",
+    cell: (row: any) => {
+      const amt = parseFloat(row.ew_credit || row.amount || 0);
+      return (
+        <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "13px" }}>
+          ₹{amt.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </span>
+      );
+    },
+  },
+  {
+    name: "Description",
+    selector: (row: any) => row.description || "-",
+    sortable: true,
+    minWidth: "220px",
+    wrap: true,
+    cell: (row: any) => (
+      <span style={{ fontSize: "12px", color: "#475569" }}>
+        {row.description || "-"}
+      </span>
+    ),
   },
   {
     name: "Status",
-    selector: (row: any) => row.status || "-",
+    selector: (row: any) => row.status || "Completed",
     sortable: true,
-  }
-];
-
-
-export const getAdminLevelBenifitsColumns = () => [
-  {
-    name: "Date",
-    selector: (row: any) => getFormattedDate(row.date || row.createdAt || row.transactionDate),
-    sortable: true,
-  },
-  {
-    name: "Payout Level",
-    selector: (row: any) => row.payoutLevel || row.level || row.description || "N/A",
-    sortable: true,
-  },
-  {
-    name: "Sponser_id",
-    selector: (row: any) => row.member_id || row.memberName || row.userId || row.user?.name || "N/A",
-    sortable: true,
-  },
-  {
-    name: "memberId",
-    selector: (row: any) => row.related_member_id || row.memberName || row.userId || row.user?.name || "N/A",
-    sortable: true,
-  },
-  {
-    name: "Amount",
-    selector: (row: any) => row.daily_earnings.gross_profit || row.amount || row.benefitAmount || "0",
-    sortable: true,
-    format: (row: any) => `${parseFloat(row.amount || row.ew_credit || row.benefitAmount || 0).toFixed(2)}`,
+    width: "115px",
+    center: true,
+    cell: (row: any) => {
+      const status = row.status || "Completed";
+      const isOk = status.toLowerCase() === "completed" || status.toLowerCase() === "approved";
+      return (
+        <span
+          style={{
+            backgroundColor: isOk ? "#dcfce7" : "#fee2e2",
+            color: isOk ? "#15803d" : "#b91c1c",
+            padding: "3px 8px",
+            borderRadius: "12px",
+            fontSize: "11px",
+            fontWeight: 700,
+          }}
+        >
+          {status}
+        </span>
+      );
+    },
   },
 ];
+
+export const getAdminLevelBonusColumns = () => [
+  {
+    name: "S No",
+    cell: (_: any, index: number) => index + 1,
+    width: "70px",
+  },
+  {
+    name: "Sponsor / Upline Name",
+    selector: (row: any) => row.Name || row.name || "-",
+    sortable: true,
+    minWidth: "160px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 700, color: "#1e293b", fontSize: "13px" }}>
+        {row.Name || row.name || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Sponsor / Upline ID",
+    selector: (row: any) => row.member_id || "-",
+    sortable: true,
+    minWidth: "140px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 600, color: "#002970", fontSize: "12px", fontFamily: "monospace" }}>
+        {row.member_id || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Member Name",
+    selector: (row: any) => row.related_member_name || "-",
+    sortable: true,
+    minWidth: "150px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 700, color: "#1e293b", fontSize: "13px" }}>
+        {row.related_member_name || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Member ID",
+    selector: (row: any) => row.related_member_id || "-",
+    sortable: true,
+    minWidth: "130px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 600, color: "#475569", fontSize: "12px", fontFamily: "monospace" }}>
+        {row.related_member_id || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Bonus (₹)",
+    selector: (row: any) => parseFloat(row.ew_credit || row.amount || 0),
+    sortable: true,
+    width: "130px",
+    cell: (row: any) => {
+      const amt = parseFloat(row.ew_credit || row.amount || 0);
+      return (
+        <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "13px" }}>
+          ₹{amt.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </span>
+      );
+    },
+  },
+  {
+    name: "Description",
+    selector: (row: any) => row.description || "-",
+    sortable: true,
+    minWidth: "220px",
+    wrap: true,
+    cell: (row: any) => (
+      <span style={{ fontSize: "12px", color: "#475569" }}>
+        {row.description || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Status",
+    selector: (row: any) => row.status || "Completed",
+    sortable: true,
+    width: "115px",
+    center: true,
+    cell: (row: any) => {
+      const status = row.status || "Completed";
+      const isOk = status.toLowerCase() === "completed" || status.toLowerCase() === "approved";
+      return (
+        <span
+          style={{
+            backgroundColor: isOk ? "#dcfce7" : "#fee2e2",
+            color: isOk ? "#15803d" : "#b91c1c",
+            padding: "3px 8px",
+            borderRadius: "12px",
+            fontSize: "11px",
+            fontWeight: 700,
+          }}
+        >
+          {status}
+        </span>
+      );
+    },
+  },
+];
+
+export const getAdminDailyIncentiveColumns = () => [
+  {
+    name: "S No",
+    cell: (_: any, index: number) => index + 1,
+    width: "70px",
+  },
+  {
+    name: "Member Name",
+    selector: (row: any) => row.Name || row.name || "-",
+    sortable: true,
+    minWidth: "160px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 700, color: "#0f172a", fontSize: "13px" }}>
+        {row.Name || row.name || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Member ID",
+    selector: (row: any) => row.member_id || "-",
+    sortable: true,
+    minWidth: "130px",
+    cell: (row: any) => (
+      <span style={{ fontWeight: 600, color: "#002970", fontSize: "12px", fontFamily: "monospace" }}>
+        {row.member_id || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Mobile No",
+    selector: (row: any) => row.mobileno || "-",
+    sortable: true,
+    width: "130px",
+    cell: (row: any) => (
+      <span style={{ fontSize: "12px", color: "#334155" }}>
+        {row.mobileno || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Incentive (₹)",
+    selector: (row: any) => parseFloat(row.ew_credit || row.amount || 0),
+    sortable: true,
+    width: "135px",
+    cell: (row: any) => {
+      const amt = parseFloat(row.ew_credit || row.amount || 0);
+      return (
+        <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "13px" }}>
+          ₹{amt.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </span>
+      );
+    },
+  },
+  {
+    name: "Description",
+    selector: (row: any) => row.description || "-",
+    sortable: true,
+    minWidth: "220px",
+    wrap: true,
+    cell: (row: any) => (
+      <span style={{ fontSize: "12px", color: "#475569" }}>
+        {row.description || "-"}
+      </span>
+    ),
+  },
+  {
+    name: "Status",
+    selector: (row: any) => row.status || "Completed",
+    sortable: true,
+    width: "115px",
+    center: true,
+    cell: (row: any) => {
+      const status = row.status || "Completed";
+      const isOk = status.toLowerCase() === "completed" || status.toLowerCase() === "approved";
+      return (
+        <span
+          style={{
+            backgroundColor: isOk ? "#dcfce7" : "#fee2e2",
+            color: isOk ? "#15803d" : "#b91c1c",
+            padding: "3px 8px",
+            borderRadius: "12px",
+            fontSize: "11px",
+            fontWeight: 700,
+          }}
+        >
+          {status}
+        </span>
+      );
+    },
+  },
+];
+
+// Aliases for backwards compatibility
+export const getAdminDailyBenifitsColumns = getAdminDailyIncentiveColumns;
+export const getAdminLevelBenifitsColumns = getAdminLevelBonusColumns;
+
 
 
 const TABLE_ROW_CUSTOM_STYLE = {

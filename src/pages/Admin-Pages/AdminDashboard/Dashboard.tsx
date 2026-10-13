@@ -6,10 +6,6 @@ import { getAdminDashboardTableColumns } from '../../../utils/DataTableColumnsPr
 import PeopleIcon from '@mui/icons-material/People';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import EventIcon from '@mui/icons-material/Event';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import SchoolIcon from '@mui/icons-material/School';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useGetAllMembersDetails, useGetROISummary } from '../../../api/Admin';
@@ -35,11 +31,6 @@ const AdminDashboard = () => {
   const pendingMembers = members.filter((member: any) =>
     member.status?.toLowerCase() === 'pending'
   ).length;
-
-  const totalCities = new Set(members.map((member: any) => member.location).filter(Boolean)).size;
-  const totalDegrees = new Set(members.map((member: any) => member.degree || member.education).filter(Boolean)).size;
-  const totalEvents = 0;
-  const totalLikes = 0;
 
   if (isLoading) {
     return (
@@ -166,27 +157,27 @@ const AdminDashboard = () => {
           justifyContent: { xs: 'space-between', md: 'center' }
         }}>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h5" sx={{ color: 'white', fontWeight: 900, lineHeight: 1 }}>{totalLikes}k</Typography>
+            <Typography variant="h5" sx={{ color: 'white', fontWeight: 900, lineHeight: 1 }}>{totalMembers}</Typography>
             <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: 'rgba(255,255,255,0.6)', mt: 0.5 }}>
-              <ThumbUpIcon sx={{ fontSize: 14 }} /> Great
+              <PeopleIcon sx={{ fontSize: 14 }} /> Total
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h5" sx={{ color: 'white', fontWeight: 900, lineHeight: 1 }}>{totalDegrees}</Typography>
+            <Typography variant="h5" sx={{ color: '#10b981', fontWeight: 900, lineHeight: 1 }}>{activeMembers}</Typography>
             <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: 'rgba(255,255,255,0.6)', mt: 0.5 }}>
-              <SchoolIcon sx={{ fontSize: 14 }} /> Degrees
+              <PersonAddIcon sx={{ fontSize: 14 }} /> Active
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h5" sx={{ color: 'white', fontWeight: 900, lineHeight: 1 }}>{totalEvents}</Typography>
+            <Typography variant="h5" sx={{ color: '#f59e0b', fontWeight: 900, lineHeight: 1 }}>{pendingMembers}</Typography>
             <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: 'rgba(255,255,255,0.6)', mt: 0.5 }}>
-              <EventIcon sx={{ fontSize: 14 }} /> Events
+              <HistoryIcon sx={{ fontSize: 14 }} /> Pending
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h5" sx={{ color: 'white', fontWeight: 900, lineHeight: 1 }}>{totalCities}</Typography>
+            <Typography variant="h5" sx={{ color: '#FFD700', fontWeight: 900, lineHeight: 1 }}>₹{(roiSummary?.totalROIDistributed || 0).toLocaleString()}</Typography>
             <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: 'rgba(255,255,255,0.6)', mt: 0.5 }}>
-              <LocationOnIcon sx={{ fontSize: 14 }} /> Cities
+              <PaymentsIcon sx={{ fontSize: 14 }} /> Incentive
             </Typography>
           </Box>
         </Box>
@@ -230,9 +221,9 @@ const AdminDashboard = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              amount={`${(roiSummary?.totalROIDistributed || 0).toLocaleString()}`}
-              title="ROI Distributed"
-              subTitle={`Today: ${(roiSummary?.todaysTotal || 0).toLocaleString()} (${roiSummary?.todaysCount || 0} payouts)`}
+              amount={`₹${(roiSummary?.totalROIDistributed || 0).toLocaleString()}`}
+              title="Daily Incentive"
+              subTitle={`Today: ₹${(roiSummary?.todaysTotal || 0).toLocaleString()} (${roiSummary?.todaysCount || 0} payouts)`}
               icon={<PaymentsIcon />}
               color="#FFD700"
               onClick={() => navigate('/admin/income/daily-payouts')}

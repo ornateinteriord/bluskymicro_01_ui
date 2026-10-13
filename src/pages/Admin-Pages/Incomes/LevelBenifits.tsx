@@ -1,28 +1,50 @@
 import { useState } from 'react';
-import { Box, Card, CardContent, TextField, Typography, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Typography,
+  CircularProgress,
+  Grid,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import GroupsIcon from '@mui/icons-material/Groups';
 import DataTable from "react-data-table-component";
-import { DASHBOARD_CUTSOM_STYLE, getAdminAggregatedIncomeColumns,  } from '../../../utils/DataTableColumnsProvider';
+import {
+  DASHBOARD_CUTSOM_STYLE,
+  getAdminLevelBonusColumns,
+  getAdminAggregatedIncomeColumns,
+} from '../../../utils/DataTableColumnsProvider';
 import { useGetAllTransactionDetails } from '../../../api/Admin';
 
 const LevelBenifits = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"detailed" | "summary">("detailed");
 
-  // Use the same transaction hook and filter for level benefits
   const { data: allTransactions, isLoading, isError } = useGetAllTransactionDetails();
 
-  // Filter transactions to get only level benefits
-  const levelBenefits = allTransactions?.filter((transaction: any) => {
+  // Filter transactions to get only level benefits (exclude direct referral and roi)
+  const levelBenefits: any[] = (allTransactions || []).filter((transaction: any) => {
     if (!transaction || typeof transaction !== 'object') return false;
-
     const txType = (transaction.transaction_type || transaction.transactionType || transaction.type || "").toLowerCase();
-
-    // Strictly match Level Bonus and explicitly exclude referral and ROI
     const isLevelBonus = txType.includes('level bonus') && !txType.includes('referral') && !txType.includes('roi');
-    
     return isLevelBonus;
-  }) || [];
+  });
 
-  // Aggregate level benefits by user
+  // Calculate summary statistics
+  const totalAmount = levelBenefits.reduce(
+    (sum, t) => sum + parseFloat(t.ew_credit || t.amount || 0),
+    0
+  );
+  const uniqueUplines = new Set(
+    levelBenefits.map((t) => t.member_id).filter(Boolean)
+  ).size;
+
+  // Aggregate level benefits by user for Summary view
   const aggregatedData = levelBenefits.reduce((acc: any, curr: any) => {
     const memberId = curr.member_id || curr.related_member_id || 'N/A';
     if (!acc[memberId]) {
@@ -30,73 +52,266 @@ const LevelBenifits = () => {
         member_id: memberId,
         name: curr.Name || curr.name || curr.memberName || curr.member_name || '-',
         totalAmount: 0,
+        txCount: 0,
       };
     }
     acc[memberId].totalAmount += parseFloat(curr.ew_credit || curr.amount || 0);
+    acc[memberId].txCount += 1;
     return acc;
   }, {});
+  const summaryList = Object.values(aggregatedData);
 
-  const finalData = Object.values(aggregatedData);
+  // Filtered detailed transactions
+  const filteredDetailedData = levelBenefits.filter((item: any) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (item.transaction_id && item.transaction_id.toLowerCase().includes(q)) ||
+      (item.member_id && item.member_id.toLowerCase().includes(q)) ||
+      (item.Name && item.Name.toLowerCase().includes(q)) ||
+      (item.name && item.name.toLowerCase().includes(q)) ||
+      (item.related_member_id && item.related_member_id.toLowerCase().includes(q)) ||
+      (item.related_member_name && item.related_member_name.toLowerCase().includes(q)) ||
+      (item.level && item.level.toString().includes(q)) ||
+      (item.description && item.description.toLowerCase().includes(q)) ||
+      (item.status && item.status.toLowerCase().includes(q)) ||
+      (item.ew_credit && item.ew_credit.toString().includes(q))
+    );
+  });
 
-  const filteredData = finalData.filter((benefit: any) =>
-    Object.values(benefit).some(
-      value =>
-        value &&
-        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  // Filtered summary data
+  const filteredSummaryData = summaryList.filter((item: any) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (item.member_id && item.member_id.toLowerCase().includes(q)) ||
+      (item.name && item.name.toLowerCase().includes(q)) ||
+      (item.totalAmount && item.totalAmount.toString().includes(q))
+    );
+  });
 
   const noDataComponent = (
-    <div style={{ padding: "24px" }}>
-      {isError ? "Error loading data" : "No data available in table"}
+    <div style={{ padding: "32px", textAlign: "center", color: "#64748b" }}>
+      {isError ? "Error loading level bonus data" : "No level bonus records found"}
     </div>
   );
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <>
-      <Typography variant="h4" sx={{ margin: "1rem", mt: 10 }}>
-        Brokerage Override
-      </Typography>
-      <Card sx={{ margin: "1rem", mt: 2 }}>
-        <CardContent>
-          <div style={{ marginBottom: "1rem", color: "#000", fontWeight: "bold", fontSize: "1.25rem"     }}>List of Level Bonus</div>
-          <Box
-                style={{
-                  display: "flex",
-                  gap: "1rem",
-                  justifyContent: "flex-end",
-                  marginBottom: "1rem",
+    <Box sx={{ p: { xs: 2, md: 3 }, mt: 8 }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
+          Level Bonus
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+          Track all multilevel commission payouts (Level 2 to Level 7), upline beneficiaries, downline members, rates, and statuses
+        </Typography>
+      </Box>
+
+      {/* Summary KPI Cards */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={4}>
+          <Card
+            sx={{
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+            }}
+          >
+            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 2.5 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '10px',
+                  backgroundColor: '#dcfce7',
+                  color: '#16a34a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 2,
                 }}
               >
-                <TextField
-                  size="small"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  sx={{ minWidth: 200 }}
-                />
+                <TrendingUpIcon />
               </Box>
-              <DataTable
-                columns={getAdminAggregatedIncomeColumns()}
-                data={filteredData}
-                pagination
-                customStyles={DASHBOARD_CUTSOM_STYLE}
-                paginationPerPage={25}
-                paginationRowsPerPageOptions={[25, 50, 100]}
-                highlightOnHover
-                noDataComponent={noDataComponent}
-              />
+              <Box>
+                <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
+                  Total Bonus Paid
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: '#16a34a', mt: 0.2 }}>
+                  ₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={4}>
+          <Card
+            sx={{
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)',
+            }}
+          >
+            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 2.5 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '10px',
+                  backgroundColor: '#dbeafe',
+                  color: '#2563eb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 2,
+                }}
+              >
+                <ReceiptLongIcon />
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
+                  Total Transactions
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: '#1e293b', mt: 0.2 }}>
+                  {levelBenefits.length}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={4}>
+          <Card
+            sx={{
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              background: 'linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)',
+            }}
+          >
+            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 2.5 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '10px',
+                  backgroundColor: '#f3e8ff',
+                  color: '#9333ea',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 2,
+                }}
+              >
+                <GroupsIcon />
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
+                  Beneficiary Uplines
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: '#1e293b', mt: 0.2 }}>
+                  {uniqueUplines}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Main Table Card */}
+      <Card
+        sx={{
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+          {/* Controls Bar: Toggle & Search */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'stretch', sm: 'center' },
+              gap: 2,
+              mb: 2.5,
+            }}
+          >
+            {/* View Mode Toggle */}
+            <ToggleButtonGroup
+              size="small"
+              value={viewMode}
+              exclusive
+              onChange={(_, nextView) => {
+                if (nextView) setViewMode(nextView);
+              }}
+              sx={{
+                '& .MuiToggleButton-root': {
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  px: 2,
+                  py: 0.6,
+                },
+                '& .Mui-selected': {
+                  backgroundColor: '#6D214F !important',
+                  color: '#ffffff !important',
+                },
+              }}
+            >
+              <ToggleButton value="detailed">
+                Detailed Records ({levelBenefits.length})
+              </ToggleButton>
+              <ToggleButton value="summary">
+                Member Summary ({summaryList.length})
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            {/* Search Input */}
+            <TextField
+              size="small"
+              placeholder={
+                viewMode === "detailed"
+                  ? "Search by Sponsor/Upline Name, ID, Member..."
+                  : "Search by Member ID or Name..."
+              }
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{ minWidth: { xs: '100%', sm: 300 } }}
+            />
+          </Box>
+
+          {/* DataTable */}
+          <DataTable
+            columns={
+              viewMode === "detailed"
+                ? getAdminLevelBonusColumns()
+                : getAdminAggregatedIncomeColumns()
+            }
+            data={viewMode === "detailed" ? filteredDetailedData : filteredSummaryData}
+            pagination
+            customStyles={DASHBOARD_CUTSOM_STYLE}
+            paginationPerPage={25}
+            paginationRowsPerPageOptions={[25, 50, 100]}
+            highlightOnHover
+            noDataComponent={noDataComponent}
+          />
         </CardContent>
       </Card>
-    </>
+    </Box>
   );
 };
 
