@@ -95,7 +95,7 @@ const NewSubscription: React.FC = () => {
     }
 
     if (targetName === "Member Not Found" || isTargetActive || isSearching) {
-      toast.error("Please provide a valid pending Target Member ID");
+      toast.error("Please provide a valid pending Member ID");
       return;
     }
     
@@ -159,7 +159,7 @@ const NewSubscription: React.FC = () => {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>
-              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Target Member ID <span style={{color: '#ef4444'}}>*</span></Typography>
+              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Member ID <span style={{color: '#ef4444'}}>*</span></Typography>
               <TextField
                 name="targetMemberId"
                 value={formData.targetMemberId}
@@ -173,7 +173,7 @@ const NewSubscription: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}>
-              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Target Name</Typography>
+              <Typography sx={{ width: '150px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>Member Name</Typography>
               <TextField
                 value={targetName}
                 fullWidth
@@ -354,17 +354,17 @@ const NewSubscription: React.FC = () => {
               </Typography>
             </Box>
 
-            {/* Target Member ID */}
+            {/* Member ID */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Target Member ID</Typography>
+              <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Member ID</Typography>
               <Typography sx={{ color: '#6D214F', fontWeight: 800, fontSize: '0.9rem', fontFamily: 'monospace' }}>
                 {purchasedPkgDetails?.targetMemberId || '-'}
               </Typography>
             </Box>
 
-            {/* Target Name */}
+            {/* Member Name */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Target Name</Typography>
+              <Typography sx={{ color: '#7A5060', fontSize: '0.82rem', fontWeight: 600 }}>Member Name</Typography>
               <Typography sx={{ color: '#2D0F1E', fontWeight: 700, fontSize: '0.88rem' }}>
                 {purchasedPkgDetails?.targetName || '-'}
               </Typography>

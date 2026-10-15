@@ -75,8 +75,8 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
         icon: <TrendingUpIcon />,
       },
       {
-        name: "Rental Yield",
-        path: "/user/earnings/daily-payout",
+        name: "Daily Incentive",
+        path: "/user/earnings/single-level-income-history",
         icon: <PaymentsIcon />,
       },
       // {

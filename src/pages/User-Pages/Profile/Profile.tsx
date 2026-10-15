@@ -6,17 +6,20 @@ import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import CakeOutlinedIcon from '@mui/icons-material/CakeOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SaveIcon from '@mui/icons-material/Save';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import UserContext from "../../../context/user/userContext";
-import { useUpdateMember } from '../../../api/Memeber';
+import { useGetMemberDetails, useUpdateMember } from '../../../api/Memeber';
+import TokenService from '../../../api/token/tokenService';
 import { LoadingComponent } from '../../../App';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
+  const currentMemberId = TokenService.getMemberId();
+  const { data: memberDetails } = useGetMemberDetails(currentMemberId);
+  const activeUser = memberDetails || user;
 
   const [formData, setFormData] = useState({
     Name: "",
@@ -27,16 +30,16 @@ const Profile: React.FC = () => {
   });
 
   useEffect(() => {
-    if (user) {
+    if (activeUser) {
       setFormData({
-        Name: user.Name ?? "",
-        gender: user.gender ?? "Male",
-        email: user.email ?? "",
-        country: user.country ?? "India",
-        dob: user.dob ?? "",
+        Name: activeUser.Name ?? "",
+        gender: activeUser.gender ?? "Male",
+        email: activeUser.email ?? "",
+        country: activeUser.country ?? "India",
+        dob: activeUser.dob ?? "",
       });
     }
-  }, [user]);
+  }, [activeUser]);
 
   const updateMember = useUpdateMember();
 
@@ -175,28 +178,39 @@ const Profile: React.FC = () => {
                 </motion.div>
                 
                 <Box sx={{ color: '#FFFFFF', zIndex: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.3 }}>
-                    <CheckCircleIcon sx={{ fontSize: 15, color: '#38BDF8' }} />
-                    <Typography variant="overline" sx={{ color: '#93C5FD', letterSpacing: '1px', fontWeight: 800, lineHeight: 1 }}>
-                      VERIFIED MEMBER
-                    </Typography>
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, mb: 0.6 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, mb: 0.8 }}>
                     {formData.Name || 'Member Profile'}
                   </Typography>
-                  <Box sx={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center',
-                    bgcolor: 'rgba(255, 255, 255, 0.15)',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    borderRadius: '8px',
-                    px: 1.2,
-                    py: 0.3,
-                    backdropFilter: 'blur(4px)'
-                  }}>
-                    <Typography variant="caption" sx={{ color: '#FCD34D', fontWeight: 800, letterSpacing: '1px' }}>
-                      LOGIN ID: {user?.member_code || user?.Member_id || 'N/A'}
-                    </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Box sx={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center',
+                      bgcolor: 'rgba(255, 255, 255, 0.15)',
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
+                      borderRadius: '8px',
+                      px: 1.2,
+                      py: 0.3,
+                      backdropFilter: 'blur(4px)'
+                    }}>
+                      <Typography variant="caption" sx={{ color: '#FCD34D', fontWeight: 800, letterSpacing: '0.8px' }}>
+                        LOGIN ID: {activeUser?.Member_id || (activeUser as any)?.member_id || activeUser?.mobileno || currentMemberId || 'N/A'}
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center',
+                      bgcolor: 'rgba(255, 255, 255, 0.12)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '8px',
+                      px: 1.2,
+                      py: 0.3,
+                      backdropFilter: 'blur(4px)'
+                    }}>
+                      <Typography variant="caption" sx={{ color: '#93C5FD', fontWeight: 800, letterSpacing: '0.8px' }}>
+                        USER ID: {activeUser?.member_code || (activeUser as any)?.user_id || (activeUser as any)?.reference_id || '0101'}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </Box>
