@@ -29,14 +29,39 @@ const MobileBottomNav: React.FC = () => {
     ((Number(walletOverview?.totalPackages ?? walletOverview?.data?.totalPackages ?? memberDetails?.totalPackages ?? memberDetails?.package_value ?? 0)) > 0)
   );
 
+  const totalInvested = Number(
+    walletOverview?.totalInvested ??
+    walletOverview?.data?.totalInvested ??
+    walletOverview?.totalPackages ??
+    walletOverview?.data?.totalPackages ??
+    memberDetails?.totalPackages ??
+    memberDetails?.package_value ??
+    0
+  );
+
+  const totalEarnings = Math.max(
+    Number(walletOverview?.totalEarnings ?? walletOverview?.data?.totalEarnings ?? 0),
+    Number(walletOverview?.totalBenefits ?? walletOverview?.data?.totalBenefits ?? 0),
+    (
+      Number(walletOverview?.directBenefits || 0) +
+      Number(walletOverview?.levelBenefits || 0) +
+      Number(walletOverview?.singleLineIncome || 0) +
+      Number(walletOverview?.roiBenefits || 0) +
+      Number(walletOverview?.roiLevelBenefits || 0) +
+      Number(walletOverview?.repaymentCommission || 0)
+    )
+  );
+
+  const canShowReinvest = hasInvestment && totalInvested > 0 && totalEarnings >= (2 * totalInvested);
+
   // Sync state with current path
   React.useEffect(() => {
     if (location.pathname.includes('/user/dashboard')) setValue('/user/dashboard');
     else if (location.search.includes('type=credits') || location.search.includes('type=Credits')) setValue('/user/transactions?type=credits');
-    else if (location.pathname.includes('/user/new-subscription')) setValue(hasInvestment ? 're-topup' : '');
+    else if (location.pathname.includes('/user/new-subscription')) setValue(canShowReinvest ? 're-topup' : '');
     else if (location.pathname.includes('/user/account/profile')) setValue('/user/account/profile');
     else setValue('');
-  }, [location.pathname, location.search, hasInvestment]);
+  }, [location.pathname, location.search, canShowReinvest]);
 
   if (location.pathname.includes('/user/chat')) return null;
 
@@ -110,10 +135,10 @@ const MobileBottomNav: React.FC = () => {
             label="Credits"
             icon={<Box className={!reTopupOpen && value === "/user/transactions?type=credits" ? "indicator" : ""}>{<AccountBalanceWalletIcon sx={{ fontSize: 22 }} />}</Box>}
           />
-          {hasInvestment && (
+          {canShowReinvest && (
             <BottomNavigationAction
               value="re-topup"
-              label="Re-Topup"
+              label="Re-Invest"
               icon={<Box className={reTopupOpen || value === "re-topup" ? "indicator" : ""}>{<AutorenewIcon sx={{ fontSize: 22 }} />}</Box>}
             />
           )}
@@ -125,8 +150,8 @@ const MobileBottomNav: React.FC = () => {
         </BottomNavigation>
       </Paper>
 
-      {/* Re-Topup Dialog accessible from mobile bottom nav only if user has investment */}
-      {hasInvestment && (
+      {/* Re-Invest Dialog accessible from mobile bottom nav only once earnings become double of investment */}
+      {canShowReinvest && (
         <ReTopupDialog open={reTopupOpen} onClose={() => setReTopupOpen(false)} />
       )}
 

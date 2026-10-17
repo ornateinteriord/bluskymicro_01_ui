@@ -53,17 +53,46 @@ export const ReTopupDialog: React.FC<ReTopupDialogProps> = ({ open, onClose }) =
   const lastInvestedAmount = allInvestments.length > 0 ? Math.max(...allInvestments) : 0;
   const minAllowed = lastInvestedAmount > 0 ? lastInvestedAmount + 100 : 100;
 
+  // Compute total investment and earnings to check 2X rule
+  const totalInvested = Number(
+    walletOverview?.totalInvested ??
+    walletOverview?.data?.totalInvested ??
+    walletOverview?.totalPackages ??
+    walletOverview?.data?.totalPackages ??
+    memberDetails?.totalPackages ??
+    memberDetails?.package_value ??
+    lastInvestedAmount
+  );
+
+  const totalEarnings = Math.max(
+    Number(walletOverview?.totalEarnings ?? walletOverview?.data?.totalEarnings ?? 0),
+    Number(walletOverview?.totalBenefits ?? walletOverview?.data?.totalBenefits ?? 0),
+    (
+      Number(walletOverview?.directBenefits || 0) +
+      Number(walletOverview?.levelBenefits || 0) +
+      Number(walletOverview?.singleLineIncome || 0) +
+      Number(walletOverview?.roiBenefits || 0) +
+      Number(walletOverview?.roiLevelBenefits || 0) +
+      Number(walletOverview?.repaymentCommission || 0)
+    )
+  );
+
+  const requiredEarnings = 2 * totalInvested;
+  const isEligibleForReinvest = totalInvested <= 0 || totalEarnings >= requiredEarnings;
+
   // Validation rules: multiples of 100, more than earlier amount, and balance check
   const amountNum = Number(investAmount);
   const isEntered = investAmount.trim() !== '' && !isNaN(amountNum);
   const isMultipleOf100 = isEntered && amountNum % 100 === 0;
   const isHigherThanLast = isEntered && amountNum >= minAllowed;
   const isBalanceSufficient = isEntered && amountNum <= creditBalance;
-  const isValid = isEntered && isMultipleOf100 && isHigherThanLast && isBalanceSufficient;
+  const isValid = isEntered && isMultipleOf100 && isHigherThanLast && isBalanceSufficient && isEligibleForReinvest;
 
   // Validation error string
   let validationError: string | null = null;
-  if (isEntered) {
+  if (!isEligibleForReinvest) {
+    validationError = `Re-investment unlocks when your total earnings reach at least ₹${requiredEarnings.toLocaleString()} (double of ₹${totalInvested.toLocaleString()}). Current earnings: ₹${totalEarnings.toLocaleString()}.`;
+  } else if (isEntered) {
     if (amountNum % 100 !== 0) {
       validationError = 'Amount must be in multiples of ₹100 only.';
     } else if (amountNum < minAllowed) {
@@ -77,6 +106,11 @@ export const ReTopupDialog: React.FC<ReTopupDialogProps> = ({ open, onClose }) =
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isEligibleForReinvest) {
+      toast.error(`Re-investment is unlocked only when total earnings reach at least ₹${requiredEarnings.toLocaleString()} (double of ₹${totalInvested.toLocaleString()} investment).`);
+      return;
+    }
 
     if (!investAmount || isNaN(amountNum)) {
       toast.error('Please enter a valid amount');
@@ -160,7 +194,7 @@ export const ReTopupDialog: React.FC<ReTopupDialogProps> = ({ open, onClose }) =
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
               <AccountBalanceWalletIcon sx={{ fontSize: 26, color: '#6D214F' }} />
               <Typography variant="body2" sx={{ color: '#2d0f1e', fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.3px' }}>
-                Invest
+                Re-Invest
               </Typography>
             </Box>
             <IconButton
@@ -177,29 +211,60 @@ export const ReTopupDialog: React.FC<ReTopupDialogProps> = ({ open, onClose }) =
             </IconButton>
           </Box>
 
-          {/* Earlier Investment Info if any */}
-          {lastInvestedAmount > 0 && (
-            <Box
+          {/* Re-Investment 2X Earnings Notice if not eligible */}
+          {!isEligibleForReinvest && (
+            <Alert
+              severity="warning"
               sx={{
                 mb: 2,
-                p: 1.2,
-                px: 1.5,
-                borderRadius: '12px',
-                bgcolor: '#FFF8F0',
-                border: '1px solid #f0d0d8',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
+                borderRadius: '14px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                border: '1px solid #fde68a',
+                bgcolor: '#fffbeb',
+                color: '#92400e',
+                '& .MuiAlert-icon': { color: '#d97706' }
               }}
             >
-              <Typography sx={{ fontSize: '0.78rem', color: '#7a5060', fontWeight: 700 }}>
-                Earlier Investment:
+              Re-investment is unlocked only after your total earnings reach at least double of your investment amount (<strong>₹{requiredEarnings.toLocaleString()}</strong>).
+              <br />
+              Current Total Earnings: <strong>₹{totalEarnings.toLocaleString()}</strong>.
+            </Alert>
+          )}
+
+          {/* Earlier Investment & Total Earnings Info */}
+          <Box
+            sx={{
+              mb: 2,
+              p: 1.4,
+              px: 1.6,
+              borderRadius: '14px',
+              bgcolor: '#FFF8F0',
+              border: '1px solid #f0d0d8',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1
+            }}
+          >
+            {lastInvestedAmount > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography sx={{ fontSize: '0.78rem', color: '#7a5060', fontWeight: 700 }}>
+                  Earlier Investment:
+                </Typography>
+                <Typography sx={{ fontSize: '0.88rem', color: '#6D214F', fontWeight: 900 }}>
+                  ₹{lastInvestedAmount.toLocaleString()}
+                </Typography>
+              </Box>
+            )}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography sx={{ fontSize: '0.78rem', color: '#065F46', fontWeight: 700 }}>
+                Total Earnings:
               </Typography>
-              <Typography sx={{ fontSize: '0.88rem', color: '#6D214F', fontWeight: 900 }}>
-                ₹{lastInvestedAmount.toLocaleString()}
+              <Typography sx={{ fontSize: '0.92rem', color: '#059669', fontWeight: 900 }}>
+                ₹{totalEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </Typography>
             </Box>
-          )}
+          </Box>
 
           {/* Form */}
           <Box component="form" onSubmit={handleSubmit}>

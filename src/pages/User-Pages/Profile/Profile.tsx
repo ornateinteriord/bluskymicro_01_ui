@@ -211,6 +211,21 @@ const Profile: React.FC = () => {
                         USER ID: {activeUser?.member_code || (activeUser as any)?.user_id || (activeUser as any)?.reference_id || '0101'}
                       </Typography>
                     </Box>
+
+                    <Box sx={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center',
+                      bgcolor: 'rgba(52, 211, 153, 0.2)',
+                      border: '1px solid rgba(52, 211, 153, 0.4)',
+                      borderRadius: '8px',
+                      px: 1.2,
+                      py: 0.3,
+                      backdropFilter: 'blur(4px)'
+                    }}>
+                      <Typography variant="caption" sx={{ color: '#6EE7B7', fontWeight: 800, letterSpacing: '0.8px' }}>
+                        LEVEL: {activeUser?.level ?? 0}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </Box>

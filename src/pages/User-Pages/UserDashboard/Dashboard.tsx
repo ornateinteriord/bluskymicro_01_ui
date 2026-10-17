@@ -199,6 +199,34 @@ const UserDashboard = () => {
     ((Number(walletOverview?.totalPackages ?? walletOverview?.data?.totalPackages ?? memberDetails?.totalPackages ?? memberDetails?.package_value ?? 0)) > 0)
   );
 
+  // Total investment amount made by the user
+  const totalInvested = Number(
+    walletOverview?.totalInvested ??
+    walletOverview?.data?.totalInvested ??
+    walletOverview?.totalPackages ??
+    walletOverview?.data?.totalPackages ??
+    memberDetails?.totalPackages ??
+    memberDetails?.package_value ??
+    0
+  );
+
+  // Total earnings of user across all benefit streams
+  const totalEarnings = Math.max(
+    Number(walletOverview?.totalEarnings ?? walletOverview?.data?.totalEarnings ?? 0),
+    Number(walletOverview?.totalBenefits ?? walletOverview?.data?.totalBenefits ?? 0),
+    (
+      Number(walletOverview?.directBenefits || 0) +
+      Number(walletOverview?.levelBenefits || 0) +
+      Number(walletOverview?.singleLineIncome || 0) +
+      Number(walletOverview?.roiBenefits || 0) +
+      Number(walletOverview?.roiLevelBenefits || 0) +
+      Number(walletOverview?.repaymentCommission || 0)
+    )
+  );
+
+  // Re-invest container & button is only displayed once earnings become at least double of investment amount
+  const canShowReinvest = hasInvestment && totalInvested > 0 && totalEarnings >= (2 * totalInvested);
+
   const handleCopyReferralLink = () => {
     const code = memberDetails?.Member_id || memberDetails?.member_id || memberId;
     if (!code) return;
@@ -471,21 +499,41 @@ const UserDashboard = () => {
           </Box>
         </Box>
 
-        {/* Bottom Section: Name */}
-        <Box sx={{ zIndex: 1 }}>
-          <Typography sx={{ color: '#E5989B', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
-            Name
-          </Typography>
-          <Typography sx={{ 
-            fontSize: { xs: '1rem', sm: '1.1rem' }, 
-            fontWeight: 800, 
-            textTransform: 'uppercase', 
-            letterSpacing: '1.5px', 
-            color: '#FFF8F0',
-            textShadow: '0 2px 6px rgba(0,0,0,0.4)'
+        {/* Bottom Section: Name & Level */}
+        <Box sx={{ zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <Box>
+            <Typography sx={{ color: '#E5989B', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
+              Name
+            </Typography>
+            <Typography sx={{ 
+              fontSize: { xs: '1rem', sm: '1.1rem' }, 
+              fontWeight: 800, 
+              textTransform: 'uppercase', 
+              letterSpacing: '1.5px', 
+              color: '#FFF8F0',
+              textShadow: '0 2px 6px rgba(0,0,0,0.4)'
+            }}>
+              {memberDetails?.Name || memberDetails?.name || 'Member'}
+            </Typography>
+          </Box>
+
+          <Box sx={{
+            bgcolor: 'rgba(244, 201, 93, 0.15)',
+            border: '1px solid rgba(244, 201, 93, 0.35)',
+            borderRadius: '6px',
+            px: 1.1,
+            py: 0.3,
+            backdropFilter: 'blur(4px)'
           }}>
-            {memberDetails?.Name || memberDetails?.name || 'Member'}
-          </Typography>
+            <Typography sx={{
+              color: '#F4C95D',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              letterSpacing: '1px'
+            }}>
+              LEVEL {memberDetails?.level ?? 0}
+            </Typography>
+          </Box>
         </Box>
       </Box>
 
@@ -1385,17 +1433,17 @@ const UserDashboard = () => {
         </Box>
       </Box>
 
-      {/* Re-Topup Section (Only displayed once user has made an initial investment) */}
-      {hasInvestment && (
+      {/* Re-Invest Section (Only displayed once earnings become double of investment amount) */}
+      {canShowReinvest && (
         <>
           <Box sx={{ mb: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.4 }}>
               <Typography sx={{ color: '#2d0f1e', fontWeight: 900, fontSize: { xs: '1rem', sm: '1.15rem' }, letterSpacing: '-0.3px' }}>
-                Re-Topup
+                Re-Invest
               </Typography>
             </Box>
 
-            {/* Single Re-Topup Container with Re-Topup Button Inside */}
+            {/* Single Re-Invest Container with Re-Invest Button Inside */}
             <Box
               sx={{
                 borderRadius: { xs: '20px', sm: '22px' },
@@ -1431,7 +1479,7 @@ const UserDashboard = () => {
                 </Box>
                 <Box>
                   <Typography sx={{ color: '#0369a1', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2 }}>
-                    Re-Topup
+                    Re-Invest
                   </Typography>
                   <Typography sx={{ color: '#64748B', fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.82rem' }, mt: 0.3 }}>
                     Credit Balance: <strong style={{ color: '#0284c7' }}>₹{Number(walletOverview?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
@@ -1439,7 +1487,7 @@ const UserDashboard = () => {
                 </Box>
               </Box>
 
-              {/* Right Side: Re-Topup Button Inside Container */}
+              {/* Right Side: Re-Invest Button Inside Container */}
               <Button
                 size="small"
                 variant="contained"
@@ -1463,7 +1511,7 @@ const UserDashboard = () => {
                   }
                 }}
               >
-                Re-Topup
+                Re-Invest
               </Button>
             </Box>
           </Box>

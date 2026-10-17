@@ -45,6 +45,8 @@ export interface MemberDetails {
   TBPDays: string;
   level_income: string;
   direct_income: string;
+  level?: number;
+  roi_daily_amount?: number;
 }
  export interface SponsorRewardData {
   isEligibleForReward: boolean;

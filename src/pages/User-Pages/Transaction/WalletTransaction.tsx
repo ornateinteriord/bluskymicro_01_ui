@@ -22,11 +22,13 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import CallReceivedIcon from '@mui/icons-material/CallReceived';
 import CallMadeIcon from '@mui/icons-material/CallMade';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { exportToExcel } from '../../../utils/excelExport';
 import { getFormattedDate } from '../../../utils/common';
-import { useGetTransactionDetails } from '../../../api/Memeber';
+import { useGetTransactionDetails, useGetWalletOverview } from '../../../api/Memeber';
+import TokenService from '../../../api/token/tokenService';
 
 const getSourceMemberId = (tx: any): string | null => {
   if (!tx) return null;
@@ -52,6 +54,24 @@ const WalletTransaction: React.FC = () => {
   
   const type = searchParams.get("type") || "all";
   const status = searchParams.get("status") || "all";
+
+  const memberId = TokenService.getMemberId();
+  const { data: walletOverview } = useGetWalletOverview(memberId);
+
+  const totalEarnings = Math.max(
+    Number(walletOverview?.totalEarnings ?? walletOverview?.data?.totalEarnings ?? 0),
+    Number(walletOverview?.totalBenefits ?? walletOverview?.data?.totalBenefits ?? 0),
+    (
+      Number(walletOverview?.directBenefits || 0) +
+      Number(walletOverview?.levelBenefits || 0) +
+      Number(walletOverview?.singleLineIncome || 0) +
+      Number(walletOverview?.roiBenefits || 0) +
+      Number(walletOverview?.roiLevelBenefits || 0) +
+      Number(walletOverview?.repaymentCommission || 0)
+    )
+  );
+
+  const creditBalance = Number(walletOverview?.balance ?? walletOverview?.data?.balance ?? walletOverview?.availableForWithdrawal ?? 0);
 
   const {
     data: transactionsResponse,
@@ -124,7 +144,7 @@ const WalletTransaction: React.FC = () => {
       : (type !== 'all' ? `${type} History` : 'Wallet Transactions');
 
   const pageSubtitle = isCreditsView
-    ? 'Complete record of deposits, investments, daily payouts, transfers & withdrawals'
+    ? ''
     : isReTopupView
       ? 'Record of account balances and transactions'
       : 'All account inflows, outflows, and wallet balances';
@@ -390,14 +410,16 @@ const WalletTransaction: React.FC = () => {
             }}>
               {pageTitle}
             </Typography>
-            <Typography sx={{
-              color: '#7A5060',
-              fontWeight: 600,
-              fontSize: { xs: '0.78rem', sm: '0.85rem' },
-              lineHeight: 1.3
-            }}>
-              {pageSubtitle}
-            </Typography>
+            {pageSubtitle ? (
+              <Typography sx={{
+                color: '#7A5060',
+                fontWeight: 600,
+                fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                lineHeight: 1.3
+              }}>
+                {pageSubtitle}
+              </Typography>
+            ) : null}
           </Box>
         </Box>
 
@@ -425,6 +447,118 @@ const WalletTransaction: React.FC = () => {
         >
           Export Statement
         </Button>
+      </Box>
+
+      {/* Summary Stat Cards (Total Earnings & Credit Balance) */}
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+        gap: { xs: 1.5, sm: 2 },
+        mb: 2.5
+      }}>
+        {/* Total Earnings Card */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 1.6, sm: 2 },
+            borderRadius: '18px',
+            background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
+            border: '1.5px solid #A7F3D0',
+            boxShadow: '0 4px 16px rgba(16, 185, 129, 0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: { xs: 1.2, sm: 1.8 }
+          }}
+        >
+          <Box sx={{
+            width: { xs: 42, sm: 48 },
+            height: { xs: 42, sm: 48 },
+            borderRadius: '14px',
+            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#FFFFFF',
+            flexShrink: 0,
+            boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)'
+          }}>
+            <TrendingUpIcon sx={{ fontSize: { xs: 22, sm: 26 } }} />
+          </Box>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography sx={{
+              color: '#065F46',
+              fontSize: { xs: '0.68rem', sm: '0.75rem' },
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Total Earnings
+            </Typography>
+            <Typography sx={{
+              color: '#064E3B',
+              fontSize: { xs: '1.05rem', sm: '1.3rem' },
+              fontWeight: 900,
+              lineHeight: 1.2,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              ₹{Number(totalEarnings).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* Credit Balance Card */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 1.6, sm: 2 },
+            borderRadius: '18px',
+            background: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)',
+            border: '1.5px solid #BAE6FD',
+            boxShadow: '0 4px 16px rgba(0, 186, 242, 0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: { xs: 1.2, sm: 1.8 }
+          }}
+        >
+          <Box sx={{
+            width: { xs: 42, sm: 48 },
+            height: { xs: 42, sm: 48 },
+            borderRadius: '14px',
+            background: 'linear-gradient(135deg, #00BAF2 0%, #0082CD 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#FFFFFF',
+            flexShrink: 0,
+            boxShadow: '0 4px 10px rgba(0, 186, 242, 0.3)'
+          }}>
+            <AccountBalanceWalletIcon sx={{ fontSize: { xs: 22, sm: 26 } }} />
+          </Box>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography sx={{
+              color: '#0369A1',
+              fontSize: { xs: '0.68rem', sm: '0.75rem' },
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Credit Balance
+            </Typography>
+            <Typography sx={{
+              color: '#0C4A6E',
+              fontSize: { xs: '1.05rem', sm: '1.3rem' },
+              fontWeight: 900,
+              lineHeight: 1.2,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              ₹{Number(creditBalance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
 
       {/* Filter & Search Bar */}
