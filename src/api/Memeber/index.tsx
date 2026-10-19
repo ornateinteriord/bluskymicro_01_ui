@@ -838,6 +838,21 @@ export const useGetROIBenefits = (memberId: any) => {
   });
 };
 
+export const useGetMemberLevelRoiSchedules = (memberId: any) => {
+  return useQuery({
+    queryKey: ["member-level-roi-schedules", memberId],
+    queryFn: async () => {
+      const response = await get(`/user/level-roi-schedules/${memberId}`);
+      if (response?.success) {
+        return response?.data || [];
+      } else {
+        throw new Error(response?.data?.message || "Failed to fetch Level ROI schedules");
+      }
+    },
+    enabled: !!memberId,
+  });
+};
+
 export const useTriggerUserROI = () => {
   const queryClient = useQueryClient();
   return useMutation({

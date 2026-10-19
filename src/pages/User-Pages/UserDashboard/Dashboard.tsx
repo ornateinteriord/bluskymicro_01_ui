@@ -23,6 +23,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { toast } from 'react-toastify';
 
 import TokenService from '../../../api/token/tokenService';
@@ -243,8 +244,8 @@ const UserDashboard = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join Blusky & Start Earning',
-          text: `Join Blusky with my referral code ${code} and unlock direct commissions & brokerage rewards!`,
+          title: 'Join E-cash & Start Earning',
+          text: `Join E-cash with my referral code ${code} and unlock direct commissions & brokerage rewards!`,
           url: referralLink,
         });
       } catch (err) {
@@ -1304,6 +1305,67 @@ const UserDashboard = () => {
               }}>
                 <Typography sx={{ color: '#92400e', fontWeight: 900, fontSize: { xs: '0.8rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   ₹{Number(walletOverview?.levelBenefits || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Card: Level Daily ROI (50-Day ROI) */}
+          <Box
+            onClick={() => navigate('/user/earnings/level-daily-roi')}
+            sx={{
+              flex: { xs: '0 0 calc(33.33% - 7px)', sm: '0 0 calc(33.33% - 10px)', md: '0 0 160px' },
+              minWidth: { xs: '115px', sm: '135px' },
+              scrollSnapAlign: 'start',
+              borderRadius: { xs: '20px', sm: '22px' },
+              background: 'linear-gradient(180deg, #EEF2FF 0%, #E0E7FF 100%)',
+              border: '1px solid #C7D2FE',
+              p: { xs: 1.4, sm: 1.8 },
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: { xs: '165px', sm: '185px' },
+              boxShadow: '0 4px 14px rgba(79, 70, 229, 0.08)',
+              transition: 'all 0.2s ease',
+              '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 18px rgba(79, 70, 229, 0.14)' }
+            }}
+          >
+            <Box>
+              <Typography sx={{ color: '#312e81', fontWeight: 900, fontSize: { xs: '0.85rem', sm: '0.95rem' }, lineHeight: 1.2, mb: 0.2 }}>
+                Level Daily ROI
+              </Typography>
+              <Typography sx={{ color: '#475569', fontSize: '9.5px', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
+                50-day payout
+              </Typography>
+            </Box>
+
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: { xs: 52, sm: 62 },
+                height: { xs: 52, sm: 62 },
+                borderRadius: '18px',
+                bgcolor: 'rgba(255,255,255,0.7)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 1,
+                boxShadow: '0 4px 12px rgba(49, 46, 129, 0.06)'
+              }}>
+                <ShowChartIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: '#4f46e5' }} />
+              </Box>
+              <Box sx={{
+                bgcolor: '#ffffff',
+                border: '1px solid #c7d2fe',
+                borderRadius: '10px',
+                py: 0.4,
+                px: 0.8,
+                width: '100%',
+                textAlign: 'center',
+                boxShadow: '0 2px 6px rgba(79, 70, 229, 0.08)'
+              }}>
+                <Typography sx={{ color: '#3730a3', fontWeight: 900, fontSize: { xs: '0.8rem', sm: '0.92rem' }, letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  ₹{Number(walletOverview?.levelDailyRoi ?? walletOverview?.roiLevelBenefits ?? 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </Typography>
               </Box>
             </Box>

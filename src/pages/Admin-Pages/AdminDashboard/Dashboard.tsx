@@ -7,13 +7,19 @@ import PeopleIcon from '@mui/icons-material/People';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';
 import PaymentsIcon from '@mui/icons-material/Payments';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { useGetAllMembersDetails, useGetROISummary } from '../../../api/Admin';
+import { useGetAllMembersDetails, useGetROISummary, useGetLevelRoiSchedules } from '../../../api/Admin';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { data: members = [], isLoading: membersLoading, error: membersError } = useGetAllMembersDetails();
   const { data: roiSummary, isLoading: roiLoading } = useGetROISummary();
+  const { data: levelRoiSchedules = [] } = useGetLevelRoiSchedules();
+
+  const activeSchedulesCount = Array.isArray(levelRoiSchedules)
+    ? levelRoiSchedules.filter((s: any) => s.status === 'Active').length
+    : 0;
 
   const isLoading = membersLoading || roiLoading;
   const error = membersError;
@@ -189,7 +195,7 @@ const AdminDashboard = () => {
           PLATFORM OVERVIEW
         </Typography>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4} lg={2.4}>
             <StatCard
               amount={totalMembers}
               title="Total Members"
@@ -199,7 +205,7 @@ const AdminDashboard = () => {
               onClick={() => navigate('/admin/members')}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4} lg={2.4}>
             <StatCard
               amount={activeMembers}
               title="Active Members"
@@ -209,7 +215,7 @@ const AdminDashboard = () => {
               onClick={() => navigate('/admin/members/active')}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4} lg={2.4}>
             <StatCard
               amount={pendingMembers}
               title="Pending Members"
@@ -219,7 +225,7 @@ const AdminDashboard = () => {
               onClick={() => navigate('/admin/members/pending')}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4} lg={2.4}>
             <StatCard
               amount={`₹${(roiSummary?.totalROIDistributed || 0).toLocaleString()}`}
               title="Daily Incentive"
@@ -227,6 +233,16 @@ const AdminDashboard = () => {
               icon={<PaymentsIcon />}
               color="#FFD700"
               onClick={() => navigate('/admin/income/daily-payouts')}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={2.4}>
+            <StatCard
+              amount={activeSchedulesCount}
+              title="Level Daily ROI"
+              subTitle={`${activeSchedulesCount} Active 50-Day Schedules`}
+              icon={<TrendingUpIcon />}
+              color="#818cf8"
+              onClick={() => navigate('/admin/income/level-daily-roi')}
             />
           </Grid>
         </Grid>

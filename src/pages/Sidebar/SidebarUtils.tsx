@@ -79,11 +79,11 @@ export const UserSideBarMenuItems: SideBarMenuItemType[] = [
         path: "/user/earnings/single-level-income-history",
         icon: <PaymentsIcon />,
       },
-      // {
-      //   name: "ROI Benefits",
-      //   path: "/user/earnings/roi-benefits",
-      //   icon: <TrendingUpIcon />,
-      // },
+      {
+        name: "Level Daily ROI",
+        path: "/user/earnings/level-daily-roi",
+        icon: <TrendingUpIcon />,
+      },
     ],
   },
   {
@@ -231,6 +231,11 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
         name: "Daily Incentive",
         path: "/admin/income/daily-payouts",
         icon: <PaymentsIcon />,
+      },
+      {
+        name: "Level Daily ROI",
+        path: "/admin/income/level-daily-roi",
+        icon: <TrendingUpIcon />,
       },
     ],
   },

@@ -72,6 +72,9 @@ const AdminReferralIncome = lazy(
 const AdminROIBenefits = lazy(
   () => import("./pages/Admin-Pages/Incomes/ROIBenifits")
 );
+const AdminLevelDailyROI = lazy(
+  () => import("./pages/Admin-Pages/Incomes/AdminLevelDailyROI")
+);
 
 const AdminPayout = lazy(() => import("./pages/Admin-Pages/Payout/Payout"));
 
@@ -202,6 +205,9 @@ const UserSingleLevelIncome = lazy(
 );
 const UserSingleLevelIncomeHistory = lazy(
   () => import("./pages/User-Pages/Earnings/SingleLevelIncomeHistory")
+);
+const UserLevelDailyROI = lazy(
+  () => import("./pages/User-Pages/Earnings/LevelDailyROI")
 );
 
 const UserWallet = lazy(() => import("./pages/User-Pages/Wallet/Wallet"));
@@ -441,6 +447,10 @@ const RoutesProvider = ({
                 path="/admin/income/roi-benefits"
                 element={<AdminROIBenefits />}
               />
+              <Route
+                path="/admin/income/level-daily-roi"
+                element={<AdminLevelDailyROI />}
+              />
 
               <Route path="/admin/payout" element={<AdminPayout />} />
 
@@ -583,6 +593,10 @@ const RoutesProvider = ({
               <Route
                 path="/user/earnings/referral-bonus"
                 element={<UserReferralBonus />}
+              />
+              <Route
+                path="/user/earnings/level-daily-roi"
+                element={<UserLevelDailyROI />}
               />
               <Route
                 path="/user/earnings/package-detail"

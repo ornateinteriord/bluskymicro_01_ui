@@ -3,6 +3,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Edit } from 'lucide-react';
 import { getFormattedDate } from './common';
+export { getFormattedDate };
 import { MemberDetails } from '../store/store';
 
 

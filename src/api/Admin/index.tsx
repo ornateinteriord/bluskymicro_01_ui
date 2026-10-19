@@ -307,6 +307,21 @@ export const useGetROIBenefits = () => {
   });
 };
 
+export const useGetLevelRoiSchedules = (memberId?: string) => {
+  return useQuery({
+    queryKey: ["admin-level-roi-schedules", memberId],
+    queryFn: async () => {
+      const url = memberId ? `/admin/level-roi-schedules/${memberId}` : "/admin/level-roi-schedules";
+      const response = await get(url);
+      if (response.success) {
+        return response.data || [];
+      } else {
+        throw new Error(response.message || "Failed to fetch Level ROI schedules");
+      }
+    },
+  });
+};
+
 
 export const useTriggerDailyROI = () => {
   const queryClient = useQueryClient();
