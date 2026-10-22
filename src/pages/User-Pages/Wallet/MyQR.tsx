@@ -45,7 +45,7 @@ import jsQR from 'jsqr';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
 import TokenService from '../../../api/token/tokenService';
-import jeeScImage from '../../../assets/E-cashScanner.jpeg';
+import jeeScImage from '../../../assets/chotu_sc.jpg';
 
 const decoder = (jsQR as any).default || jsQR;
 
@@ -785,35 +785,38 @@ const MyQR: React.FC = () => {
                 mb: 2.5,
               }}
             >
-              <Typography variant="caption" sx={{ fontWeight: 800, color: '#002970', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: '#002970', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
                 Scan & Pay via PhonePe / UPI
               </Typography>
               <Box
                 sx={{
                   width: '100%',
-                  maxWidth: 220,
+                  maxWidth: { xs: 300, sm: 330 },
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderRadius: '16px',
+                  borderRadius: '18px',
                   overflow: 'hidden',
-                  bgcolor: '#ffffff',
-                  p: 1,
-                  boxShadow: '0 4px 16px rgba(0, 186, 242, 0.12)',
-                  border: '1.5px solid #BAE6FD',
+                  bgcolor: '#0f0f12',
+                  boxShadow: '0 10px 28px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 186, 242, 0.35)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                    boxShadow: '0 14px 34px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(0, 186, 242, 0.55)',
+                  }
                 }}
               >
                 <Box
                   component="img"
                   src={jeeScImage}
-                  alt="E-Cash Scanner QR"
+                  alt="PhonePe Scanner QR"
                   sx={{
                     width: '100%',
                     height: 'auto',
-                    maxHeight: '320px',
-                    objectFit: 'contain',
                     display: 'block',
-                    borderRadius: '8px',
+                    objectFit: 'contain',
+                    transform: 'scale(1.10)',
+                    transformOrigin: 'center center',
                   }}
                 />
               </Box>

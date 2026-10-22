@@ -326,20 +326,28 @@ export const useGetLevelRoiSchedules = (memberId?: string) => {
 export const useTriggerDailyROI = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => {
-      return await post("/admin/trigger-roi", {});
+    mutationFn: async (payload?: {
+      date?: string;
+      specificDateOnly?: boolean;
+      type?: "all" | "daily_incentive" | "level_roi";
+      memberId?: string;
+    }) => {
+      return await post("/admin/trigger-roi", payload || {});
     },
-    onSuccess: (response) => {
-      if (response.success) {
+    onSuccess: (response: any) => {
+      if (response?.success) {
         toast.success(response.message || "ROI Sync triggered successfully");
         queryClient.invalidateQueries({ queryKey: ["admin-daily-payouts"] });
         queryClient.invalidateQueries({ queryKey: ["admin-roi-summary"] });
+        queryClient.invalidateQueries({ queryKey: ["admin-level-roi-schedules"] });
+        queryClient.invalidateQueries({ queryKey: ["admin-roi-benefits"] });
+        queryClient.invalidateQueries({ queryKey: ["AllTransactionDetails"] });
       } else {
-        toast.error(response.message || "ROI Sync failed");
+        toast.error(response?.message || "ROI Sync failed");
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to trigger ROI Sync");
+      toast.error(error.response?.data?.message || error.message || "Failed to trigger ROI Sync");
     },
   });
 };

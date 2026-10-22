@@ -22,7 +22,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SendIcon from '@mui/icons-material/Send';
 import PersonIcon from '@mui/icons-material/Person';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
-import ecashScannerImg from '../../../assets/E-cashScanner.jpeg';
+import ecashScannerImg from '../../../assets/chotu_sc.jpg';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import jsQR from 'jsqr';
@@ -800,14 +800,15 @@ const EcashScanner: React.FC = () => {
           <Box
             component="img"
             src={ecashScannerImg}
-            alt="E-Cash Scanner QR Card"
+            alt="Scanner QR Card"
             sx={{
               width: '100%',
-              maxWidth: 300,
+              maxWidth: 340,
               height: 'auto',
               borderRadius: '20px',
               boxShadow: '0 8px 24px rgba(109,33,79,0.12)',
-              bgcolor: '#ffffff',
+              bgcolor: '#0f0f12',
+              transform: 'scale(1.08)',
             }}
           />
           <Button
