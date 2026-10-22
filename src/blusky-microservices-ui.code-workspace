@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../bluskymicro_01_server/Blusky-microservices-server"
+		}
+	],
+	"settings": {}
+}

@@ -76,6 +76,7 @@ const Register = () => {
   const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
   const [firebaseToken, setFirebaseToken] = useState<string>("");
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   const { data: sponsorData, isLoading, isError, error, refetch } = useGetSponserRef(formData.Sponsor_code);
 
@@ -88,7 +89,10 @@ const Register = () => {
   }, [resendCooldown]);
 
   const handleSendOTP = async () => {
-    if (!formData.mobileno || formData.mobileno.length !== 10) {
+    let cleanMobile = formData.mobileno.replace(/\D/g, "");
+    if (cleanMobile.length > 10) cleanMobile = cleanMobile.slice(-10);
+
+    if (!cleanMobile || cleanMobile.length !== 10) {
       toast.error("Please enter a valid 10-digit mobile number first");
       return;
     }
@@ -96,17 +100,18 @@ const Register = () => {
     setIsSendingOTP(true);
     try {
       const res: any = await post("/auth/send-registration-otp", {
-        mobileno: formData.mobileno
+        mobileno: cleanMobile
       });
 
       if (res.success) {
         setOtp("");
+        if (res.devOtp) {
+          setDevOtp(res.devOtp);
+          toast.info(`Test OTP: ${res.devOtp}`, { autoClose: 30000 });
+        }
         setOtpDialogOpen(true);
         setResendCooldown(60);
-        toast.success(res.message || "OTP sent successfully!");
-        if (res.devOtp) {
-          toast.info(`Test OTP: ${res.devOtp}`, { autoClose: 12000 });
-        }
+        toast.success(res.message || "OTP sent successfully! Valid for 10 minutes.");
       } else {
         toast.error(res.message || "Failed to send OTP");
       }
@@ -125,10 +130,13 @@ const Register = () => {
       return;
     }
 
+    let cleanMobile = formData.mobileno.replace(/\D/g, "");
+    if (cleanMobile.length > 10) cleanMobile = cleanMobile.slice(-10);
+
     setIsVerifyingOTP(true);
     try {
       const res: any = await post("/auth/verify-registration-otp", {
-        mobileno: formData.mobileno,
+        mobileno: cleanMobile,
         otp: otp.trim()
       });
 
@@ -136,13 +144,14 @@ const Register = () => {
         setFirebaseToken(res.token || "");
         setIsMobileVerified(true);
         setOtpDialogOpen(false);
+        setDevOtp(null);
         toast.success("Mobile number verified successfully!");
       } else {
-        toast.error(res.message || "Invalid OTP");
+        toast.error(res.message || "Invalid or expired OTP");
       }
     } catch (error: any) {
       console.error("Verification Error", error);
-      const msg = error.response?.data?.message || error.message || "Invalid OTP. Please try again.";
+      const msg = error.response?.data?.message || error.message || "Invalid or expired OTP. Please try again.";
       toast.error(msg);
     } finally {
       setIsVerifyingOTP(false);
@@ -183,7 +192,12 @@ const Register = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "mobileno") {
-      const cleanValue = value.replace(/\D/g, "").slice(0, 10);
+      let cleanValue = value.replace(/\D/g, "");
+      if (cleanValue.length > 10 && cleanValue.startsWith("91")) {
+        cleanValue = cleanValue.slice(-10);
+      } else if (cleanValue.length > 10) {
+        cleanValue = cleanValue.slice(-10);
+      }
       if (isMobileVerified && cleanValue !== formData.mobileno) {
         setIsMobileVerified(false);
         setFirebaseToken("");
@@ -723,10 +737,52 @@ const Register = () => {
         <DialogTitle sx={{ textAlign: 'center', pb: 1, pt: 1, fontWeight: 800, fontSize: { xs: '1.15rem', sm: '1.25rem' }, color: '#6D214F' }}>
           Verify Mobile Number
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, pt: 1 }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, pt: 1 }}>
           <Typography variant="body2" sx={{ textAlign: 'center', color: '#b08090', fontSize: '0.85rem' }}>
             Enter the 6-digit verification code sent to <strong style={{ color: '#6D214F' }}>+91 {formData.mobileno}</strong>
           </Typography>
+
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#6D214F',
+              fontWeight: 600,
+              fontSize: '0.78rem',
+              bgcolor: '#fce8ec',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: '8px',
+              border: '1px solid #f0d0d8',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.5
+            }}
+          >
+            ⏱️ <strong>OTP is valid for 10 minutes</strong>
+          </Typography>
+
+          {devOtp && (
+            <Box
+              onClick={() => setOtp(devOtp)}
+              sx={{
+                cursor: 'pointer',
+                bgcolor: 'rgba(109, 33, 79, 0.06)',
+                border: '1px dashed #6D214F',
+                borderRadius: '10px',
+                px: 2,
+                py: 0.8,
+                textAlign: 'center',
+                transition: 'all 0.2s',
+                '&:hover': { bgcolor: 'rgba(109, 33, 79, 0.12)', transform: 'scale(1.02)' }
+              }}
+            >
+              <Typography variant="caption" sx={{ color: '#6D214F', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                <span>🔑 Test OTP:</span>
+                <strong style={{ letterSpacing: '2px', fontSize: '0.95rem' }}>{devOtp}</strong>
+                <span style={{ fontSize: '0.7rem', color: '#8f2f68', textDecoration: 'underline' }}>(Click to fill)</span>
+              </Typography>
+            </Box>
+          )}
 
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
             <MuiOtpInput

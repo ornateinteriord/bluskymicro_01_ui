@@ -9,7 +9,7 @@ import TokenService from '../../../api/token/tokenService';
 import { useGetWalletOverview } from '../../../api/Memeber';
 import { useRequestAddOnMutation, useGetLoadFundConfig, useUploadPaymentScreenshot } from '../../../api/Packages';
 import { toast } from 'react-toastify';
-import ecashScannerImage from '../../../assets/E-cashScanner.jpeg';
+import ecashScannerImage from '../../../assets/chotu_sc.jpg';
 
 const LoadFundPage: React.FC = () => {
   const navigate = useNavigate();
@@ -172,29 +172,32 @@ const LoadFundPage: React.FC = () => {
               <Box
                 sx={{
                   width: '100%',
-                  maxWidth: 240,
+                  maxWidth: { xs: 300, sm: 330 },
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderRadius: '16px',
+                  borderRadius: '18px',
                   overflow: 'hidden',
-                  bgcolor: '#ffffff',
-                  p: 1.2,
-                  boxShadow: '0 4px 16px rgba(109,33,79,0.1)',
-                  border: '1px solid #f0d0d8',
+                  bgcolor: '#0f0f12',
+                  boxShadow: '0 10px 28px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(109, 33, 79, 0.35)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                    boxShadow: '0 14px 34px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(109, 33, 79, 0.55)',
+                  }
                 }}
               >
                 <Box
                   component="img"
                   src={ecashScannerImage}
-                  alt="E-Cash Scanner QR Code"
+                  alt="PhonePe Scanner QR Code"
                   sx={{
                     width: '100%',
                     height: 'auto',
-                    maxHeight: '360px',
-                    objectFit: 'contain',
                     display: 'block',
-                    borderRadius: '10px',
+                    objectFit: 'contain',
+                    transform: 'scale(1.10)',
+                    transformOrigin: 'center center',
                   }}
                 />
               </Box>
