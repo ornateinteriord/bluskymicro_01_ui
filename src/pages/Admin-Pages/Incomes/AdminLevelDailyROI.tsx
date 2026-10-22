@@ -25,6 +25,7 @@ import { DASHBOARD_CUTSOM_STYLE } from '../../../utils/DataTableColumnsProvider'
 import { getFormattedDate } from '../../../utils/common';
 import { useGetAllTransactionDetails } from '../../../api/Admin';
 import { useGetLevelRoiSchedules } from '../../../api/Admin';
+import { TriggerMissingROIButton } from '../../../components/Dialogs/TriggerMissingROIDialog';
 
 const getLevelBadgeStyles = (level: number) => {
   switch (level) {
@@ -307,22 +308,25 @@ const AdminLevelDailyROI = () => {
       boxSizing: 'border-box'
     }}>
       {/* Header */}
-      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography sx={{
-          fontWeight: 900,
-          color: '#1e293b',
-          fontSize: { xs: '1.25rem', sm: '1.6rem', md: '1.9rem' },
-          lineHeight: 1.2
-        }}>
-          Level Daily ROI (50 Days)
-        </Typography>
-        <Typography sx={{
-          color: '#64748b',
-          mt: 0.5,
-          fontSize: { xs: '0.78rem', sm: '0.88rem' }
-        }}>
-          Multi-level daily revenue share distributed across 7 upline tiers for 50 days (Levels 1 to 7, Rank ≥ 3)
-        </Typography>
+      <Box sx={{ mb: { xs: 2, sm: 3 }, display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+        <Box>
+          <Typography sx={{
+            fontWeight: 900,
+            color: '#1e293b',
+            fontSize: { xs: '1.25rem', sm: '1.6rem', md: '1.9rem' },
+            lineHeight: 1.2
+          }}>
+            Level Daily ROI (50 Days)
+          </Typography>
+          <Typography sx={{
+            color: '#64748b',
+            mt: 0.5,
+            fontSize: { xs: '0.78rem', sm: '0.88rem' }
+          }}>
+            Multi-level daily revenue share distributed across 7 upline tiers for 50 days (Levels 1 to 7, Rank ≥ 3)
+          </Typography>
+        </Box>
+        <TriggerMissingROIButton defaultType="level_roi" pageTitle="Level Daily ROI" label="Trigger Missing ROI" />
       </Box>
 
       {/* KPI Summary Cards: 2x2 grid on mobile, 4 in row on desktop */}

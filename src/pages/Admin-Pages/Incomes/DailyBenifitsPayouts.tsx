@@ -20,6 +20,7 @@ import {
   getAdminAggregatedIncomeColumns,
 } from '../../../utils/DataTableColumnsProvider';
 import { useGetAllDailyPayouts } from '../../../api/Admin';
+import { TriggerMissingROIButton } from '../../../components/Dialogs/TriggerMissingROIDialog';
 
 const SingleLevelIncomeAdmin = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -99,13 +100,16 @@ const SingleLevelIncomeAdmin = () => {
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, mt: 8 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
-          Daily Incentive
-        </Typography>
-        <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
-          Track all daily return payouts (1% Daily), member details, cycle progress, and transaction statuses
-        </Typography>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
+            Daily Incentive
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+            Track all daily return payouts (1% Daily), member details, cycle progress, and transaction statuses
+          </Typography>
+        </Box>
+        <TriggerMissingROIButton defaultType="daily_incentive" pageTitle="Daily Incentive" label="Trigger Missing Incentive" />
       </Box>
 
       {/* Summary KPI Cards */}
