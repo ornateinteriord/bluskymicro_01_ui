@@ -180,23 +180,23 @@ export const AdminSideBarMenuItems: SideBarMenuItemType[] = [
     ],
   },
   {
-    name: "Vendors",
+    name: "Members",
     icon: <GroupIcon />,
     isExpandable: true,
     subItems: [
-      { name: "All Vendors", path: "/admin/members", icon: <PeopleIcon /> },
+      { name: "All Members", path: "/admin/members", icon: <PeopleIcon /> },
       {
-        name: "Pending Vendors",
+        name: "Pending Members",
         path: "/admin/members/pending",
         icon: <PersonAddIcon />,
       },
       {
-        name: "Active Vendors",
+        name: "Active Members",
         path: "/admin/members/active",
         icon: <CheckCircleIcon />,
       },
       {
-        name: "Inactive Vendors",
+        name: "Inactive Members",
         path: "/admin/members/inactive",
         icon: <PersonIcon />,
       },

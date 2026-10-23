@@ -441,7 +441,7 @@ export const getAdminDashboardTableColumns: any = () => [
     sortable: true,
   },
   {
-    name: "Vendor",
+    name: "Member",
     selector: (row: any) => row.Name || row.Member || "-",
     center: true,
     sortable: true,
@@ -467,7 +467,7 @@ export const getMembersColumns = (
       sortable: true,
     },
     {
-      name: "Vendor Name (ID)",
+      name: "Member Name (ID)",
       selector: (row: any) => `${row.Name ?? "-"} (${row.Member_id})`,
       sortable: true,
     },
@@ -577,7 +577,7 @@ export const getMembersColumns = (
             <IconButton
               onClick={() => handleEditClick(row.Member_id)}
               style={{ color: '#000', padding: '5px', borderRadius: '4px', cursor: 'pointer' }}
-              title="Edit Vendor"
+              title="Edit Member"
             >
               <Edit />
             </IconButton>
@@ -598,7 +598,7 @@ export const getPermissionsColumns = (
       width: "70px",
     },
     {
-      name: "Vendor Name (ID)",
+      name: "Member Name (ID)",
       selector: (row: any) => `${row.Name ?? "-"} (${row.Member_id})`,
       sortable: true,
     },
@@ -672,7 +672,7 @@ export const getPendingMembersColumns = (
       width: "70px",
     },
     {
-      name: "Vendor Name (ID)",
+      name: "Member Name (ID)",
       selector: (row: any) => `${row.Name ?? "-"} (${row.Member_id})`,
       sortable: true,
     },
